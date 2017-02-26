@@ -255,6 +255,12 @@ Storage API
 
 The database/storage solution will be used via the following interfaces:
 
+`getLabel()`
+
+Return a unique label number for a new exchange.
+
+I haven't yet worked out how to do this - is it just a sequence number or do we need a number that is harder to guess, but still unique?
+
 `registerUser(userId, publicKey)`
 
 Add a new user to the registry (return success/failure).
