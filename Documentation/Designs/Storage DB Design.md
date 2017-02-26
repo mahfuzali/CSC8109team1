@@ -211,3 +211,75 @@ Interfaces will be designed to decouple the implementation details
 
 Diagram
 =======
+![Storage and Database](images/storage.png)
+
+Schema
+======
+
+There are 3 tables:
+
+User Registry
+-------------
+
+User ID  | Public Key
+---------|------------
+Alice    | xAg1FWs34*^s
+Bob      | ...
+
+Exchange State
+--------------
+
+Label   | Sender | Receiver | Protocol     | Step Number | Last Message     | Document ID
+--------|--------|----------|--------------|-------------|------------------|----------------------
+Label 1 | Alice  | Bob      | CoffeySaidha | 2           | SigAlice(h(doc)) | {S3 object ID of doc}
+Label 2 | Chen   | Daoud    | CoffeySaidha | ...         | ...              | ...
+
+Message Log
+-----------
+
+Label   | Sender | Receiver  | Protocol     | Step Number | Message
+--------|--------|-----------|--------------|-------------|-----------------------
+Label 1 | Alice  | Bob       | CoffeySaidha | 0           | {request for exchange}
+Label 1 | Alice  | Bob       | CoffeySaidha | 1           | SigAlice(h(doc))
+Label 1 | Alice  | Bob       | CoffeySaidha | 2           | SigAlice(h(doc))
+Label 1 | Alice  | Bob       | CoffeySaidha | 3           | ...
+
+Some notes on this:
+
+I've added a **Protocol** column, at the moment we are only expecting to develop the CoffeySaidha protocol.  If our system can be extended to use different protocols, then we would need to know which one the clients are using.
+
+I'm not sure yet what we need to store for sender and receiver in each column, is it the overall sender (always Alice) and overall receiver (always Bob) or the sender and receiver of that particular message (so for step 3, Bob is the sender and Alice via TTP is the receiver).
+
+Storage API
+===========
+
+The database/storage solution will be used via the following interfaces:
+
+`registerUser(userId, publicKey)`
+
+Add a new user to the registry (return success/failure).
+
+`getUserKey(userId)`
+
+If the user exists in the registry return their public key.
+
+`storeMessage(label, sender, receiver, protocol, step, message)`
+
+1. Store the message details in the messsage log
+2. Update the current state of the exchange `label`
+3. Return success/failure
+
+`storeMessage(label, sender, receiver, protocol, step, message, document)`
+
+Overloaded version of storeMessage, takes an extra parameter containing the document.
+
+1. Store the document in S3 and obtain its S3 Object ID
+2. Store the message details in the messsage log
+3. Update the current state of the exchange `label` including the S3 Object ID of the document
+4. Return success/failure
+
+`getState(label)
+Return a record structure containing the current state of exchange `label` or null if none found.
+
+
+
