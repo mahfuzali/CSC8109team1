@@ -278,7 +278,7 @@ Overloaded version of storeMessage, takes an extra parameter containing the docu
 3. Update the current state of the exchange `label` including the S3 Object ID of the document
 4. Return success/failure
 
-`getState(label)
+`getState(label)`
 Return a record structure containing the current state of exchange `label` or null if none found.
 
 
