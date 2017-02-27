@@ -34,6 +34,8 @@ Sizing
 
 Some example document sizes:
 
+| Document                              | Size  |
+|---------------------------------------|-------|
 | 12 page academic paper in PDF format  | 2 MB  |
 | 1920x1080 bitmap image, 24 bit colour | 6 MB  |
 | 54 slide lecture notes in PowerPoint  | 10 MB |
