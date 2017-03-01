@@ -1,19 +1,7 @@
-/**
- * MessageQueue interface
- */
-package uk.ac.ncl.csc8109.team1.msg;
+Message Service API
+===================
 
-/**
- * @author Stephen Shephard
- *
- */
-public interface MessageQueue {
-	
-	/**
-	 * Perform initialisation actions
-	 * @return true if successful, false otherwise
-	 */
-	boolean initialise();
+An implentation of the Message Service interface will be created for Amazon SQS.  That is, when an instance of AmazonSQS is created, it can be used to create and work with Queues in that service.
 
 	/**
 	 * Create a message queue
@@ -52,5 +40,3 @@ public interface MessageQueue {
 	 * @return true if successful, false otherwise
 	 */
 	boolean deleteMessage(String queueName, String messageHandle);
-	
-}
