@@ -217,7 +217,15 @@ Diagram
 Schema
 ======
 
-There are 2 tables:
+There are 3 tables:
+
+User Registry
+-------------
+
+User ID  | Public Key
+---------|------------
+Alice    | xAg1FWs34*^s
+Bob      | ...
 
 Exchange State
 --------------
@@ -243,13 +251,19 @@ I've added a **Protocol** column, at the moment we are only expecting to develop
 
 I'm not sure yet what we need to store for sender and receiver in each column, is it the overall sender (always Alice) and overall receiver (always Bob) or the sender and receiver of that particular message (so for step 3, Bob is the sender and Alice via TTP is the receiver).
 
-**User Registry** is no longer needed, the Amazon Key Registry service will be used instead.
-
 
 Storage API
 ===========
 
 The database/storage solution will be used via the following interfaces:
+
+`registerUser(userId, publicKey)`
+
+Add a new user to the registry (return success/failure).
+
+`getUserKey(userId)`
+
+If the user exists in the registry return their public key.
 
 `storeMessage(label, sender, receiver, protocol, step, message)`
 
@@ -272,6 +286,6 @@ Return a record structure containing the current state of exchange `label` or nu
 
 Notes:
 
-**getLabel()** is no longer needed, TDS will generate the label itself using the Java UUID class.
+**getLabel()** will now be moved to TDS (it will generate the label itself using the Java UUID class)
 
 
