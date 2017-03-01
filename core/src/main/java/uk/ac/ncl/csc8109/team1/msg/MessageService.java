@@ -33,6 +33,15 @@ public interface MessageService {
 	boolean sendMessage(String queueName, String message, String target);
 	
 	/**
+	 * Send a document to a queue
+	 * @param queueName - name of the queue
+	 * @param document - a document as a string of up to 2GB
+	 * @param target - the userid of the ultimate recipient of the message
+	 * @return true if successful, false otherwise
+	 */
+	boolean sendDocument(String queueName, String document, String target);
+	
+	/**
 	 * Receive a message from a queue
 	 * @param queueName - name of the queue
 	 * @return a message as a serialised string, or null if none
