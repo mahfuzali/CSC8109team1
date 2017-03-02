@@ -5,9 +5,9 @@ CSC8109 Group Project
 
 * Mahfuz Ali, Cryptography
 * Zayyad Gaya, Project Plan, Client
-* Stephen Shephard, Team Leader, Storage/DB
-* Huan Xu, Interfaces
-* Yue Yuan, Protocol
+* Stephen Shephard, Team Leader, Messaging
+* Huan Xu, Storage/DB
+* Yue Yuan, TDS and Protocol
 
 ## Code structure
 
