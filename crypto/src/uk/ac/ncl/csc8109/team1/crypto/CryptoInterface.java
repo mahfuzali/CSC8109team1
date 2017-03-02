@@ -9,7 +9,7 @@ import java.io.File;
  * @Version 1.2
  * @email m.ali4@newcastle.ac.uk
  */
-public interface CrytoInterface {
+public interface CryptoInterface {
 
 	/**
 	 * Encrypts the file
