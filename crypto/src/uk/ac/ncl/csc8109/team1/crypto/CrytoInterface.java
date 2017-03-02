@@ -28,14 +28,14 @@ public interface CrytoInterface {
 	void decryptFile(String inputPath, String outputPath, String key);
 	
 	/**
-	 * 
-	 * @return
+	 * Gets the public key
+	 * @return publicKey
 	 */
 	String getPublicKey();
 	
 	/**
-	 * 
-	 * @return
+	 * Gets the private key
+	 * @return private key
 	 */
 	String getPrivateKey();
 	

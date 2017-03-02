@@ -100,8 +100,8 @@ public class Crypto implements CrytoInterface {
 	}
 	
 	/**
-	 * Gets the public key
-	 * @return publicKey
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#getPublicKey()
+	 *
 	 */
 	public String getPublicKey() {
 		return publicKey;
@@ -116,8 +116,8 @@ public class Crypto implements CrytoInterface {
 	}
 	
 	/**
-	 * Gets the private key
-	 * @return
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#getPrivateKey()
+	 *
 	 */
 	public String getPrivateKey() {
 		return privateKey;
