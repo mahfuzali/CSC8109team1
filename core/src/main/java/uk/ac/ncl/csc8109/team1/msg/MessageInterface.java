@@ -1,5 +1,5 @@
 /**
- * MessageService interface
+ * Message Service interface
  */
 package uk.ac.ncl.csc8109.team1.msg;
 
@@ -7,7 +7,7 @@ package uk.ac.ncl.csc8109.team1.msg;
  * @author Stephen Shephard
  *
  */
-public interface MessageService {
+public interface MessageInterface {
 	
 	/**
 	 * Create a message queue
