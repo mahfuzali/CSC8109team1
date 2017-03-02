@@ -57,7 +57,7 @@ import javax.crypto.NoSuchPaddingException;
  * @Version 1.2
  * @email m.ali4@newcastle.ac.uk
  */
-public class Crypto implements CrytoInterface {
+public class Crypto implements CryptoInterface {
 
 	private KeyPair keypair;
 	private String publicKey;
