@@ -70,7 +70,7 @@ import javax.crypto.spec.SecretKeySpec;
  * functions. The {@link Crypto} class shows the way in which this class can/should be used.  
  * 
  * @author Mahfuz Ali
- * @Version 1.1
+ * @Version 1.2
  * @email m.ali4@newcastle.ac.uk
  */
 class CryptoUtil {

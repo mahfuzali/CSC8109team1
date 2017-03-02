@@ -42,8 +42,8 @@ import java.io.File;
 public class CryptoApp {
 
 	public static void main(String[] args) {
-		Crypto alice = new Crypto();
-		Crypto bob = new Crypto();
+		CrytoInterface alice = new Crypto();
+		CrytoInterface bob = new Crypto();
 		
 		sender(alice);
 		receiver(bob);
@@ -61,7 +61,7 @@ public class CryptoApp {
 	 * 
 	 * @param sender
 	 */
-	public static void sender(Crypto sender) {
+	public static void sender(CrytoInterface sender) {
 		System.out.println("Create KeyPairs for Alice");
 		System.out.print("Public key:\t");
 		System.out.println(sender.getPublicKey());
@@ -74,7 +74,7 @@ public class CryptoApp {
 	 * 
 	 * @param receiver
 	 */
-	public static void receiver(Crypto receiver) {
+	public static void receiver(CrytoInterface receiver) {
 		System.out.println("Create KeyPairs for Bob");
 		System.out.print("Public key:\t");
 		System.out.println(receiver.getPublicKey());
@@ -88,7 +88,7 @@ public class CryptoApp {
 	 * @param sender
 	 * @param f
 	 */
-	public static void getHash(Crypto sender, File f) {
+	public static void getHash(CrytoInterface sender, File f) {
 		System.out.println("Alice generates hash of the file");
 		String hash = sender.getHashOfFile(f);
 		System.out.println(hash);
@@ -100,10 +100,10 @@ public class CryptoApp {
 	 * @param sender
 	 * @param f
 	 */
-	public static void getSignature(Crypto sender, File f) {
+	public static void getSignature(CrytoInterface sender, File f) {
 		System.out.println("Alice generates signature of the hash");
 		String hash = sender.getHashOfFile(f);
-		sender.setSignature(hash);
+		((Crypto) sender).setSignature(hash);
 		String signature = sender.getSignature();
 		System.out.println(signature);
 		System.out.println();
@@ -115,11 +115,11 @@ public class CryptoApp {
 	 * @param receiver
 	 * @param f
 	 */
-	public static void getVerification(Crypto sender, Crypto receiver, File f) {
+	public static void getVerification(CrytoInterface sender, CrytoInterface receiver, File f) {
 		System.out.println("Bob verifies the signature of the hash");
 		String hash = sender.getHashOfFile(f);
 		String signature = sender.getSignature();
-		String verification = receiver.isVerification(hash, sender.getPublicKey(), signature);
+		String verification = receiver.isVerified(hash, sender.getPublicKey(), signature);
 		System.out.println(verification);
 		System.out.println();
 	}
@@ -129,7 +129,7 @@ public class CryptoApp {
 	 * @param sender
 	 * @param receiver
 	 */
-	public static void getSharedKey(Crypto sender, Crypto receiver) {
+	public static void getSharedKey(CrytoInterface sender, CrytoInterface receiver) {
 		System.out.println("Alice computes the shared key");
 		String senderCheck = sender.getSharedKey(receiver.getPublicKey());
 		System.out.println(senderCheck);
@@ -146,7 +146,7 @@ public class CryptoApp {
 	 * @param sender
 	 * @param receiver
 	 */
-	public static void encryptionAndDecryption(Crypto sender, Crypto receiver) {
+	public static void encryptionAndDecryption(CrytoInterface sender, CrytoInterface receiver) {
 		String senderCheck = sender.getSharedKey(receiver.getPublicKey());
 		String receiverCheck = receiver.getSharedKey(sender.getPublicKey());
 	

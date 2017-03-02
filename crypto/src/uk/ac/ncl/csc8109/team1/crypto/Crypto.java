@@ -57,7 +57,7 @@ import javax.crypto.NoSuchPaddingException;
  * @Version 1.2
  * @email m.ali4@newcastle.ac.uk
  */
-public class Crypto {
+public class Crypto implements CrytoInterface {
 
 	private KeyPair keypair;
 	private String publicKey;
@@ -132,8 +132,8 @@ public class Crypto {
 	}
 	
 	/**
-	 * Gets the hash of the file 
-	 * @return hash of file
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#getHashOfFile(File)
+	 *
 	 */
 	public String getHashOfFile(File file) {
 		try {
@@ -146,8 +146,8 @@ public class Crypto {
 	}
 		
 	/**
-	 * Gets the signature
-	 * @return signature
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#getSignature()
+	 *
 	 */
 	public String getSignature() {
 		return signature;
@@ -169,13 +169,10 @@ public class Crypto {
 	}
 	
 	/**
-	 * Verifies the signauture of the hash.
-	 * @param <code>hash</code> hash value signed
-	 * @param <code>publicKey</code> public key of the signed party
-	 * @param <code>signature</code> the original signature
-	 * @return verified: if successful; otherwise, not verified
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#isVerified(String, String, String)
+	 *
 	 */
-	public String isVerification(String hash, String publicKey, String signature) {
+	public String isVerified(String hash, String publicKey, String signature) {
 		try {
 			verified = c.verifySig(strToByte(hash), strToPublicKey(publicKey), strToByte(signature));
 		} catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException | NoSuchProviderException e) {
@@ -191,10 +188,8 @@ public class Crypto {
 	
 	
 	/**
-	 * Encrypts the file
-	 * @param <code>inputPath</code> file to encrypt
-	 * @param <code>outputPath<code> encrypted file
-	 * @param <code>key</code> key to encrypt the file with
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#encryptFile(String, String, String)
+	 *
 	 */
 	public void encryptFile(String inputPath, String outputPath, String key) {
 		try {
@@ -207,10 +202,8 @@ public class Crypto {
 	}
 
 	/**
-	 * Decryptd the file
-	 * @param <code>inputPath</code> file to decrypt
-	 * @param <code>outputPath<code> decrypted file
-	 * @param <code>key</code> key to decrypt the file with
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#decryptFile(String, String, String)
+	 *
 	 */
 	public void decryptFile(String inputPath, String outputPath, String key) {
 		// TODO Auto-generated method stub
@@ -224,9 +217,8 @@ public class Crypto {
 	}	
 	
 	/**
-	 * Gets the computed shared key 
-	 * @param receiverPublicKey
-	 * @return
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#getSharedKey(String)
+	 *
 	 */
 	public String getSharedKey(String receiverPublicKey) {
 		String secret = null;
