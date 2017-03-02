@@ -1,7 +1,14 @@
 /**
  * Message Service interface
+ * 
+ * Provides a level of abstraction to Amazon SQS messaging
+ * Assumes SQS - and uses its message type
+ * but can use other implementations e.g. Extended SQS
+ * 
  */
 package uk.ac.ncl.csc8109.team1.msg;
+
+import com.amazonaws.services.sqs.model.Message;
 
 /**
  * @author Stephen Shephard
@@ -44,9 +51,9 @@ public interface MessageInterface {
 	/**
 	 * Receive a message from a queue
 	 * @param queueName - name of the queue
-	 * @return a message as a serialised string, or null if none
+	 * @return a message object, or null if none
 	 */
-	String receiveMessage(String queueName);
+	Message receiveMessage(String queueName);
 	
 	/**
 	 * Delete a message from a queue
