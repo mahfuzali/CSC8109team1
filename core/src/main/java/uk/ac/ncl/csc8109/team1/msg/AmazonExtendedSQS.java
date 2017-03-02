@@ -32,7 +32,7 @@ import com.amazon.sqs.javamessaging.ExtendedClientConfiguration;
  * @author Stephen Shephard
  *
  */
-public class AmazonExtendedSQS implements MessageService {
+public class AmazonExtendedSQS implements MessageInterface {
 	
 	private static final String s3BucketName = UUID.randomUUID() + "-"
 		    + DateTimeFormat.forPattern("yyMMdd-hhmmss").print(new DateTime());
