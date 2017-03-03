@@ -7,8 +7,10 @@ Call the constructor to set up a connection to the messaging service.  See Messa
 
 	/**
 	 * Constructor
+	 * @param bucketName - bucket name to use for messaging
+	 * @throws IllegalStateException if bucket does not exist
 	 */
-	public AmazonExtendedSQS()
+	AmazonExtendedSQS(String bucketName);
 
 	/**
 	 * Create a message queue
