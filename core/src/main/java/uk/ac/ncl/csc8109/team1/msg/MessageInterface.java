@@ -34,19 +34,21 @@ public interface MessageInterface {
 	 * Send a message to a queue
 	 * @param queueName - name of the queue
 	 * @param message - a message as a serialised string
+	 * @param source - the userid of the original source of the message
 	 * @param target - the userid of the ultimate recipient of the message
 	 * @return true if successful, false otherwise
 	 */
-	boolean sendMessage(String queueName, String message, String target);
+	boolean sendMessage(String queueName, String message, String source, String target);
 	
 	/**
 	 * Send a document to a queue
 	 * @param queueName - name of the queue
 	 * @param document - a document as a string of up to 2GB
+	 * @param source - the userid of the original source of the message
 	 * @param target - the userid of the ultimate recipient of the message
 	 * @return true if successful, false otherwise
 	 */
-	boolean sendDocument(String queueName, String document, String target);
+	boolean sendDocument(String queueName, String document, String source, String target);
 	
 	/**
 	 * Receive a message from a queue

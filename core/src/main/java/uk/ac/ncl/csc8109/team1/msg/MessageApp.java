@@ -41,7 +41,7 @@ public class MessageApp {
         System.out.println("Created queue " + queueName + " " + success);
         
         // Send a message
-        success = sqsx.sendMessage(queueName, myLongString, "Bob");
+        success = sqsx.sendMessage(queueName, myLongString, "Alice", "Bob");
         System.out.println("Sent message to queue " + queueName + " " + success);
         
         // Receive message
@@ -54,16 +54,17 @@ public class MessageApp {
             System.out.println("  Receipt handle: " + messageHandle);
             System.out.println("  Message body (first 5 characters): " + message.getBody().substring(0, 5));
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
         }
         
         // Delete message
-        // success = sqsx.deleteMessage(queueName, messageHandle);
-        // System.out.println("Deleted message from queue " + queueName + " " + success);
+        success = sqsx.deleteMessage(queueName, messageHandle);
+        System.out.println("Deleted message from queue " + queueName + " " + success);
         
         // Delete queue
-        // success = sqsx.delete(queueName);
-        // System.out.println("Deleted queue " + queueName + " " + success);
+        success = sqsx.delete(queueName);
+        System.out.println("Deleted queue " + queueName + " " + success);
 	}
 
 }

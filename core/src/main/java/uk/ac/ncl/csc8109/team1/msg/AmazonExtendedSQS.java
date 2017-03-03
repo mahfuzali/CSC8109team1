@@ -9,15 +9,16 @@ import java.util.List;
 import java.util.UUID;
 import com.amazon.sqs.javamessaging.AmazonSQSExtendedClient;
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
@@ -36,7 +37,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 	// private static final String s3BucketName = UUID.randomUUID() + "-" + DateTimeFormat.forPattern("yyMMdd-hhmmss").print(new DateTime());
 	private static final String s3BucketName = "csc8109team1";
 	
-	private static final Regions awsRegion = Regions.EU_WEST_1;
+	private static final Region awsRegion = Region.getRegion(Regions.EU_WEST_1);
 	
 	private ProfileCredentialsProvider credentials = null;
 	
@@ -55,11 +56,9 @@ public class AmazonExtendedSQS implements MessageInterface {
 	          + "location (/home/$USER/.aws/credentials) and is in a valid format.", e);
 	      }
 
-	    AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-	    		.withRegion(awsRegion)
-                .withCredentials(credentials)
-                .build();
-
+	    AmazonS3 s3 = new AmazonS3Client(credentials);
+	    s3.setRegion(awsRegion);
+	    
 	    // Code to create a bucket.. code to check for a bucket and create if not found?
 	    
 	    // Set the Amazon S3 bucket name, and set a lifecycle rule on the bucket to
@@ -77,13 +76,9 @@ public class AmazonExtendedSQS implements MessageInterface {
 	    // Set the SQS extended client configuration with large payload support enabled
 	    ExtendedClientConfiguration extendedClientConfig = new ExtendedClientConfiguration()
 	    		.withLargePayloadSupportEnabled(s3, s3BucketName);
-
-	    AmazonSQS sqs = AmazonSQSClientBuilder.standard()
-	    		.withRegion(awsRegion)
-                .withCredentials(credentials)
-                .build();
 	    
-	    sqsExtended = new AmazonSQSExtendedClient(sqs, extendedClientConfig);
+	    sqsExtended = new AmazonSQSExtendedClient(new AmazonSQSClient(credentials), extendedClientConfig);
+	    sqsExtended.setRegion(awsRegion);
 	}
 
 	/**
@@ -127,10 +122,11 @@ public class AmazonExtendedSQS implements MessageInterface {
 	 * Send a message to a queue
 	 * @param queueName - name of the queue
 	 * @param message - a message as a serialised string
+	 * @param source - the userid of the original source of the message
 	 * @param target - the userid of the ultimate recipient of the message
 	 * @return true if successful, false otherwise
 	 */
-	public boolean sendMessage(String queueName, String message, String target) {
+	public boolean sendMessage(String queueName, String message, String source, String target) {
 		String queueUrl;
 		// Get the Queue URL
 		try {
@@ -141,6 +137,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		// Build and send the message
 		try {
 			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("Source", new MessageAttributeValue().withDataType("String.Source").withStringValue(source));
 			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue(target));
 		    SendMessageRequest request = new SendMessageRequest();
 		    request.withMessageBody(message);
@@ -153,10 +150,15 @@ public class AmazonExtendedSQS implements MessageInterface {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.ac.ncl.csc8109.team1.msg.MessageService#sendDocument(java.lang.String, java.lang.String, java.lang.String)
+	/**
+	 * Send a document to a queue
+	 * @param queueName - name of the queue
+	 * @param document - a document as a string of up to 2GB
+	 * @param source - the userid of the original source of the message
+	 * @param target - the userid of the ultimate recipient of the message
+	 * @return true if successful, false otherwise
 	 */
-	public boolean sendDocument(String queueName, String document, String target) {
+	public boolean sendDocument(String queueName, String document, String source, String target) {
 		// TODO Auto-generated method stub
 		return false;
 	}
