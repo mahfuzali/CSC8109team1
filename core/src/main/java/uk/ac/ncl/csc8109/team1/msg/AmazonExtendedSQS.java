@@ -6,20 +6,16 @@ package uk.ac.ncl.csc8109.team1.msg;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 import com.amazon.sqs.javamessaging.AmazonSQSExtendedClient;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.DeleteQueueRequest;
@@ -34,19 +30,20 @@ import com.amazon.sqs.javamessaging.ExtendedClientConfiguration;
  */
 public class AmazonExtendedSQS implements MessageInterface {
 	
-	// private static final String s3BucketName = UUID.randomUUID() + "-" + DateTimeFormat.forPattern("yyMMdd-hhmmss").print(new DateTime());
-	private static final String s3BucketName = "csc8109team1";
+	private final String s3BucketName;
 	
 	private static final Region awsRegion = Region.getRegion(Regions.EU_WEST_1);
 	
-	private ProfileCredentialsProvider credentials = null;
+	private final ProfileCredentialsProvider credentials;
 	
-	private AmazonSQS sqsExtended = null;
+	private final AmazonSQS sqsExtended;
 
 	/**
 	 * Constructor
+	 * @param bucketName - bucket name to use for messaging
+	 * @throws IllegalStateException if bucket does not exist
 	 */
-	public AmazonExtendedSQS() {
+	public AmazonExtendedSQS(String bucketName) {
 	    try {
 	        credentials = new ProfileCredentialsProvider("default");
 	      } catch (Exception e) {
@@ -56,23 +53,18 @@ public class AmazonExtendedSQS implements MessageInterface {
 	          + "location (/home/$USER/.aws/credentials) and is in a valid format.", e);
 	      }
 
+	    // Set bucket name property to passed-in value
+	    this.s3BucketName = bucketName;
+	    
+	    // Create S3 client
 	    AmazonS3 s3 = new AmazonS3Client(credentials);
 	    s3.setRegion(awsRegion);
 	    
-	    // Code to create a bucket.. code to check for a bucket and create if not found?
+	    // Check that bucket exists
+	    if (!s3.doesBucketExist(s3BucketName)) {
+	    	throw(new IllegalStateException("S3 bucket " + s3BucketName + " does not exist"));
+	    }
 	    
-	    // Set the Amazon S3 bucket name, and set a lifecycle rule on the bucket to
-	    //   permanently delete objects a certain number of days after
-	    //   each object's creation date.
-	    //   Then create the bucket, and enable message objects to be stored in the bucket.
-	    
-	    // BucketLifecycleConfiguration.Rule expirationRule = new BucketLifecycleConfiguration.Rule();
-	    // expirationRule.withExpirationInDays(14).withStatus("Enabled");
-	    // BucketLifecycleConfiguration lifecycleConfig = new BucketLifecycleConfiguration().withRules(expirationRule);
-
-	    // s3.createBucket(s3BucketName);
-	    // s3.setBucketLifecycleConfiguration(s3BucketName, lifecycleConfig);
-
 	    // Set the SQS extended client configuration with large payload support enabled
 	    ExtendedClientConfiguration extendedClientConfig = new ExtendedClientConfiguration()
 	    		.withLargePayloadSupportEnabled(s3, s3BucketName);

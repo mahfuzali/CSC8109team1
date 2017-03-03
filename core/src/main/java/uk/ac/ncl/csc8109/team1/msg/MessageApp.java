@@ -24,7 +24,7 @@ public class MessageApp {
 		boolean success = false;
 		
 		// Initialise queue service
-		MessageInterface sqsx = new AmazonExtendedSQS();
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		System.out.println("Initialised queue service");
 
 	    // Create a long string of characters for the message object to be stored in the bucket
