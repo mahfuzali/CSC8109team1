@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="TDS:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="TDS.war">
+      <element id="artifact" artifact-name="TDS:war exploded" />
+    </root>
+  </artifact>
+</component>
