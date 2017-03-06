@@ -3,8 +3,13 @@
  */
 package uk.ac.ncl.csc8109.team1.msg;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -69,8 +74,6 @@ public class MessageApp {
         messageHandle = null;
         message = sqsx.receiveMessage(queueName);
         ByteBuffer document;
-		Path docPath;
-		byte[] docByteArray;
         if (message != null) {
         	messageHandle = message.getReceiptHandle();
         	System.out.println("Message received from queue " + queueName);
@@ -82,11 +85,20 @@ public class MessageApp {
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
             System.out.println("  DocumentName:" + attributes.get("DocumentName").getStringValue());
-            document = attributes.get("Document").getBinaryValue();
-			docByteArray = new byte[document.remaining()];
-			document.get(docByteArray);
+            document = attributes.get("Document").getBinaryValue().asReadOnlyBuffer();
+            document.flip();
+            
+            OutputStream outputFile;
+            WritableByteChannel outputChannel = null;
 			try {
-				Files.write(Paths.get("src/main/resources/received"), docByteArray);
+				outputFile = new FileOutputStream("src/main/resources/received");
+	            outputChannel = Channels.newChannel(outputFile);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            try {
+				outputChannel.write(document);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
