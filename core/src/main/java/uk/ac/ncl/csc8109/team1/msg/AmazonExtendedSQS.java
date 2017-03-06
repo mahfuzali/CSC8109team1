@@ -4,6 +4,11 @@
 package uk.ac.ncl.csc8109.team1.msg;
 
 import java.util.Map;
+import java.io.FileInputStream;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import com.amazon.sqs.javamessaging.AmazonSQSExtendedClient;
@@ -113,12 +118,13 @@ public class AmazonExtendedSQS implements MessageInterface {
 	/**
 	 * Send a message to a queue
 	 * @param queueName - name of the queue
+	 * @param label - exchange label
 	 * @param message - a message as a serialised string
 	 * @param source - the userid of the original source of the message
 	 * @param target - the userid of the ultimate recipient of the message
 	 * @return true if successful, false otherwise
 	 */
-	public boolean sendMessage(String queueName, String message, String source, String target) {
+	public boolean sendMessage(String queueName, String label, String message, String source, String target) {
 		String queueUrl;
 		// Get the Queue URL
 		try {
@@ -129,6 +135,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		// Build and send the message
 		try {
 			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("Label", new MessageAttributeValue().withDataType("String.Label").withStringValue(label));
 			messageAttributes.put("Source", new MessageAttributeValue().withDataType("String.Source").withStringValue(source));
 			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue(target));
 		    SendMessageRequest request = new SendMessageRequest();
@@ -143,16 +150,54 @@ public class AmazonExtendedSQS implements MessageInterface {
 	}
 
 	/**
-	 * Send a document to a queue
+	 * Send a message and attached document to a queue
 	 * @param queueName - name of the queue
-	 * @param document - a document as a string of up to 2GB
+	 * @param label - exchange label
+	 * @param message - a message as a serialised string
+	 * @param document - a filename of a document
 	 * @param source - the userid of the original source of the message
 	 * @param target - the userid of the ultimate recipient of the message
 	 * @return true if successful, false otherwise
 	 */
-	public boolean sendDocument(String queueName, String document, String source, String target) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean sendMsgDocument(String queueName, String label, String message, String document, String source, String target) {
+		String queueUrl;
+		Path docPath;
+		byte[] docByteArray;
+		ByteBuffer docByteBuffer;
+		
+		// Get the Queue URL
+		try {
+			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
+		} catch (Exception e) {
+			return false;
+		}
+		
+		// Read the document file to a byte buffer
+		try {
+			docPath = Paths.get(document);
+			docByteArray = Files.readAllBytes(docPath);
+			docByteBuffer = ByteBuffer.wrap(docByteArray);
+		} catch (Exception e) {
+			return false;
+		}
+		
+		// Build and send the message
+		try {
+			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("Label", new MessageAttributeValue().withDataType("String.Label").withStringValue(label));
+			messageAttributes.put("Source", new MessageAttributeValue().withDataType("String.Source").withStringValue(source));
+			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue(target));
+			messageAttributes.put("DocumentName", new MessageAttributeValue().withDataType("String.DocumentName").withStringValue(document));
+			messageAttributes.put("Document", new MessageAttributeValue().withDataType("Binary.Document").withBinaryValue(docByteBuffer));
+		    SendMessageRequest request = new SendMessageRequest();
+		    request.withMessageBody(message);
+		    request.withQueueUrl(queueUrl);
+		    request.withMessageAttributes(messageAttributes);
+		    sqsExtended.sendMessage(request);
+	    } catch (Exception e) {
+	    	return false;
+	    }
+		return true;
 	}
 
 	/**
