@@ -1,15 +1,5 @@
 package uk.ac.ncl.csc8109.team1.client;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 public class ClientTest {
 	public static void main(String[] args) {
 		Client c = new Client();
