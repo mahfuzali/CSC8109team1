@@ -28,6 +28,7 @@ import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
 public class tds {
 	
 	static UUID uuid;
+	static FairExchangeEntity fe;
 
 	/**
 	 * step 0
@@ -62,9 +63,12 @@ public class tds {
 		
 	}
 	
+	
+	
 	/**
 	 * step 1
 	 * @param Alice_id, Bob_id
+	 * Alice send request 
 	 */
 	public static void getAliceBobKey(String Alice_id, String Bob_id){
 //		initialization
@@ -74,16 +78,20 @@ public class tds {
 		MessageRepository mr;
 		mr = new MessageRepositoryImpl();
 		
-		//get key by their id
+		//get public key by their id
 		String Alice_key = rr.getPublicKeyById(Alice_id);
 		String Bob_key = rr.getPublicKeyById(Bob_id);
+		
+		//check  user id 
+		boolean Alice_Exist = rr.checkAlreadyExist(Alice_id);
+		boolean Bob_Exist = rr.checkAlreadyExist(Bob_id);
 		
 		//get the current system timestamp
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		long tt = ts.getTime();
 		
 		//message log
-		FairExchangeEntity fe = 
+		fe = 
 				new FairExchangeEntity(uuid,
 						Bob_id,
 						Alice_id,
@@ -93,24 +101,31 @@ public class tds {
 						tt);
 		
 		//store message in DB
-		if(Alice_id!=null && Alice_key!=null){
-			if(Bob_id!=null && Bob_key!=null){
+		if((Alice_Exist==true) && (Bob_Exist==true)){
+	     //	if(Bob_id!=null && Bob_key!=null){
 				mr.storeMessage(uuid, fe);
-			}else{
+			}
+				else{
 				System.out.println("Step 1(Bob) Error!");
 			}
-		}else{
-			System.out.println("Step 1(Alice) Error!");
+		//}else{
+			//System.out.println("Step 1(Alice) Error!");
 		}
 		
-	}
+	//}
 	
 	/**
 	 * step 2
 	 * @param label
+	 * send label to Alice
 	 */
 	public static void sendLabelToAlice(FairExchangeEntity fe){
+		// generate label
+		
+		
+		
 		//send label to Alice
+		
 		
 		
 		//initialization
@@ -134,25 +149,30 @@ public class tds {
 	/**
 	 * step 3
 	 * Alice send doc, eoo, L to TDS
+	 * eoo--siga(h(doc))--publickey
 	 */
-	public static void receiveEOOFromAlice(FairExchangeEntity fe){
+	public static void receiveEOOFromAlice(FairExchangeEntity fe, String publickey, String label3, String Alice_id, String doc){
 		
 		MessageRepository mr;
 		mr = new MessageRepositoryImpl();
 		
-		//FileRepository fr;
-		//fr = new FileRepositoryImpl();
+		RegisterRepository rr;
+		rr = new RegisterRepositoryImpl();
 		
+		FileRepository fr;
+		fr = new FileRepositoryImpl();
+		
+		//get the public key 
+		String Alice_key = rr.getPublicKeyById(Alice_id);
 		
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		long tt = ts.getTime();
 		
-		fe.setOriginHash("eoo");
+		fe.setOriginHash("publickey");
 		fe.setCreateTime(tt);
 
 		FileEntity fileEntity = new FileEntity();
-        FileRepository fileRepository = new FileRepositoryImpl();
-        File initialFile = new File("src/main/resources/sample.txt");
+		File initialFile = new File("src/main/resources/sample.txt");
         InputStream targetStream = null;
         try {
             targetStream = new FileInputStream(initialFile);
@@ -162,26 +182,35 @@ public class tds {
         fileEntity.setFileName(initialFile.getName());
         fileEntity.setInputStream(targetStream);
         String key =UUID.randomUUID().toString();
-        fileRepository.storeFile(key,fileEntity);
 		
+        if (Alice_key == publickey){
 		mr.storeMessage(uuid, fe);
+        fr.storeFile(key, fileEntity);
+        }
+        else{ System.out.println("Step 2 Error!"); }
+        	
 
 	}
 	
 	/**
 	 * step 4
+	 * send EOO and lable to BOb
+	 * eoo--publick key
 	 */
 	public static void sendEOOToBob(FairExchangeEntity fe){
-		//send EOO and label to Bob
 		
 		
 		//initialization
 		MessageRepository mr;
 		mr = new MessageRepositoryImpl();
+		//get message from last step
+	
+		//send message(eoo) and label to BOb
 		
-//		FairExchangeEntity fe2 = mr.getMessage(uuid);  这里有问题
-		//send message(eoo) to BOb
+		String step3message = fe.getOriginHash();
 				
+		
+		
 		//get the current system timestamp
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		long tt = ts.getTime();
@@ -197,23 +226,31 @@ public class tds {
 	
 	/**
 	 * step 5
+	 * receive EOR from Bob
+	 * EOR=Bobpublic key
 	 */
-	public static void receiveEORFromBob(FairExchangeEntity fe){
+	public static void receiveEORFromBob(FairExchangeEntity fe, String Bob_id, String Bob_publickey, String label){
 		//receive message form Bob
 		
+		//get Bob public key
+		RegisterRepository rr;
+		rr = new RegisterRepositoryImpl();
+		String Bob_key = rr.getPublicKeyById(Bob_id);
 		
-		//initialization
+		
+	 	//store message 	
 		MessageRepository mr;
 		mr = new MessageRepositoryImpl();
-				
+		
 		//get the current system timestamp
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		long tt = ts.getTime();
 				
 		fe.setOriginHash("EOR");
 		fe.setCreateTime(tt);
-				
-		if(fe!=null)
+		
+		//check label and public key
+		if(label == uuid.toString() && Bob_key == Bob_publickey)
 			mr.storeMessage(uuid, fe);
 		else
 			System.out.println("Step 5 Error!");
@@ -222,19 +259,19 @@ public class tds {
 	
 	/**
 	 * step 6
+	 * send doc to Bob
 	 */
-	public static void sendDocToBob(doc, FairExchangeEntity fe){
-		//send document to Bob
-		
-		
+	public static void sendDocToBob(FairExchangeEntity fe){
 		 
 		//initialization
 		MessageRepository mr;
 		mr = new MessageRepositoryImpl();
 		
-		FileRepository fr;
-		FileEntity f = fr.getFile(uuid);
+		FileRepository fr = new FileRepositoryImpl();
+		FileEntity f = fr.getFile(uuid.toString());
 		//send doc to Bob
+		
+		
 		
 		//get the current system timestamp
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
@@ -254,11 +291,12 @@ public class tds {
 	/**
 	 * step 7
 	 * @param label
+	 * send EOR,label to alice
 	 */
 	public static void sendEORtoAlice(FairExchangeEntity fe){
-//		send EOR to Alice
-		
-		
+	   //get the EOR
+		String step5message = fe.getOriginHash(); 
+		// send EOR and label to ALice
 		
 		//initialization
 		MessageRepository mr;
@@ -298,7 +336,7 @@ public class tds {
 		fe.setOriginHash("EOR");
 		fe.setCreateTime(tt);
 				
-		if(fe!=null)
+		if(fe!=null && Alice_label == uuid.toString() && Bob_label == uuid.toString())
 			mr.storeMessage(uuid, fe);
 		else
 			System.out.println("Step 8 Error!");
@@ -306,8 +344,9 @@ public class tds {
 	}
 	
 	public static void main(String[] args) {
+		System.out.println("Hello world");
 		registerUser();
 	}
 	
-	s
+	
 }
