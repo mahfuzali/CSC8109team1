@@ -3,6 +3,9 @@
  */
 package uk.ac.ncl.csc8109.team1.msg;
 
+import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
+import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,9 +13,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,13 +43,30 @@ public class MessageApp {
 	    success = sqsx.create(queueName);
         System.out.println("Created queue " + queueName + " " + success);
         
+        // Send a registration request
+        success = sqsx.registerRequest(queueName, "Alice");
+        System.out.println("Sent registration request to queue " + queueName + " " + success);
+        
+        // Receive message
+        String messageHandle = null;
+        Message message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Userid:" + attributes.get("Userid").getStringValue());
+        }
+        
         // Send a message
         success = sqsx.sendMessage(queueName, "Exchange #1", "Simple test message #1", "Alice", "Bob");
         System.out.println("Sent message to queue " + queueName + " " + success);
         
         // Receive message
-        String messageHandle = null;
-        Message message = sqsx.receiveMessage(queueName);
+        messageHandle = null;
+        message = sqsx.receiveMessage(queueName);
         if (message != null) {
         	messageHandle = message.getReceiptHandle();
         	System.out.println("Message received from queue " + queueName);

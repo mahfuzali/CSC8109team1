@@ -31,6 +31,14 @@ public interface MessageInterface {
 	boolean delete(String queueName);
 	
 	/**
+	 * Send a user registration request to the TDS queue
+	 * @param queueName - name of the queue
+	 * @param userid - id of the user to register
+	 * @return true if successful, false otherwise
+	 */
+	boolean registerRequest(String queueName, String userid);
+	
+	/**
 	 * Send a message to a queue
 	 * @param queueName - name of the queue
 	 * @param label - exchange label

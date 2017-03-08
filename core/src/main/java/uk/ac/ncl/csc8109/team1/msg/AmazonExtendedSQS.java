@@ -148,6 +148,35 @@ public class AmazonExtendedSQS implements MessageInterface {
 	    }
 		return true;
 	}
+	
+	/**
+	 * Send a user registration request to the TDS queue
+	 * @param queueName - name of the queue
+	 * @param userid - id of the user to register
+	 * @return true if successful, false otherwise
+	 */
+	public boolean registerRequest(String queueName, String userid) {
+		String queueUrl;
+		// Get the Queue URL
+		try {
+			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
+		} catch (Exception e) {
+			return false;
+		}
+		// Build and send the message
+		try {
+			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("Userid", new MessageAttributeValue().withDataType("String.Userid").withStringValue(userid));
+		    SendMessageRequest request = new SendMessageRequest();
+		    request.withMessageBody("Registration Request");
+		    request.withQueueUrl(queueUrl);
+		    request.withMessageAttributes(messageAttributes);
+		    sqsExtended.sendMessage(request);
+	    } catch (Exception e) {
+	    	return false;
+	    }
+		return true;
+	}
 
 	/**
 	 * Send a message and attached document to a queue
