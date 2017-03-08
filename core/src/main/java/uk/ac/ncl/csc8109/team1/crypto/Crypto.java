@@ -149,23 +149,15 @@ public class Crypto implements CryptoInterface {
 	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#getSignature()
 	 *
 	 */
-	public String getSignature() {
-		return signature;
-	}
-	
-	/**
-	 * Sets the signature of a given hash value.
-	 * Can be used to generate the EOO and EOR part of
-	 * the fair-exchange protocol
-	 * @param <code>hash</code> hash value to be signed
-	 */
-	void setSignature(String hash) {
+	public String getSignature(String hash) {
 		try {
 			this.signature = byteToStr(c.signData(strToByte(hash), strToPrivateKey(getPrivateKey())));
 		} catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException | NoSuchProviderException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		return signature;
 	}
 	
 	/**
@@ -232,8 +224,7 @@ public class Crypto implements CryptoInterface {
 	}
 	
 	/**
-	 * Stores the keypair in the local file system
-	 * @param <code>path<code> file to store the keypair
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#storeKeyPair(String)
 	 */
 	public void storeKeyPair(String path) {
 		try {
@@ -245,8 +236,7 @@ public class Crypto implements CryptoInterface {
 	}
 	
 	/**
-	 * Loads the keypair from a file 
-	 * @param <code>path<code> file where the keypair is stored
+	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#loadKeyPair(String)
 	 */
 	public void loadKeyPair(String path) {
 		 try {

@@ -48,13 +48,14 @@ public class CryptoApp {
 		sender(alice);
 		receiver(bob);
 		
-		File f = new File("src/main/resources/sample");
+		File f = new File("sample");
 		getHash(alice, f);
 		getSignature(alice, f);
 		getVerification(alice, bob, f);
 		
 		getSharedKey(alice, bob);
 		encryptionAndDecryption(alice, bob);
+				
 	}
 	
 	/**
@@ -103,8 +104,7 @@ public class CryptoApp {
 	public static void getSignature(CryptoInterface sender, File f) {
 		System.out.println("Alice generates signature of the hash");
 		String hash = sender.getHashOfFile(f);
-		((Crypto) sender).setSignature(hash);
-		String signature = sender.getSignature();
+		String signature = sender.getSignature(hash);
 		System.out.println(signature);
 		System.out.println();
 	}
@@ -118,7 +118,7 @@ public class CryptoApp {
 	public static void getVerification(CryptoInterface sender, CryptoInterface receiver, File f) {
 		System.out.println("Bob verifies the signature of the hash");
 		String hash = sender.getHashOfFile(f);
-		String signature = sender.getSignature();
+		String signature = sender.getSignature(hash);
 		String verification = receiver.isVerified(hash, sender.getPublicKey(), signature);
 		System.out.println(verification);
 		System.out.println();
@@ -151,9 +151,9 @@ public class CryptoApp {
 		String receiverCheck = receiver.getSharedKey(sender.getPublicKey());
 	
 		System.out.println("Alice encrypts the file using the computes shared key");
-		sender.encryptFile("src/main/resources/sample", "src/main/resources/encryptedsample", senderCheck);
+		sender.encryptFile("tech", "encryptedtech", senderCheck);
 		System.out.println("Bob decrypts the file using the computes shared key");
-		receiver.decryptFile("src/main/resources/encryptedsample", "src/main/resources/decryptedsample", receiverCheck);
+		receiver.decryptFile("encryptedtech", "decryptedtech", receiverCheck);
 	}
 	
 	

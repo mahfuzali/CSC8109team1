@@ -53,10 +53,12 @@ public interface CryptoInterface {
 	String getHashOfFile(File file);
 	
 	/**
-	 * Gets the signature
-	 * @return signature
+	 * Sets and gets the signature of a given hash value.
+	 * Can be used to generate the EOO and EOR part of
+	 * the fair-exchange protocol
+	 * @param <code>hash</code> hash value to be signed
 	 */
-	String getSignature();
+	String getSignature(String hash);
 	
 	/**
 	 * Verifies the signauture of the hash.
@@ -66,4 +68,18 @@ public interface CryptoInterface {
 	 * @return verified: if successful; otherwise, not verified
 	 */
 	String isVerified(String hash, String publicKey, String signature); 
+	
+	
+	/**
+	 * Stores the keypair in the local file system
+	 * @param <code>path<code> file to store the keypair
+	 */
+	public void storeKeyPair(String path);
+	
+	
+	/**
+	 * Loads the keypair from a file 
+	 * @param <code>path<code> file where the keypair is stored
+	 */
+	public void loadKeyPair(String path);
 }
