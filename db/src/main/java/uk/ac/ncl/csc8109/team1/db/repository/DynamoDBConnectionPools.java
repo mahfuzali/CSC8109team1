@@ -4,7 +4,6 @@ import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
 import java.util.ArrayList;
@@ -63,9 +62,9 @@ public class DynamoDBConnectionPools {
 
     private AmazonDynamoDB createConnection(){
         counter++;
-        AmazonDynamoDB client = AmazonDynamoDBAsyncClientBuilder.standard().withRegion(Regions.EU_WEST_1).withCredentials(new ClasspathPropertiesFileCredentialsProvider()).build();
-        //AmazonDynamoDBClient client = new AmazonDynamoDBClient(new ClasspathPropertiesFileCredentialsProvider());
-
+//        AmazonDynamoDB client = AmazonDynamoDBAsyncClientBuilder.standard().withRegion(Regions.EU_WEST_1).withCredentials(new ClasspathPropertiesFileCredentialsProvider()).build();
+        AmazonDynamoDBClient client = new AmazonDynamoDBClient(new ClasspathPropertiesFileCredentialsProvider());
+        client.setRegion(Region.getRegion(Regions.EU_WEST_1));
         return client;
     }
 }

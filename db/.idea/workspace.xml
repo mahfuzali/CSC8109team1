@@ -29,18 +29,30 @@
       <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="27" column="20" lean-forward="true" selection-start-line="27" selection-start-column="20" selection-end-line="27" selection-end-column="20" />
+            <state relative-caret-position="342">
+              <caret line="30" column="26" lean-forward="false" selection-start-line="30" selection-start-column="26" selection-end-line="30" selection-end-column="26" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FairExchangeEntity.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DynamoDBConnectionPools.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/DynamoDBConnectionPools.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="608">
+              <caret line="67" column="22" lean-forward="true" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FairExchangeEntity.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/model/FairExchangeEntity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="552">
-              <caret line="94" column="5" lean-forward="false" selection-start-line="94" selection-start-column="5" selection-end-line="94" selection-end-column="5" />
+            <state relative-caret-position="666">
+              <caret line="104" column="0" lean-forward="false" selection-start-line="104" selection-start-column="0" selection-end-line="104" selection-end-column="0" />
               <folding>
                 <element signature="e#1106#1107#0" expanded="true" />
                 <element signature="e#1135#1136#0" expanded="true" />
@@ -65,11 +77,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FileRepositoryImpl.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="FileRepositoryImpl.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/impl/FileRepositoryImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="9" column="48" lean-forward="false" selection-start-line="9" selection-start-column="33" selection-end-line="9" selection-end-column="54" />
+            <state relative-caret-position="152">
+              <caret line="8" column="48" lean-forward="false" selection-start-line="8" selection-start-column="48" selection-end-line="8" selection-end-column="48" />
               <folding />
             </state>
           </provider>
@@ -92,7 +104,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/DynamoDBConnectionPools.java" />
         <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/impl/MessageRepositoryImpl.java" />
         <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/model/RegisterEntity.java" />
         <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/impl/RegisterRepositoryImpl.java" />
@@ -104,9 +115,10 @@
         <option value="$PROJECT_DIR$/README.MD" />
         <option value="$PROJECT_DIR$/src/main/resources/AwsCredentials.properties" />
         <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/FileRepository.java" />
-        <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/impl/FileRepositoryImpl.java" />
-        <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/model/FairExchangeEntity.java" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/DynamoDBConnectionPools.java" />
+        <option value="$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/impl/FileRepositoryImpl.java" />
       </list>
     </option>
   </component>
@@ -920,7 +932,7 @@
       <updated>1488737567332</updated>
       <workItem from="1488737571629" duration="11127000" />
       <workItem from="1488820266726" duration="688000" />
-      <workItem from="1489015752303" duration="527000" />
+      <workItem from="1489015752303" duration="1425000" />
     </task>
     <servers />
   </component>
@@ -957,7 +969,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="12342000" />
+    <option name="totallyTimeSpent" value="13240000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="325" y="28" width="1607" height="970" extended-state="0" />
@@ -1104,13 +1116,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/DynamoDBConnectionPools.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="65" column="8" lean-forward="false" selection-start-line="65" selection-start-column="8" selection-end-line="65" selection-end-column="180" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/resources/sample.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1210,26 +1215,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/impl/FileRepositoryImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="9" column="48" lean-forward="false" selection-start-line="9" selection-start-column="33" selection-end-line="9" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="27" column="20" lean-forward="true" selection-start-line="27" selection-start-column="20" selection-end-line="27" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/model/FairExchangeEntity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="552">
-          <caret line="94" column="5" lean-forward="false" selection-start-line="94" selection-start-column="5" selection-end-line="94" selection-end-column="5" />
+        <state relative-caret-position="666">
+          <caret line="104" column="0" lean-forward="false" selection-start-line="104" selection-start-column="0" selection-end-line="104" selection-end-column="0" />
           <folding>
             <element signature="e#1106#1107#0" expanded="true" />
             <element signature="e#1135#1136#0" expanded="true" />
@@ -1240,6 +1229,32 @@
             <element signature="e#1321#1322#0" expanded="true" />
             <element signature="e#1357#1358#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="30" column="26" lean-forward="false" selection-start-line="30" selection-start-column="26" selection-end-line="30" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/DynamoDBConnectionPools.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="608">
+          <caret line="67" column="22" lean-forward="true" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/uk/ac/ncl/csc8109/team1/db/repository/impl/FileRepositoryImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="8" column="48" lean-forward="false" selection-start-line="8" selection-start-column="48" selection-end-line="8" selection-end-column="48" />
+          <folding />
         </state>
       </provider>
     </entry>

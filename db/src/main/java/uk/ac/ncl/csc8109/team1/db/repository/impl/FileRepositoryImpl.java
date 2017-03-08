@@ -7,7 +7,6 @@ import com.amazonaws.regions.Regions;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import org.apache.log4j.Logger;
 
@@ -27,7 +26,9 @@ public class FileRepositoryImpl implements FileRepository {
     private static AmazonS3 s3;
     public FileRepositoryImpl(){
         if(s3 == null) {
-            s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.EU_WEST_1).withCredentials(new ClasspathPropertiesFileCredentialsProvider()).build();
+//            s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.EU_WEST_1).withCredentials(new ClasspathPropertiesFileCredentialsProvider()).build();
+            s3 = new AmazonS3Client(new ClasspathPropertiesFileCredentialsProvider());
+            s3.setRegion(Region.getRegion(Regions.EU_WEST_1));
         }
     }
 
