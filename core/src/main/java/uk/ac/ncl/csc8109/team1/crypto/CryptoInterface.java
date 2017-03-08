@@ -69,17 +69,15 @@ public interface CryptoInterface {
 	 */
 	String isVerified(String hash, String publicKey, String signature); 
 	
-	
 	/**
 	 * Stores the keypair in the local file system
 	 * @param <code>path<code> file to store the keypair
 	 */
-	public void storeKeyPair(String path);
-	
+	void storeKeyPair(String path);
 	
 	/**
 	 * Loads the keypair from a file 
 	 * @param <code>path<code> file where the keypair is stored
 	 */
-	public void loadKeyPair(String path);
+	void loadKeyPair(String path);
 }
