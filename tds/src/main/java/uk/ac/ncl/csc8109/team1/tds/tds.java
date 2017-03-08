@@ -28,38 +28,50 @@ import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
 public class tds {
 	
 	static UUID uuid;
-	static FairExchangeEntity fe;
-
+	static FairExchangeEntity fe = new FairExchangeEntity();
+	static RegisterRepository rr = new RegisterRepositoryImpl();
+	//static RegisterEntity re = new RegisterEntity();
+	static MessageRepository mr = new MessageRepositoryImpl();
 	/**
 	 * step 0
 	 */
 	public static void registerUser(){
 		//initialization, use interface
-		RegisterRepository rr;
-		rr = new RegisterRepositoryImpl();
+		
 		
 		//register alice and bob
-		RegisterEntity reg_Alice = new RegisterEntity("alice123", "alicepublickey");
-		RegisterEntity reg_Bob = new RegisterEntity("bob123", "bobpublickey");
 		
+		RegisterEntity reg_Alice = new RegisterEntity();
+		RegisterEntity reg_Bob = new RegisterEntity();
+//		
 		//get their keys
-		String Alice_id = reg_Alice.getId();
-		String Bob_id = reg_Bob.getId();
+		String Alice_id = "alice000";
+		String Bob_id = "bob000";
 		
 		//registration
 		if(!rr.checkAlreadyExist(Alice_id)){
-			rr.registerUser(reg_Alice);
+			reg_Alice.setId("alice000");
+			reg_Alice.setPublicKey("alicepublickey000");
 		}else{
 			System.out.println("please change Alice's id!");
 		}
-		
+		// string alice_id= alice123
+		//检查在不在
+		//RegisterEntity reg_Alice = new RegisterEntity("alice123", "alicepublickey");
+		//RegisterEntity reg_Bob = new RegisterEntity("bob123", "bobpublickey");
+		//id and publickey 是不是一个人
 		if(!rr.checkAlreadyExist(Bob_id)){
-			rr.registerUser(reg_Bob);
+			reg_Bob.setId("bob000");
+			reg_Bob.setPublicKey("bobpublickey000");
+			//RegisterEntity reg_Bob = new RegisterEntity("bob000", "bobpublickey000");
 		}else{
 			System.out.println("please change Bob's id!");
 		}
 		
 		System.out.println("test 1");
+		System.out.println(reg_Bob.getId());
+		System.out.println(reg_Alice.getPublicKey());
+		//System.out.println(rr.registerUser(re));
 		
 	}
 	
@@ -72,44 +84,50 @@ public class tds {
 	 */
 	public static void getAliceBobKey(String Alice_id, String Bob_id){
 //		initialization
-		RegisterRepository rr;
-		rr = new RegisterRepositoryImpl();
+//		RegisterRepository rr;
+//		rr = new RegisterRepositoryImpl();
 		
-		MessageRepository mr;
-		mr = new MessageRepositoryImpl();
+		
 		
 		//get public key by their id
-		String Alice_key = rr.getPublicKeyById(Alice_id);
-		String Bob_key = rr.getPublicKeyById(Bob_id);
+//		String Alice_key = rr.getPublicKeyById(Alice_id);
+//		String Bob_key = rr.getPublicKeyById(Bob_id);
 		
 		//check  user id 
+		System.out.println(rr.getPublicKeyById("alice000"));
 		boolean Alice_Exist = rr.checkAlreadyExist(Alice_id);
 		boolean Bob_Exist = rr.checkAlreadyExist(Bob_id);
-		
+		System.out.println(Alice_Exist);
+		System.out.println(Bob_Exist);
 		//get the current system timestamp
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		long tt = ts.getTime();
 		
-		//message log
-		fe = 
-				new FairExchangeEntity(uuid,
-						Bob_id,
-						Alice_id,
-						Alice_key,
-						Bob_key,
-						"Request",
-						tt);
+		//message log uuid,
+//		Bob_id,
+//		Alice_id,
+//		Alice_key,
+//		Bob_key,
+//		"Request",
+//		tt
+		
 		
 		//store message in DB
 		if((Alice_Exist==true) && (Bob_Exist==true)){
 	     //	if(Bob_id!=null && Bob_key!=null){
+				fe.setUuid(uuid);
+		
+				fe.setCreateTime(tt);
+				fe.setFromID(Alice_id);
+				fe.setToID(Bob_id);
+				fe.setOriginHash("request");
 				mr.storeMessage(uuid, fe);
 			}
 				else{
 				System.out.println("Step 1(Bob) Error!");
 			}
-		//}else{
-			//System.out.println("Step 1(Alice) Error!");
+		 System.out.println("step1 test");
+		 System.out.println(mr.getMessage(uuid));
 		}
 		
 	//}
@@ -345,7 +363,9 @@ public class tds {
 	
 	public static void main(String[] args) {
 		System.out.println("Hello world");
+		//registerUser();
 		registerUser();
+		getAliceBobKey("alice000","bob000");
 	}
 	
 	
