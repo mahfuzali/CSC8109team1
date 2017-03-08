@@ -5,6 +5,7 @@ package uk.ac.ncl.csc8109.team1.msg;
 
 import java.util.Map;
 import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,6 +90,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 	    try {
 	    	sqsExtended.createQueue(createQueueRequest);
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    	return false;
 	    }
 		return true;
@@ -105,11 +107,13 @@ public class AmazonExtendedSQS implements MessageInterface {
 		try {
 			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		try {
 			sqsExtended.deleteQueue(new DeleteQueueRequest(queueUrl));
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    	return false;
 	    }
 		return true;
@@ -130,6 +134,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		try {
 			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		// Build and send the message
@@ -144,6 +149,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		    request.withMessageAttributes(messageAttributes);
 		    sqsExtended.sendMessage(request);
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    	return false;
 	    }
 		return true;
@@ -153,14 +159,16 @@ public class AmazonExtendedSQS implements MessageInterface {
 	 * Send a user registration request to the TDS queue
 	 * @param queueName - name of the queue
 	 * @param userid - id of the user to register
+	 * @param publicKey - user's public key
 	 * @return true if successful, false otherwise
 	 */
-	public boolean registerRequest(String queueName, String userid) {
+	public boolean registerRequest(String queueName, String userid, String publicKey) {
 		String queueUrl;
 		// Get the Queue URL
 		try {
 			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		// Build and send the message
@@ -173,6 +181,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		    request.withMessageAttributes(messageAttributes);
 		    sqsExtended.sendMessage(request);
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    	return false;
 	    }
 		return true;
@@ -198,6 +207,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		try {
 			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		
@@ -207,6 +217,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 			docByteArray = Files.readAllBytes(docPath);
 			docByteBuffer = ByteBuffer.wrap(docByteArray);
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		
@@ -224,6 +235,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		    request.withMessageAttributes(messageAttributes);
 		    sqsExtended.sendMessage(request);
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    	return false;
 	    }
 		return true;
@@ -241,6 +253,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		try {
 			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 		// Receive at most one message from the queue
@@ -252,6 +265,52 @@ public class AmazonExtendedSQS implements MessageInterface {
 				message = messages.get(0);
 			}			
 	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    	return null;
+	    }
+		return message;
+	}
+	
+	/**
+	 * Receive a message for a specific user from a queue accessed by many users
+	 * @param queueName - name of the queue
+	 * @param userid - id of the user
+	 * @return a message object, or null if none
+	 */
+	public Message receiveMyMessage(String queueName, String userid) {
+		String queueUrl;
+		Message message = null;
+		String messageHandle = null;
+		// Get the Queue URL
+		try {
+			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		// Receive at most 10 messages from the queue
+		try {
+			ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl);
+			List<Message> messages = sqsExtended.receiveMessage(receiveMessageRequest.withMessageAttributeNames("All").withMaxNumberOfMessages(10)).getMessages();
+			// Check all the messages received
+			Map<String, MessageAttributeValue> attributes;
+			MessageAttributeValue attr;
+			for (Message m: messages) {
+				// Check the attributes of the message
+	            attributes = m.getMessageAttributes();
+	            attr = attributes.get("Target");
+	            // If the message has a Target attribute, and it matches the userid, then return this message
+	            if (attr != null && attr.getStringValue().equals(userid)) {
+	            	message = m;
+	            	break;
+	            } else {
+	            	// Make this message immediately visible to others
+	            	messageHandle = m.getReceiptHandle();
+	            	sqsExtended.changeMessageVisibility(queueUrl, messageHandle, 0);
+	            }
+			}
+	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    	return null;
 	    }
 		return message;
@@ -269,6 +328,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 		try {
 			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 		// Delete the message
@@ -276,6 +336,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 			DeleteMessageRequest request = new DeleteMessageRequest(queueUrl, messageHandle);
 			sqsExtended.deleteMessage(request);
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    	return false;
 	    }
 		return true;

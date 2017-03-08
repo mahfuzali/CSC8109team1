@@ -34,9 +34,10 @@ public interface MessageInterface {
 	 * Send a user registration request to the TDS queue
 	 * @param queueName - name of the queue
 	 * @param userid - id of the user to register
+	 * @param publicKey - user's public key
 	 * @return true if successful, false otherwise
 	 */
-	boolean registerRequest(String queueName, String userid);
+	boolean registerRequest(String queueName, String userid, String publicKey);
 	
 	/**
 	 * Send a message to a queue
@@ -67,6 +68,14 @@ public interface MessageInterface {
 	 * @return a message object, or null if none
 	 */
 	Message receiveMessage(String queueName);
+	
+	/**
+	 * Receive a message for a specific user from a queue accessed by many users
+	 * @param queueName - name of the queue
+	 * @param userid - id of the user
+	 * @return a message object, or null if none
+	 */
+	Message receiveMyMessage(String queueName, String userid);
 	
 	/**
 	 * Delete a message from a queue

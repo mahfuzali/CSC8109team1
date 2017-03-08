@@ -44,10 +44,10 @@ public class MessageApp {
         System.out.println("Created queue " + queueName + " " + success);
         
         // Send a registration request
-        success = sqsx.registerRequest(queueName, "Alice");
+        success = sqsx.registerRequest(queueName, "Alice", "PUBLICKEY");
         System.out.println("Sent registration request to queue " + queueName + " " + success);
         
-        // Receive message
+        // Receive registration request
         String messageHandle = null;
         Message message = sqsx.receiveMessage(queueName);
         if (message != null) {
@@ -59,6 +59,10 @@ public class MessageApp {
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
             System.out.println("  Userid:" + attributes.get("Userid").getStringValue());
         }
+        
+        // Delete registration request
+        success = sqsx.deleteMessage(queueName, messageHandle);
+        System.out.println("Deleted registration request from queue " + queueName + " " + success);
         
         // Send a message
         success = sqsx.sendMessage(queueName, "Exchange #1", "Simple test message #1", "Alice", "Bob");
@@ -125,6 +129,31 @@ public class MessageApp {
         // Delete message
         success = sqsx.deleteMessage(queueName, messageHandle);
         System.out.println("Deleted message from queue " + queueName + " " + success);
+        
+        // Send a message
+        success = sqsx.sendMessage(queueName, "Exchange #1", "Simple test message #3", "Alice", "Bob");
+        System.out.println("Sent message for Bob to queue " + queueName + " " + success);
+        
+        // Try to receive message for Alice
+        messageHandle = null;
+        message = sqsx.receiveMyMessage(queueName, "Alice");
+        System.out.println("There is " + (message==null ? "no" : "a") + " message for Alice");
+        
+        // Try to receive message for Bob
+        messageHandle = null;
+        message = sqsx.receiveMyMessage(queueName, "Bob");
+        System.out.println("There is " + (message==null ? "no" : "a") + " message for Bob");
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Label:" + attributes.get("Label").getStringValue());
+            System.out.println("  Source:" + attributes.get("Source").getStringValue());
+            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+        }
         
         // Delete queue
         success = sqsx.delete(queueName);
