@@ -19,33 +19,55 @@ public class FairExchangeEntity {
     @DynamoDBAttribute
     private String fromID;
     @DynamoDBAttribute
-    private String fPublicKey;
+    private String lastMessage;
     @DynamoDBAttribute
-    private String tPublicKey;
-    @DynamoDBAttribute
-    private String originHash;
-    @DynamoDBAttribute
-    private String receiptHash;
-    @DynamoDBAttribute
-    private long createTime;
-    @DynamoDBTypeConvertedEnum
-    @DynamoDBAttribute
-    private FairExchangeStage stage;
+    private int stage;
     @DynamoDBAttribute
     private String fileKey;
+    @DynamoDBAttribute
+    private String regque;
+    @DynamoDBAttribute
+    private String proque;
 
     public FairExchangeEntity() {
     }
 
-    public FairExchangeEntity(UUID uuid, String toID, String fromID, String fPublicKey, String tPublicKey, String originHash, long createTime) {
+    public FairExchangeEntity(UUID uuid, String toID, String fromID) {
         this.uuid = uuid;
         this.toID = toID;
         this.fromID = fromID;
-        this.fPublicKey = fPublicKey;
-        this.tPublicKey = tPublicKey;
-        this.originHash = originHash;
-        this.createTime = createTime;
-        this.stage = FairExchangeStage.STAGE1;
+    }
+
+    public String getRegque() {
+        return regque;
+    }
+
+    public void setRegque(String regque) {
+        this.regque = regque;
+    }
+
+    public String getProque() {
+        return proque;
+    }
+
+    public void setProque(String proque) {
+        this.proque = proque;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
+    }
+
+    public int getStage() {
+        return stage;
+    }
+
+    public void setStage(int stage) {
+        this.stage = stage;
     }
 
     public void setUuid(UUID uuid) {
@@ -60,22 +82,6 @@ public class FairExchangeEntity {
         this.fromID = fromID;
     }
 
-    public void setfPublicKey(String fPublicKey) {
-        this.fPublicKey = fPublicKey;
-    }
-
-    public void settPublicKey(String tPublicKey) {
-        this.tPublicKey = tPublicKey;
-    }
-
-    public void setOriginHash(String originHash) {
-        this.originHash = originHash;
-    }
-
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
-    }
-
     public UUID getUuid() {
         return uuid;
     }
@@ -86,38 +92,6 @@ public class FairExchangeEntity {
 
     public String getFromID() {
         return fromID;
-    }
-
-    public String getfPublicKey() {
-        return fPublicKey;
-    }
-
-    public String gettPublicKey() {
-        return tPublicKey;
-    }
-
-    public String getOriginHash() {
-        return originHash;
-    }
-
-    public String getReceiptHash() {
-        return receiptHash;
-    }
-
-    public void setReceiptHash(String receiptHash) {
-        this.receiptHash = receiptHash;
-    }
-
-    public long getCreateTime() {
-        return createTime;
-    }
-
-    public FairExchangeStage getStage() {
-        return stage;
-    }
-
-    public void setStage(FairExchangeStage stage) {
-        this.stage = stage;
     }
 
     public String getFileKey() {

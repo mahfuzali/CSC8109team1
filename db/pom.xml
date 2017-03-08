@@ -30,7 +30,7 @@
             <artifactId>aws-java-sdk-dynamodb</artifactId>
             <version>1.11.98</version>
         </dependency>
-        
+
 
         <dependency>
             <groupId>junit</groupId>

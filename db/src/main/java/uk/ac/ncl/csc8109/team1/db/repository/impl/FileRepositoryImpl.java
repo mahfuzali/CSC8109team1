@@ -1,5 +1,6 @@
 package uk.ac.ncl.csc8109.team1.db.repository.impl;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -7,16 +8,14 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.*;
 import org.apache.log4j.Logger;
 
 import uk.ac.ncl.csc8109.team1.db.model.FileEntity;
 import uk.ac.ncl.csc8109.team1.db.repository.FileRepository;
 
 import java.io.IOException;
+import java.net.URL;
 
 /**
  * Created by Huan on 2017/3/2.
@@ -54,5 +53,20 @@ public class FileRepositoryImpl implements FileRepository {
     @Override
     public void deleteFile(String key) {
         s3.deleteObject(bucketName,key);
+    }
+
+    @Override
+    public URL generatePreSignedUrl(String key) {
+        java.util.Date expiration = new java.util.Date();
+        long msec = expiration.getTime();
+        msec += 1000 * 60 * 60*6; // 6 hour.
+        expiration.setTime(msec);
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                new GeneratePresignedUrlRequest(bucketName, key);
+        generatePresignedUrlRequest.setMethod(HttpMethod.GET); // Default.
+        generatePresignedUrlRequest.setExpiration(expiration);
+
+        return s3.generatePresignedUrl(generatePresignedUrlRequest);
+
     }
 }
