@@ -61,7 +61,8 @@ public class Client {
 	private String source;
 	
 	/**
-	 * 
+	 * In instantiation, a unique id is generated; along with,
+	 * public and private key and a queue name
 	 */
 	public Client() {
 		uid = UUID.randomUUID().toString();
@@ -72,89 +73,89 @@ public class Client {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the unique uuid
+	 * @return <code>uid</code>
 	 */
 	public String getUUID() {
 		return uid;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the public key
+	 * @return <code>publicKey</code>
 	 */
 	public String getPublicKey() {
 		return publicKey;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the private key
+	 * @return <code>privateKey</code>
 	 */
 	public String getPrivateKey() {
 		return privateKey;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the queue name
+	 * @return <code>queueName</code>
 	 */
 	public String getQueueName() {
 		return queueName;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the label
+	 * @return <code>label</code>
 	 */
 	public String getLabel() {
 		return label;
 	}
 
 	/**
-	 * 
-	 * @param label
+	 * Sets the label for exchange
+	 * @param <code>label</code> label for exchange
 	 */
 	public void setLabel(String label) {
 		this.label = label;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the name of the tds 
+	 * @return <code>tds</code> name of the tds
 	 */
 	public String getTds() {
 		return tds;
 	}
 
 	/**
-	 * 
-	 * @param tds
+	 * Sets the value name of the tds
+	 * @param <code>tds<code> name of tds
 	 */
 	public void setTds(String tds) {
 		this.tds = tds;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the name of the destination
+	 * @return <code>source</code> destination name
 	 */
 	public String getSource() {
 		return source;
 	}
 
 	/**
-	 * 
-	 * @param source
+	 * Sets the name of the destination
+	 * @param <code>source</code> destination name
 	 */
 	public void setSource(String source) {
 		this.source = source;
 	}
 	
 	/**
-	 * 
-	 * @param FILENAME
-	 * @param data
+	 * Writes to a file only if the data does not exists
+	 * @param <code>FILENAME<code> name of the file 
+	 * @param <code>data</code> data to write
 	 */
 	public void writeToFile(String FILENAME, String data) {
 		if(check(FILENAME, data) == false) {
@@ -165,8 +166,8 @@ public class Client {
 	}
 	
 	/**
-	 * 
-	 * @param FILENAME
+	 * Reads from a file
+	 * @param <code>FILENAME</code> file to read from
 	 */
 	public void readFromFile(String FILENAME) {
 		BufferedReader br = null;
@@ -192,9 +193,9 @@ public class Client {
 	}
 	
 	/**
-	 * 
-	 * @param FILENAME
-	 * @param data
+	 * Writes to a file o
+	 * @param <code>FILENAME<code> name of the file 
+	 * @param <code>data</code> data to write
 	 */
 	private void write(String FILENAME, String data) {
 		BufferedWriter bw = null;
@@ -225,10 +226,10 @@ public class Client {
 	}
 	
 	/**
-	 * 
-	 * @param FILENAME
-	 * @param data
-	 * @return
+	 * Checks if the data exists in the file
+	 * @param <code>FILENAME<code> name of the file 
+	 * @param <code>data</code> data to check
+	 * @return <code>true</code> if exists; else, <code>false</code>
 	 */
 	private boolean check(String FILENAME, String data) {
 		boolean flag = false;

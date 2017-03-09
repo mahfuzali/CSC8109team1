@@ -31,6 +31,13 @@
 
 package uk.ac.ncl.csc8109.team1.client;
 
+/** 
+ * This class shows how to use the client object
+ * 
+ * @author Mahfuz Ali
+ * @Version 1.3
+ * @email m.ali4@newcastle.ac.uk
+ */
 public class ClientTest {
 	public static void main(String[] args) {
 		Client c = new Client();
