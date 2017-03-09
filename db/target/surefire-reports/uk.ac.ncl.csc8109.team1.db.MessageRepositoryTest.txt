@@ -1,0 +1,18 @@
+-------------------------------------------------------------------------------
+Test set: uk.ac.ncl.csc8109.team1.db.MessageRepositoryTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.001 sec <<< FAILURE!
+testAddAndGetMessage(uk.ac.ncl.csc8109.team1.db.MessageRepositoryTest)  Time elapsed: 0.001 sec  <<< ERROR!
+java.lang.Error: Unresolved compilation problem: 
+	The constructor FairExchangeEntity(UUID, String, String, String, String, String, Long) is undefined
+
+	at uk.ac.ncl.csc8109.team1.db.MessageRepositoryTest.generateFairExchangeEntity(MessageRepositoryTest.java:43)
+	at uk.ac.ncl.csc8109.team1.db.MessageRepositoryTest.testAddAndGetMessage(MessageRepositoryTest.java:19)
+
+testDeleteMessage(uk.ac.ncl.csc8109.team1.db.MessageRepositoryTest)  Time elapsed: 0 sec  <<< ERROR!
+java.lang.Error: Unresolved compilation problem: 
+	The constructor FairExchangeEntity(UUID, String, String, String, String, String, Long) is undefined
+
+	at uk.ac.ncl.csc8109.team1.db.MessageRepositoryTest.generateFairExchangeEntity(MessageRepositoryTest.java:43)
+	at uk.ac.ncl.csc8109.team1.db.MessageRepositoryTest.testDeleteMessage(MessageRepositoryTest.java:27)
+

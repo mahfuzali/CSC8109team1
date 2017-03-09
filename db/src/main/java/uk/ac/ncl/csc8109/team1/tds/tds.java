@@ -9,13 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.Assert;
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
-import com.amazonaws.services.dynamodbv2.model.PutItemResult;
 
 import uk.ac.ncl.csc8109.team1.db.model.FairExchangeEntity;
+import uk.ac.ncl.csc8109.team1.db.model.FairExchangeStage;
 import uk.ac.ncl.csc8109.team1.db.model.FileEntity;
 import uk.ac.ncl.csc8109.team1.db.model.RegisterEntity;
 import uk.ac.ncl.csc8109.team1.db.repository.FileRepository;
@@ -26,7 +23,9 @@ import uk.ac.ncl.csc8109.team1.db.repository.impl.MessageRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
 
 public class tds {
-	
+
+
+
 	static UUID uuid;
 	static FairExchangeEntity fe = new FairExchangeEntity();
 	static RegisterRepository rr = new RegisterRepositoryImpl();
@@ -36,6 +35,21 @@ public class tds {
 	/**
 	 * step 0
 	 */
+
+	public static void register(String id, String publickey) {
+		//RegisterRepository registerRepository = new RegisterRepositoryImpl();
+		RegisterEntity registerEntity = new RegisterEntity();
+		if(rr.checkAlreadyExist(id)){
+			throw new IllegalArgumentException("user id already exists");
+		}
+		registerEntity.setId(id);
+		registerEntity.setPublicKey(publickey);
+		rr.registerUser(registerEntity);
+
+
+		//todo 加密部分
+
+	}
 	public static void registerUser(){
 		
 		//register alice and bob
@@ -111,12 +125,35 @@ public class tds {
 		 System.out.println("step1 test");
 		 System.out.println(mr.getMessage(uuid));
 		}
+
+	public UUID storeMeg(String fromId, String toId){
+
+
+		//RegisterEntity registerEntity = new RegisterEntity();
+		if(!rr.checkAlreadyExist(fromId)){
+			throw new IllegalArgumentException("fromuser id not exists");
+		}
+		if(!rr.checkAlreadyExist(toId)){
+			throw new IllegalArgumentException("touser id not exists");
+		}
+		//check sig
+		FairExchangeEntity fairExchangeEntity = new FairExchangeEntity();
+		fairExchangeEntity.setFromID(fromId);
+		fairExchangeEntity.setToID(toId);
+		uuid = UUID.randomUUID();
+		fairExchangeEntity.setUuid(uuid);
+		fairExchangeEntity.setStage(1);
+		mr.storeMessage(uuid,fairExchangeEntity);
+
+
+		return uuid;
+	}
 		
 	//}
 	
 	/**
 	 * step 2
-	 * @param label
+	 * @param fe
 	 * send label to Alice
 	 */
 	public static void sendLabelToAlice(FairExchangeEntity fe){
@@ -158,7 +195,7 @@ public class tds {
         try {
             targetStream = new FileInputStream(initialFile);
         } catch (FileNotFoundException e) {
-            Assert.fail();
+
         }
         fileEntity.setFileName(initialFile.getName());
         fileEntity.setInputStream(targetStream);
@@ -249,7 +286,7 @@ public class tds {
 	
 	/**
 	 * step 7
-	 * @param label
+	 * @param fe
 	 * send EOR,label to alice
 	 */
 	public static void sendEORtoAlice(FairExchangeEntity fe){
