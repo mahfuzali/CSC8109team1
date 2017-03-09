@@ -56,10 +56,7 @@ public class ClientTest {
 		
 		String l = c.getTds() + "," +  c.getSource() + "," + c.getLabel();
 				
-		System.out.println("Line: " + l);
-
 		String FILENAME = "teamPath";
-		
 		c.writeToFile(FILENAME, l);
 		c.readFromFile("teamPath");
 
