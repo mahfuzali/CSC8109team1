@@ -222,18 +222,18 @@ There are 3 tables:
 User Registry
 -------------
 
-User ID  | Public Key
----------|------------
-Alice    | xAg1FWs34*^s
-Bob      | ...
+User ID  | Public Key   | Queue
+---------|--------------|------- 
+Alice    | xAg1FWs34*^s |
+Bob      | ...          |
 
 Exchange State
 --------------
 
-Label   | Sender | Receiver | Protocol     | Step Number | Last Message     | Document ID
---------|--------|----------|--------------|-------------|------------------|----------------------
-Label 1 | Alice  | Bob      | CoffeySaidha | 2           | SigAlice(h(doc)) | {S3 object ID of doc}
-Label 2 | Chen   | Daoud    | CoffeySaidha | ...         | ...              | ...
+Label   | Sender | Receiver | Protocol     | Step Number | Last Message     | Document ID          | Sender Queue | Receiver Queue
+--------|--------|----------|--------------|-------------|------------------|----------------------|--------------|---------------
+Label 1 | Alice  | Bob      | CoffeySaidha | 2           | SigAlice(h(doc)) | {S3 object ID of doc}|              |
+Label 2 | Chen   | Daoud    | CoffeySaidha | ...         | ...              | ...                  |              |
 
 Message Log
 -----------
