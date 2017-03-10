@@ -31,6 +31,15 @@
 
 package uk.ac.ncl.csc8109.team1.client;
 
+import java.util.Map;
+import java.util.UUID;
+
+import com.amazonaws.services.sqs.model.Message;
+import com.amazonaws.services.sqs.model.MessageAttributeValue;
+
+import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
+import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
+
 /** 
  * This class shows how to use the client object
  * 
@@ -57,9 +66,50 @@ public class ClientTest {
 		String l = c.getTds() + "," +  c.getSource() + "," + c.getLabel();
 				
 		String FILENAME = "teamPath";
-		c.writeToFile(FILENAME, l);
-		c.readFromFile("teamPath");
+		//c.writeToFile(FILENAME, l);
+		//c.readFromFile("teamPath");
 
+		
+		
+		
+		
+		
+		boolean success = false;
+		
+		// Initialise queue service
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		System.out.println("Initialised queue service");
+	
+		// Create a message queue name
+	    String queueName = "csc8109_1_tds_queue_20070306_reg";
+	    
+	    // Create a queue
+	    success = sqsx.create(queueName);
+        System.out.println("Created queue " + queueName + " " + success);
+        
+        // Send a registration request
+        success = sqsx.registerRequest(queueName, c.getUUID(), c.getPublicKey());
+        System.out.println("Sent registration request to queue " + queueName + " " + success);
+        
+        
+        
+        // Receive registration request
+        String messageHandle = null;
+        Message message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Userid:" + attributes.get("Userid").getStringValue());
+        }
+        
+		
+		
+		
+		
 	}
 	
 	
