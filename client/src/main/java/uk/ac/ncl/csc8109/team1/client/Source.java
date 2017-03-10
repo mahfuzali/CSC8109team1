@@ -14,35 +14,23 @@ public class Source {
 	private static final String name = "alice-";
 	private static String EOO;
 	
-	// **Starts exchange**//
 	public static void main(String[] args) {
 		Client alice = new Client();
 		alice.setLabel("label1");
 		alice.setSource("bob");
 		alice.setQueueName("csc8109_1_tds_queue_20070306_alice");
-		// **Request exchange from TDS, which is label(id) of exchange**//
 
-		// **Wait for exchange id from TDS**//
+		//File f = new File("sample");
+		//System.out.println(sendDocMsg(f, alice, TDS_queueName));
 
-		// **Send message1 to TDS
-		// doc along with signature of A containing hash of doc (doc,
-		// sigA(h(doc)))**//
-		File f = new File("sample");
-		System.out.println(sendMsg(f, alice, TDS_queueName));
-		
-		// **wait for message(Evidence of origin) from TDS at the of exchange
-		// which is signature of B containing signature of A which contains hash
-		// of the doc(sigB(sigA(h(doc)) **//
 
 		//receiveMsg(alice, TDS_queueName);
 		
-		// 4. receive the eor from tds 
+		receiveMsg(alice, alice.getQueueName());
 		
-		
-		// **Output then end**//
 	}
 	
-	public static boolean sendMsg(File f, Client source, String tds_queue) {
+	public static boolean sendDocMsg(File f, Client source, String tds_queue) {
 		boolean success = false;
 
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
