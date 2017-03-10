@@ -32,6 +32,8 @@
 package uk.ac.ncl.csc8109.team1.client;
 
 import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
+import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
+import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
 import uk.ac.ncl.csc8109.team1.crypto.Crypto;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -39,7 +41,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
+
+import com.amazonaws.services.sqs.model.Message;
+import com.amazonaws.services.sqs.model.MessageAttributeValue;
 
 /** 
  * This class represents a client in a fair-exchange protocol
@@ -59,8 +65,6 @@ public class Client {
 	private String tds;
 	private String source;
 	
-	private String EOO;
-	private String EOR;
 	
 	/**
 	 * In instantiation, a unique id is generated; along with,
@@ -271,12 +275,74 @@ public class Client {
 		return flag;
 	}
 
+	/**
+	 * 
+	 * @param file
+	 * @return
+	 */
 	public String getEOO(File file) {
 		return crypto.getSignature(crypto.getHashOfFile(file));
 	}
 
+	/**
+	 * 
+	 * @param str
+	 * @return
+	 */
 	public String getEOR(String str) {
 		return crypto.getSignature(str);
 	}
 
+	/**
+	 * 
+	 * @param c
+	 * @param tdsQueue
+	 */
+	public void regRequest(Client c, String tdsQueue) {
+		boolean success = false;
+		
+		// Initialise queue service
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		System.out.println("Initialised queue service");
+	
+		// Create a message queue name
+	    String queueName = tdsQueue;
+	    
+	    // Create a queue
+	    success = sqsx.create(queueName);
+        System.out.println("Created queue " + queueName + " " + success);
+        
+        // Send a registration request
+        success = sqsx.registerRequest(queueName, /*c.getUUID()*/ "Alice", c.getPublicKey());
+        System.out.println("Sent registration request to queue " + queueName + " " + success);
+	}
+	
+	/**
+	 * 
+	 * @param tdsQueue
+	 * @param userid
+	 */
+	public void getQueueNameFromTDS(String tdsQueue, String userid) {
+		// Initialise queue service
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		System.out.println("Initialised queue service");
+        String messageHandle = null;
+        
+        // Try to receive message for Bob
+        Message message = sqsx.receiveMyMessage(tdsQueue, userid);
+        System.out.println("There is " + (message==null ? "no" : "a") + " message for " + userid);
+        
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + tdsQueue);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Queue:" + attributes.get("Queue").getStringValue());
+            setQueueName(attributes.get("Queue").getStringValue());
+            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+        }  
+	}
+	
 }
