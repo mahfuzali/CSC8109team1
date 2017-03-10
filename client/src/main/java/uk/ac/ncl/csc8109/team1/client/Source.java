@@ -38,7 +38,8 @@ import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
 
 import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
-import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;;
+import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
+
 
 public class Source {
 	@SuppressWarnings("unused")
@@ -49,7 +50,7 @@ public class Source {
 	private static String EOO;
 	
 	private static String queue; 
-	
+		
 	public static void main(String[] args) throws IOException {
 		Client alice = new Client();
 		// For monday - tds should give me a label back
@@ -65,6 +66,11 @@ public class Source {
 		/* Exchange record between multiple clients */
 		String data = alice.getQueueName() + "," + alice.getLabel() + "," + alice.getDestination(); 
 		alice.writeToFile("resource/"+ alice.getUUID() + "-exchange", data);
+		
+		
+		/* Get bobs public key from the DB to compute shared key */
+		/* Encrypt the file use the shared key */ 
+		
 		
 		
 		//File f = new File("sample");

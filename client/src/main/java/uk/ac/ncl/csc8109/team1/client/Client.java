@@ -318,6 +318,28 @@ public class Client {
 
 	/**
 	 * 
+	 * @param f
+	 * @param inputPath
+	 * @param outputPath
+	 * @param key
+	 */
+	void encrypt(String inputPath, String outputPath, String key) {
+		crypto.encryptFile(inputPath, outputPath, key);
+	}
+	
+	/**
+	 * 
+	 * @param f
+	 * @param inputPath
+	 * @param outputPath
+	 * @param key
+	 */
+	void decrypt(String inputPath, String outputPath, String key) {
+		crypto.decryptFile(inputPath, outputPath, key);
+	}
+	
+	/**
+	 * 
 	 * @param file
 	 * @return
 	 */
