@@ -49,7 +49,7 @@ public class Source {
 		
 		String queue = tds_queue;
 		String label = source.getLabel();
-		String eoo = source.EOO(f);
+		String eoo = source.getEOO(f);
 		setEOO(eoo);
 		String uuid = source.getUUID();
 		String target = source.getSource();

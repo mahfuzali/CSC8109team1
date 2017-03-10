@@ -87,7 +87,7 @@ public class Target {
 
 		String queue = q;
 		String label = source.getLabel();
-		String eor = source.EOR(eoo);
+		String eor = source.getEOR(eoo);
 		String uuid = source.getUUID();
 		String target = source.getSource();
 

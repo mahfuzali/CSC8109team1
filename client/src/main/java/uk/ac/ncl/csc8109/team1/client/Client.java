@@ -59,6 +59,9 @@ public class Client {
 	private String tds;
 	private String source;
 	
+	private String EOO;
+	private String EOR;
+	
 	/**
 	 * In instantiation, a unique id is generated; along with,
 	 * public and private key and a queue name
@@ -68,7 +71,7 @@ public class Client {
 		crypto = new Crypto();
 		this.publicKey = crypto.getPublicKey();
 		this.privateKey = crypto.getPrivateKey();
-		this.queueName = UUID.randomUUID().toString() + "_queue";
+		//this.queueName = UUID.randomUUID().toString() + "_queue";
 	}
 
 	/**
@@ -101,6 +104,16 @@ public class Client {
 	 */
 	public String getQueueName() {
 		return queueName;
+	}
+
+	
+
+	/**
+	 * 
+	 * @param queueName
+	 */
+	public void setQueueName(String queueName) {
+		this.queueName = queueName;
 	}
 
 	/**
@@ -256,6 +269,14 @@ public class Client {
 			}
 		}			
 		return flag;
+	}
+
+	public String getEOO(File file) {
+		return crypto.getSignature(crypto.getHashOfFile(file));
+	}
+
+	public String getEOR(String str) {
+		return crypto.getSignature(str);
 	}
 
 }
