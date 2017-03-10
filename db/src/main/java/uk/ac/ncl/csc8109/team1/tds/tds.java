@@ -61,7 +61,7 @@ public class tds {
 	 * @param Alice_id, Bob_id
 	 * Alice send request 
 	 */
-	public UUID step1(String fromId, String toId, String sig){
+	public static UUID step1(String fromId, String toId, String sig){
 
         //¼ì²ésig
 		//RegisterEntity registerEntity = new RegisterEntity();
@@ -116,7 +116,7 @@ public class tds {
 	 * Alice send doc, eoo, L to TDS
 	 * eoo--siga(h(doc))--publickey
 	 */
-	public static void receiveEOOFromAlice(String publickey, String label, String fromId, String toId, String doc){
+	public static void step3(String Eoo, String label, String fromId, String toId, String doc){
 		
 		//receive message
 		
@@ -126,7 +126,7 @@ public class tds {
 		}
 		if(!rr.checkAlreadyExist(toId)){
 			throw new IllegalArgumentException("touser id not exists");
-		
+		}
 
 		FileEntity fileEntity = new FileEntity();
 		File initialFile = new File("src/main/resources/sample.txt");
@@ -141,22 +141,21 @@ public class tds {
         String key =UUID.randomUUID().toString();
 		
         //¼ì²éid ºÍ EOO
-        if (){
+   
         fe.setLastMessage("eoo");
         fe.setStage(3);
 		mr.storeMessage(uuid, fe);
         fr.storeFile(key, fileEntity);
-        }
-        else{ System.out.println("Step 2 Error!");
-        	
-	}
+        
+		}
+
 	
 	/**
 	 * step 4
 	 * send EOO and lable to BOb
 	 * eoo--publick key
 	 */
-	public static void sendEOOToBob(){
+	public static void step4(){
 		
 		
 		//get message(EOO) from last step
@@ -183,16 +182,22 @@ public class tds {
 	 * receive EOR from Bob
 	 * EOR=Bobpublic key = sigb(siga(hash(doc)))
 	 */
-	public static void receiveEORFromBob(String toId, String Bob_publickey, String label){
+	public static void step5(String toId, String fromId, String EOR, String label){
 		//receive message form Bob
 		
 		
-		//get Bob public key
-		String Bob_key = rr.getPublicKeyById(Bob_id);
+	   //check id 
+		if(!rr.checkAlreadyExist(fromId)){
+			throw new IllegalArgumentException("fromuser id not exists");
+		}
+		if(!rr.checkAlreadyExist(toId)){
+			throw new IllegalArgumentException("touser id not exists");
+		}
 		
+		//check eor and id
 		
 		//check label and public key
-		if(label == uuid.toString() && Bob_key == Bob_publickey) {
+		if(label == uuid.toString()) {
 			fe.setLastMessage("EOR");
 		    fe.setStage(5);
 			mr.storeMessage(uuid, fe);
@@ -206,7 +211,7 @@ public class tds {
 	 * step 6
 	 * send doc to Bob
 	 */
-	public static void sendDocToBob(FairExchangeEntity fe){
+	public static void step6(){
 		 
 		//get the doc
 		FileEntity f = fr.getFile(uuid.toString());
@@ -228,7 +233,7 @@ public class tds {
 	 * @param fe
 	 * send EOR,label to alice
 	 */
-	public static void sendEORtoAlice(FairExchangeEntity fe){
+	public static void step7(){
 	   //get the EOR
 		String EOR = fe.getLastMessage(); 
 		
@@ -251,12 +256,18 @@ public class tds {
 	 * @param Alice_label
 	 * @param Bob_label
 	 */
-	public static void receiveBothLabel(String Alice_label, String Bob_label,FairExchangeEntity fe){
+	public static void step8(String fromId, String toId, String from_label, String to_label){
 		// receive alice and bob send label to tds
 		
 		
-	
-		if(fe!=null && Alice_label == uuid.toString() && Bob_label == uuid.toString()) {
+	   // //check id 
+		if(!rr.checkAlreadyExist(fromId)){
+			throw new IllegalArgumentException("fromuser id not exists");
+		}
+		if(!rr.checkAlreadyExist(toId)){
+			throw new IllegalArgumentException("touser id not exists");
+		}
+		if(fe!=null && from_label == uuid.toString() && to_label == uuid.toString()) {
 			fe.setLastMessage("label");
 		    fe.setStage(8);
 			mr.storeMessage(uuid, fe);
@@ -291,9 +302,17 @@ public class tds {
         }
 	    
 	    
-//		registerUser();
-//		getAliceBobKey("alice000","bob000");
-	}
+		register("alice1", "alicekey", "siga");
+        register("bob1", "bobkey","sigb");
+        step1("alice1", "bob1", "message");
+        step2();
+        step3("eoo", "label", "alice1", "bob1", "doc");
+        step4();
+        step5("alice1", "bob1", "message", "label");
+        step6();
+        step7();
+        step8("alice1", "bob1","alice_label", "bob_label");
+    }
 	
 	
 }
