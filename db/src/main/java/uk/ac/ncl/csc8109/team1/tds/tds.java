@@ -35,103 +35,35 @@ public class tds {
 	//static RegisterEntity re = new RegisterEntity();
 	static MessageRepository mr = new MessageRepositoryImpl();
 	static FileRepository fr = new FileRepositoryImpl();
+	
 	/**
 	 * step 0
 	 */
 
-	public static void register(String id, String publickey) {
+	public static void register(String id, String publickey, String sig) {
 		//RegisterRepository registerRepository = new RegisterRepositoryImpl();
 		RegisterEntity registerEntity = new RegisterEntity();
 		if(rr.checkAlreadyExist(id)){
 			throw new IllegalArgumentException("user id already exists");
 		}
+		
+		//
 		registerEntity.setId(id);
 		registerEntity.setPublicKey(publickey);
 		rr.registerUser(registerEntity);
 
 
-		//todo åŠ å¯†éƒ¨åˆ†
+		//todo 
 
 	}
-	public static void registerUser(){
-		
-		//register alice and bob
-		
-		RegisterEntity reg_Alice = new RegisterEntity();
-		RegisterEntity reg_Bob = new RegisterEntity();
-//		
-		//get their keys
-		String Alice_id = "alice000";
-		String Bob_id = "bob000";
-		
-		//registration
-		if(!rr.checkAlreadyExist(Alice_id)){
-			reg_Alice.setId("alice000");
-			reg_Alice.setPublicKey("alicepublickey000");
-		}else{
-			System.out.println("please change Alice's id!");
-		}
-		
-		
-		
-		if(!rr.checkAlreadyExist(Bob_id)){
-			reg_Bob.setId("bob000");
-			reg_Bob.setPublicKey("bobpublickey000");
-			//RegisterEntity reg_Bob = new RegisterEntity("bob000", "bobpublickey000");
-		}else{
-			System.out.println("please change Bob's id!");
-		}
-		
-		System.out.println("test 1");
-		System.out.println(reg_Bob.getId());
-		System.out.println(reg_Alice.getPublicKey());
-		//System.out.println(rr.registerUser(re));
-		
-	}
-	
-	
-	
 	/**
 	 * step 1
 	 * @param Alice_id, Bob_id
 	 * Alice send request 
 	 */
-	public static void getAliceBobKey(String Alice_id, String Bob_id){
-		
-		
-		//get public key by their id
-//		String Alice_key = rr.getPublicKeyById(Alice_id);
-//		String Bob_key = rr.getPublicKeyById(Bob_id);
-		
-		//check  user id 
-		System.out.println(rr.getPublicKeyById("alice000"));
-		boolean Alice_Exist = rr.checkAlreadyExist(Alice_id);
-		boolean Bob_Exist = rr.checkAlreadyExist(Bob_id);
-		System.out.println(Alice_Exist);
-		System.out.println(Bob_Exist);
-		
-		
-		
-		//store message in DB
-		if((Alice_Exist==true) && (Bob_Exist==true)){
-	     //	if(Bob_id!=null && Bob_key!=null){
-				fe.setUuid(uuid);
-				fe.setFromID(Alice_id);
-				fe.setToID(Bob_id);
-				fe.setLastMessage("label");
-				fe.setStage(1);
-				mr.storeMessage(uuid, fe);
-			}
-				else{
-				System.out.println("Step 1(Bob) Error!");
-			}
-		 System.out.println("step1 test");
-		 System.out.println(mr.getMessage(uuid));
-		}
+	public UUID step1(String fromId, String toId, String sig){
 
-	public UUID storeMeg(String fromId, String toId){
-
-
+        //¼ì²ésig
 		//RegisterEntity registerEntity = new RegisterEntity();
 		if(!rr.checkAlreadyExist(fromId)){
 			throw new IllegalArgumentException("fromuser id not exists");
@@ -140,13 +72,12 @@ public class tds {
 			throw new IllegalArgumentException("touser id not exists");
 		}
 		//check sig
-		FairExchangeEntity fairExchangeEntity = new FairExchangeEntity();
-		fairExchangeEntity.setFromID(fromId);
-		fairExchangeEntity.setToID(toId);
+		fe.setFromID(fromId);
+		fe.setToID(toId);
 		uuid = UUID.randomUUID();
-		fairExchangeEntity.setUuid(uuid);
-		fairExchangeEntity.setStage(1);
-		mr.storeMessage(uuid,fairExchangeEntity);
+		fe.setUuid(uuid);
+		fe.setStage(1);
+		mr.storeMessage(uuid,fe);
 
 
 		return uuid;
@@ -159,7 +90,7 @@ public class tds {
 	 * @param fe
 	 * send label to Alice
 	 */
-	public static void sendLabelToAlice(FairExchangeEntity fe){
+	public static void step2(){
 		// generate label
 		
 		
@@ -185,11 +116,16 @@ public class tds {
 	 * Alice send doc, eoo, L to TDS
 	 * eoo--siga(h(doc))--publickey
 	 */
-	public static void receiveEOOFromAlice(FairExchangeEntity fe, String publickey, String label3, String Alice_id, String doc){
+	public static void receiveEOOFromAlice(String publickey, String label, String fromId, String toId, String doc){
 		
+		//receive message
 		
-		//get the public key 
-		String Alice_key = rr.getPublicKeyById(Alice_id);
+		//check id
+		if(!rr.checkAlreadyExist(fromId)){
+			throw new IllegalArgumentException("fromuser id not exists");
+		}
+		if(!rr.checkAlreadyExist(toId)){
+			throw new IllegalArgumentException("touser id not exists");
 		
 
 		FileEntity fileEntity = new FileEntity();
@@ -204,15 +140,15 @@ public class tds {
         fileEntity.setInputStream(targetStream);
         String key =UUID.randomUUID().toString();
 		
-        if (Alice_key == publickey){
+        //¼ì²éid ºÍ EOO
+        if (){
         fe.setLastMessage("eoo");
         fe.setStage(3);
 		mr.storeMessage(uuid, fe);
         fr.storeFile(key, fileEntity);
         }
-        else{ System.out.println("Step 2 Error!"); }
+        else{ System.out.println("Step 2 Error!");
         	
-
 	}
 	
 	/**
@@ -220,7 +156,7 @@ public class tds {
 	 * send EOO and lable to BOb
 	 * eoo--publick key
 	 */
-	public static void sendEOOToBob(FairExchangeEntity fe){
+	public static void sendEOOToBob(){
 		
 		
 		//get message(EOO) from last step
@@ -247,7 +183,7 @@ public class tds {
 	 * receive EOR from Bob
 	 * EOR=Bobpublic key = sigb(siga(hash(doc)))
 	 */
-	public static void receiveEORFromBob(FairExchangeEntity fe, String Bob_id, String Bob_publickey, String label){
+	public static void receiveEORFromBob(String toId, String Bob_publickey, String label){
 		//receive message form Bob
 		
 		
