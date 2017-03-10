@@ -24,28 +24,15 @@ public class Target {
 	private static String EOR;
 
 	public static void main(String[] args) {
-		//**Starts exchange right away**//
 		Client bob  = new Client();
 		bob.setLabel("label1");
 		bob.setSource("alice");
 		bob.setQueueName("csc8109_1_tds_queue_20070306_bob");
 
-		//**Wait for message2 from TDS **//
-		//signature containing hash of doc (SigA (h(doc)))**//
 		receiveMsg(bob);
 		System.out.println(getEOO());
 		
-		/**/
-		
-		
-		//**Send message3 to TDS
-		//target signature containing signature of source(A) which contains hash of doc (sigB(sigA(h(doc)))**//
 		sendMsg(bob, TDS_queueName, getEOO());	
-			
-		//**wait for doc from TDS**//
-			
-			
-		//**Output then end**//
 	}
 
 	public static void receiveMsg(Client target) {
@@ -70,21 +57,10 @@ public class Target {
 	}
 	
 	public static boolean sendMsg(Client source, String q, String eoo) {
-		/*boolean success = false;
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-
-		success = sqsx.sendMessage(queue, source.getLabel(), getEOO(), name, source.getSource());	
-		if (!success)
-			throw new IllegalArgumentException("null or empty value is passed");
-
-		return success;
-		*/
-		
 		boolean success = false;
 
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		
-
 		String queue = q;
 		String label = source.getLabel();
 		String eor = source.getEOR(eoo);
