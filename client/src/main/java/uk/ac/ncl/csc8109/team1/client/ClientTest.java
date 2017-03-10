@@ -31,6 +31,8 @@
 
 package uk.ac.ncl.csc8109.team1.client;
 
+import java.io.IOException;
+
 /** 
  * This class shows how to use the client object
  * 
@@ -39,24 +41,26 @@ package uk.ac.ncl.csc8109.team1.client;
  * @email m.ali4@newcastle.ac.uk
  */
 public class ClientTest {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		Client c = new Client();
 		c.setLabel("label6");
-		c.setSource("source7");
+		c.setDestination("source7");
 		c.setTds("tds1");
 		
-		/*
 		System.out.println(c.getUUID());
 		System.out.println(c.getPublicKey());
 		System.out.println(c.getPrivateKey());
+		
+		
+		/*
 		System.out.println(c.getQueueName());
 		System.out.println(c.getLabel());
 		System.out.println(c.getTds());
 		System.out.println(c.getSource());
 		*/
 		
-		String l = c.getTds() + "," +  c.getSource() + "," + c.getLabel();
-		System.out.println(l);		
+		//String l = c.getTds() + "," +  c.getSource() + "," + c.getLabel();
+		//System.out.println(l);		
 		//String FILENAME = "teamPath";
 		//c.writeToFile(FILENAME, l);
 		//c.readFromFile("teamPath");

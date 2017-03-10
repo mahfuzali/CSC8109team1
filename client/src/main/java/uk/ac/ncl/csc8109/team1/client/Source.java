@@ -31,6 +31,7 @@
 package uk.ac.ncl.csc8109.team1.client;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import com.amazonaws.services.sqs.model.Message;
@@ -49,25 +50,27 @@ public class Source {
 	
 	private static String queue; 
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		Client alice = new Client();
+		// For monday - tds should give me a label back
 		alice.setLabel("label1");
-		alice.setSource("bob");
+		alice.setDestination("bob");
 
-		//alice.regRequest(alice, TDS_QueueName_Reg);
+		alice.regRequest(alice, TDS_QueueName_Reg);
 		
 		/* Change the Alice to uuid */
-		alice.getQueueNameFromTDS(TDS_QueueName_Reg, "Alice");
+		alice.getQueueNameFromTDS(TDS_QueueName_Reg, alice.getUUID());
 		System.out.println(alice.getQueueName());
+		
+		/* Exchange record between multiple clients */
+		String data = alice.getQueueName() + "," + alice.getLabel() + "," + alice.getDestination(); 
+		alice.writeToFile("resource/"+ alice.getUUID() + "-exchange", data);
 		
 		
 		//File f = new File("sample");
 		//System.out.println(sendDocMsg(f, alice, TDS_queueName));
-
-		
 		//receiveMsg(TDS_queueName);
 		//receiveMsg(alice.getQueueName());
-
 	}
 	
 	/**
@@ -87,14 +90,14 @@ public class Source {
 		String eoo = source.getEOO(f);
 		setEOO(eoo);
 		String uuid = source.getUUID();
-		String target = source.getSource();
+		String target = source.getDestination();
 
 		if ((queue != null && !queue.isEmpty()) 
 				&& (label != null && !label.isEmpty())
 				&& (eoo != null && !eoo.isEmpty())
 				&& (uuid != null && !uuid.isEmpty())
 				&& (target != null && !target.isEmpty())) {
-			//success = msg.sendMessage(source.getQueueName(), source.getLabel(), eoo, source.getUUID(), source.getSource());
+			//success = msg.sendMessage(source.getQueueName(), source.getLabel(), eoo, source.getUUID(), source.getDestination());
 			
 			System.out.println("EOO before sending");
 			System.out.println(eoo);

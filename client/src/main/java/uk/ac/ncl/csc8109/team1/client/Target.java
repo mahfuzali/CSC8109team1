@@ -30,6 +30,7 @@
  */
 package uk.ac.ncl.csc8109.team1.client;
 
+import java.io.IOException;
 import java.util.Map;
 
 import com.amazonaws.services.sqs.model.Message;
@@ -47,17 +48,20 @@ public class Target {
 	private static String EOO;
 	private static String EOR;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		Client bob  = new Client();
 		bob.setLabel("label1");
-		bob.setSource("alice");
+		bob.setDestination("alice");
 
-		
 		bob.regRequest(bob, TDS_QueueName_Reg);
 		
-		/* Change the Bob to uuid */
-		bob.getQueueNameFromTDS(TDS_QueueName_Reg, "Bob");
+		/* Change the Alice to uuid */
+		bob.getQueueNameFromTDS(TDS_QueueName_Reg, bob.getUUID());
 		System.out.println(bob.getQueueName());
+		
+		/* Exchange record between multiple clients */
+		String data = bob.getQueueName() + "," + bob.getLabel() + "," + bob.getDestination(); 
+		bob.writeToFile("resource/"+ bob.getUUID() + "-exchange", data);
 		
 		
 		receiveMsg(bob);
@@ -107,7 +111,7 @@ public class Target {
 		String label = source.getLabel();
 		String eor = source.getEOR(eoo);
 		String uuid = source.getUUID();
-		String target = source.getSource();
+		String target = source.getDestination();
 
 		if ((queue != null && !queue.isEmpty()) 
 				&& (label != null && !label.isEmpty())
@@ -115,7 +119,7 @@ public class Target {
 				&& (uuid != null && !uuid.isEmpty())
 				&& (target != null && !target.isEmpty())) {
 			
-			success = sqsx.sendMessage(queue, source.getLabel(), eor, name + source.getUUID(), source.getSource());
+			success = sqsx.sendMessage(queue, source.getLabel(), eor, name + source.getUUID(), source.getDestination());
 			if (!success)
 				throw new IllegalArgumentException("null or empty value is passed");
 		}

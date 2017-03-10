@@ -41,6 +41,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
@@ -63,21 +65,62 @@ public class Client {
 	private CryptoInterface crypto;
 	
 	private String tds;
-	private String source;
-	
+	private String destination;
 	
 	/**
 	 * In instantiation, a unique id is generated; along with,
 	 * public and private key and a queue name
 	 */
 	public Client() {
-		uid = UUID.randomUUID().toString();
-		crypto = new Crypto();
-		this.publicKey = crypto.getPublicKey();
-		this.privateKey = crypto.getPrivateKey();
+		try {
+			initialize();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//uid = UUID.randomUUID().toString();
+		//crypto = new Crypto();
+		//this.publicKey = crypto.getPublicKey();
+		//this.privateKey = crypto.getPrivateKey();
 		//this.queueName = UUID.randomUUID().toString() + "_queue";
 	}
 
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	void initialize() throws IOException {
+	String FILENAME = "resource/UUID";
+		
+		File uuidFile = new File(FILENAME);
+		// if file doesnt exists, then create it
+		if (!uuidFile.exists()) {
+			uuidFile.createNewFile();
+			uid = UUID.randomUUID().toString();
+			write(FILENAME, uid);
+		} else {
+			uid = new String(Files.readAllBytes(Paths.get(FILENAME)));
+		}
+		
+		File pubKey = new File("resource/public.key");
+		File priKey = new File("resource/private.key");
+		
+		if (pubKey.exists() && priKey.exists()) {
+			//System.out.println("Exist");
+			crypto = new Crypto();
+			crypto.loadKeyPair("resource");
+			this.publicKey = crypto.getPublicKey();
+			this.privateKey = crypto.getPrivateKey();
+		} else {
+			//System.out.println("Does not exist");
+			crypto = new Crypto();
+			crypto.storeKeyPair("resource");
+			this.publicKey = crypto.getPublicKey();
+			this.privateKey = crypto.getPrivateKey();
+		}
+			
+	}
+	
 	/**
 	 * Gets the unique uuid
 	 * @return <code>uid</code>
@@ -109,8 +152,6 @@ public class Client {
 	public String getQueueName() {
 		return queueName;
 	}
-
-	
 
 	/**
 	 * 
@@ -156,16 +197,16 @@ public class Client {
 	 * Gets the name of the destination
 	 * @return <code>source</code> destination name
 	 */
-	public String getSource() {
-		return source;
+	public String getDestination() {
+		return destination;
 	}
 
 	/**
 	 * Sets the name of the destination
 	 * @param <code>source</code> destination name
 	 */
-	public void setSource(String source) {
-		this.source = source;
+	public void setDestination(String destination) {
+		this.destination = destination;
 	}
 	
 	/**
@@ -313,7 +354,7 @@ public class Client {
         System.out.println("Created queue " + queueName + " " + success);
         
         // Send a registration request
-        success = sqsx.registerRequest(queueName, /*c.getUUID()*/ "Alice", c.getPublicKey());
+        success = sqsx.registerRequest(queueName, c.getUUID() /*"Alice"*/, c.getPublicKey());
         System.out.println("Sent registration request to queue " + queueName + " " + success);
 	}
 	

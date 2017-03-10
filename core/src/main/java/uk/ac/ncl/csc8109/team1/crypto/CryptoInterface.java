@@ -58,7 +58,7 @@ public interface CryptoInterface {
 	 * the fair-exchange protocol
 	 * @param <code>hash</code> hash value to be signed
 	 */
-	String getSignature(String hash);
+	 String getSignature(String hash);
 	
 	/**
 	 * Verifies the signauture of the hash.
@@ -73,11 +73,11 @@ public interface CryptoInterface {
 	 * Stores the keypair in the local file system
 	 * @param <code>path<code> file to store the keypair
 	 */
-	void storeKeyPair(String path);
+	public void storeKeyPair(String path);
 	
 	/**
 	 * Loads the keypair from a file 
 	 * @param <code>path<code> file where the keypair is stored
 	 */
-	void loadKeyPair(String path);
+	public void loadKeyPair(String path);
 }

@@ -82,7 +82,7 @@ public class Crypto implements CryptoInterface {
 			e.printStackTrace();
 		}
 	}
-
+		
 	/**
 	 * Gets the KeyPair: public and private
 	 * @return <code<KeyPair</code> public and private
@@ -239,7 +239,7 @@ public class Crypto implements CryptoInterface {
 	 * @see uk.ac.ncl.csc8109.team1.crypto.CrytoInterface#loadKeyPair(String)
 	 */
 	public void loadKeyPair(String path) {
-		 try {
+		try {
 			KeyPair pair = c.loadKeyPair(path);
 			setPublicKey(byteToStr(pair.getPublic().getEncoded()));
 			setPrivateKey(byteToStr(pair.getPrivate().getEncoded()));

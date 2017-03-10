@@ -61,11 +61,9 @@ public class TDSSimulation {
 	private static String label;
 	private static String target;
 	private static String source;
-	
 	private static String userId;
 	
 	public static void main(String[] args) {
-	
 		//receiveMsg(TDS_QueueName);
 		//System.out.println(getEOO());
 

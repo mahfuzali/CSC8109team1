@@ -45,6 +45,12 @@ public class CryptoApp {
 		CryptoInterface alice = new Crypto();
 		CryptoInterface bob = new Crypto();
 		
+		//alice.storeKeyPair("resource");
+		alice.loadKeyPair("resource");
+		
+		
+		
+		/*
 		sender(alice);
 		receiver(bob);
 		
@@ -55,7 +61,7 @@ public class CryptoApp {
 		
 		getSharedKey(alice, bob);
 		encryptionAndDecryption(alice, bob);
-				
+		*/	
 	}
 	
 	/**
