@@ -12,7 +12,7 @@ import java.util.UUID;
 @DynamoDBTable(tableName = "message_table")
 public class FairExchangeEntity {
     @DynamoDBHashKey
-    private UUID uuid;
+    private String uuid;
     @DynamoDBAttribute
     private String toID;
     @DynamoDBAttribute
@@ -24,33 +24,53 @@ public class FairExchangeEntity {
     @DynamoDBAttribute
     private String fileKey;
     @DynamoDBAttribute
-    private String regque;
+    private String protocol;
     @DynamoDBAttribute
-    private String proque;
+    private String senderqueue;
+    @DynamoDBAttribute
+    private String receiverqueue;
+    @DynamoDBAttribute
+    private long timestamp;
 
     public FairExchangeEntity() {
     }
 
-    public FairExchangeEntity(UUID uuid, String toID, String fromID) {
+    public FairExchangeEntity(String uuid, String toID, String fromID) {
         this.uuid = uuid;
         this.toID = toID;
         this.fromID = fromID;
     }
 
-    public String getRegque() {
-        return regque;
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    public void setRegque(String regque) {
-        this.regque = regque;
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
-    public String getProque() {
-        return proque;
+    public String getProtocol() {
+        return protocol;
     }
 
-    public void setProque(String proque) {
-        this.proque = proque;
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getSenderqueue() {
+        return senderqueue;
+    }
+
+    public void setSenderqueue(String senderqueue) {
+        this.senderqueue = senderqueue;
+    }
+
+    public String getReceiverqueue() {
+        return receiverqueue;
+    }
+
+    public void setReceiverqueue(String receiverqueue) {
+        this.receiverqueue = receiverqueue;
     }
 
     public String getLastMessage() {
@@ -69,9 +89,7 @@ public class FairExchangeEntity {
         this.stage = stage;
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
+
 
     public void setToID(String toID) {
         this.toID = toID;
@@ -81,8 +99,12 @@ public class FairExchangeEntity {
         this.fromID = fromID;
     }
 
-    public UUID getUuid() {
+    public String getUuid() {
         return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getToID() {

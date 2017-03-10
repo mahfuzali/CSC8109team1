@@ -75,7 +75,7 @@ public class tds {
 		fe.setFromID(fromId);
 		fe.setToID(toId);
 		uuid = UUID.randomUUID();
-		fe.setUuid(uuid);
+		fe.setUuid(uuid.toString());
 		fe.setStage(1);
 		mr.storeMessage(uuid,fe);
 

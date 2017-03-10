@@ -17,17 +17,17 @@ public class MessageRepositoryTest {
     public void testAddAndGetMessage() {
         MessageRepository messageRepository = new MessageRepositoryImpl();
         FairExchangeEntity fairExchangeEntity = generateFairExchangeEntity();
-        messageRepository.storeMessage(fairExchangeEntity.getUuid(), fairExchangeEntity);
-        FairExchangeEntity message = messageRepository.getMessage(fairExchangeEntity.getUuid());
+        messageRepository.storeMessage(UUID.fromString(fairExchangeEntity.getUuid()), fairExchangeEntity);
+        FairExchangeEntity message = messageRepository.getMessage(UUID.fromString(fairExchangeEntity.getUuid()));
         Assert.assertNotNull(message);
     }
     @Test
     public void testDeleteMessage() {
         MessageRepository messageRepository = new MessageRepositoryImpl();
         FairExchangeEntity fairExchangeEntity = generateFairExchangeEntity();
-        messageRepository.storeMessage(fairExchangeEntity.getUuid(), fairExchangeEntity);
-        messageRepository.deleteMessage(fairExchangeEntity.getUuid());
-        FairExchangeEntity oo = messageRepository.getMessage(fairExchangeEntity.getUuid());
+        messageRepository.storeMessage(UUID.fromString(fairExchangeEntity.getUuid()), fairExchangeEntity);
+        messageRepository.deleteMessage(UUID.fromString(fairExchangeEntity.getUuid()));
+        FairExchangeEntity oo = messageRepository.getMessage(UUID.fromString(fairExchangeEntity.getUuid()));
         Assert.assertNull(oo);
 
     }
@@ -35,12 +35,13 @@ public class MessageRepositoryTest {
         UUID id = UUID.randomUUID();
         String toId = "huanhuan";
         String fromId = "huan";
-        String fpublic = "hello";
-        String tpublic = "hi";
-        String o = "helloworld";
         Date d = new Date();
         Long time = d.getTime();
-        FairExchangeEntity fairExchangeEntity = new FairExchangeEntity(id, toId, fromId, fpublic, tpublic, o, time);
+        FairExchangeEntity fairExchangeEntity = new FairExchangeEntity();
+        fairExchangeEntity.setUuid(id.toString());
+        fairExchangeEntity.setToID(toId);
+        fairExchangeEntity.setFromID(fromId);
+        fairExchangeEntity.setTimestamp(time);
         return fairExchangeEntity;
     }
 

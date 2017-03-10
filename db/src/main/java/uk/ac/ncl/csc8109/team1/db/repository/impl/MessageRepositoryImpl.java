@@ -36,7 +36,7 @@ public class MessageRepositoryImpl implements MessageRepository{
     public FairExchangeEntity getMessage(UUID uuid) {
         AmazonDynamoDB dbClient = DynamoDBConnectionPools.getInstance().getConnection();
         DynamoDBMapper mapper = new DynamoDBMapper(dbClient);
-        FairExchangeEntity result = mapper.load(FairExchangeEntity.class,uuid);
+        FairExchangeEntity result = mapper.load(FairExchangeEntity.class,uuid.toString());
         DynamoDBConnectionPools.getInstance().returnConnection(dbClient);
         return result;
     }
@@ -51,7 +51,7 @@ public class MessageRepositoryImpl implements MessageRepository{
     public void deleteMessage(UUID uuid) {
         AmazonDynamoDB dbClient = DynamoDBConnectionPools.getInstance().getConnection();
         DynamoDBMapper mapper = new DynamoDBMapper(dbClient);
-        FairExchangeEntity result = mapper.load(FairExchangeEntity.class,uuid);
+        FairExchangeEntity result = mapper.load(FairExchangeEntity.class,uuid.toString());
         if(result!=null){
             mapper.delete(result);
         }
