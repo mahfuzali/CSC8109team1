@@ -43,7 +43,7 @@ public interface MessageInterface {
 	 * Send a user registration request response to the TDS queue
 	 * @param tdsQueueName - name of the TDS registration queue
 	 * @param userid - id of the user to register
-	 * @param targetQueueName - name of the TDS registration queue
+	 * @param targetQueueName - name of the target user's newly created queue
 	 * @return true if successful, false otherwise
 	 */
 	boolean registerResponse(String tdsQueueName, String userid, String targetQueueName);
