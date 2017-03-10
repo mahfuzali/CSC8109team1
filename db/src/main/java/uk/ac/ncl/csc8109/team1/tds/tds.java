@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-
+import com.amazonaws.services.sqs.model.Message;
+import com.amazonaws.services.sqs.model.MessageAttributeValue;
 
 import uk.ac.ncl.csc8109.team1.db.model.FairExchangeEntity;
 import uk.ac.ncl.csc8109.team1.db.model.FairExchangeStage;
@@ -21,6 +22,8 @@ import uk.ac.ncl.csc8109.team1.db.repository.RegisterRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.FileRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.MessageRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
+import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
+import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
 
 public class tds {
 
@@ -329,6 +332,29 @@ public class tds {
 	
 	public static void main(String[] args) {
 		System.out.println("Hello world");
+		
+		// Initialise queue service
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		
+		// TDS message queue name
+	    String queueName = "csc8109_1_tds_queue_20070306";
+	    
+        // Receive message
+        String messageHandle = null;
+        Message message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Label:" + attributes.get("Label").getStringValue());
+            System.out.println("  Source:" + attributes.get("Source").getStringValue());
+            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+        }
+	    
+	    
 //		registerUser();
 //		getAliceBobKey("alice000","bob000");
 	}
