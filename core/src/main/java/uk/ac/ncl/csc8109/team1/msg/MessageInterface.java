@@ -49,6 +49,17 @@ public interface MessageInterface {
 	boolean registerResponse(String tdsQueueName, String userid, String targetQueueName);
 	
 	/**
+	 * Send an exchange request to the TDS queue (client request to TDS for an exchange label)
+	 * @param queueName - name of the queue
+	 * @param protocol - exchange protocol name
+	 * @param message - a message as a serialised string
+	 * @param source - the userid of the original source of the message
+	 * @param target - the userid of the ultimate recipient of the message
+	 * @return true if successful, false otherwise
+	 */
+	boolean exchangeRequest(String queueName, String protocol, String message, String source, String target);
+	
+	/**
 	 * Send a message to a queue
 	 * @param queueName - name of the queue
 	 * @param label - exchange label
