@@ -6,17 +6,22 @@ import uk.ac.ncl.csc8109.team1.crypto.CryptoApp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.Assert;
 
 
 
@@ -33,27 +38,34 @@ public class CryptoTest {
 	private String bhash;
 	private String bsignature;
 	private String bShared;
+	private String verification;
 	private String bhashDiffFile;
+	private File file;
+	private File newFile;
+	private File diffFile;
+	private String techPath; 
 	
 	
 	CryptoApp a = new CryptoApp();
 	
 	CryptoInterface alice = new Crypto();
 	CryptoInterface bob = new Crypto();
+	
 	File f = new File("sample");
+	File f2 = new File("sample");
 	File f1 = new File("Untitled 2");
-	private String aliceCheck;
-	private String bobCheck;
-	String techPath = "tech";
-	Path tech = Paths.get(techPath);
-	String techPath2 = "tech2";
-	Path tech2 = Paths.get(techPath2);
+	File tech1 = new File("tech");
 	
-	private File bobDecryptFile;
-	private File aliceEncryptFile;
-	
-	
-	
+//	private String str;
+//	
+//	public String getStr() {
+//		return str;
+//	}
+//
+//	public void setStr(String str) {
+//		this.str = str;
+//	}
+
 	@Before
 	public void setUp(){
 		aPbk = alice.getPublicKey();
@@ -67,8 +79,51 @@ public class CryptoTest {
 		bhashDiffFile = bob.getHashOfFile(f1);
 	    bsignature = bob.getSignature(bhash);
 	    
+		verification = bob.isVerified(ahash, aPbk, asignature);
+	    
 	    aShared = alice.getSharedKey(bPbk);
 	    bShared = bob.getSharedKey(aPbk);
+	    
+	    file = f;
+	    newFile = f;
+	    diffFile = f1;
+	    
+	    
+	    techPath = "tech";
+		Path tech = Paths.get(techPath);
+		String techPath2 = "tech2";
+		Path tech2 = Paths.get(techPath2);
+	    
+//	   String str = alice.encryptFile("core/tech", "core/tech1", aShared);
+//	    
+//	    FileInputStream fis = null;
+//        String str = "";
+//
+//        try {
+//            fis = new FileInputStream(tech1);
+//            int content;
+//            while ((content = fis.read()) != -1) {
+//                // convert to char and display it
+//                str += (char) content;
+//            }
+//
+//            System.out.println("After reading file");
+//            System.out.println(str);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            try {
+//                if (fis != null)
+//                    fis.close();
+//            } catch (IOException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+	    
+	    
+	    
+	    
 
 	}
 	
@@ -78,8 +133,18 @@ public class CryptoTest {
 	}
 	
 	@Test
-	public void testHash(){
+	public void testHashEquals(){
 		assertEquals(ahash, bhash);
+	}
+	
+	@Test
+	public void testAliceHashNotNull(){
+		assertNotNull(ahash);
+	}
+	
+	@Test
+	public void testBobHashNotNull(){
+		assertNotNull(bhash);
 	}
 	
 	public void testDifferentHashFile(){
@@ -98,18 +163,75 @@ public class CryptoTest {
 	}
 	
 	@Test
+	public void testAlicePublicKeyNotNull(){
+		 assertNotNull(bPbk);
+	}
+	
+	@Test
 	public void testBobPublicKeys(){
 		 assertEquals(bPbk, bPbk);
 	}
 	
 	@Test
-	public void testPublicKeyString(){
+	public void testBobPublicKeysNotNull(){
+		 assertNotNull(bPbk);
+	}
+	
+	@Test
+	public void testAlicePublicKeyString(){
 		assertTrue(aPbk instanceof String);
 	}
 	
 	@Test
-	public void testPrivateKeyString(){
+	public void testBobPublicKeyString(){
+		assertTrue(bPbk instanceof String);
+	}
+	
+	@Test
+	public void testAlicePrivateKeyString(){
 		assertTrue(aPrk instanceof String);
+	}
+	
+	@Test
+	public void testBobPrivateKeyString(){
+		assertTrue(bPrk instanceof String);
+	}
+	
+	@Test
+	public void testAlicePrivateKeyNotNull(){
+		assertNotNull(aPrk);
+	}
+	
+	@Test
+	public void testBobPrivateKeyNotNull(){
+		assertNotNull(bPrk);
+	}
+	
+	@Test
+	public void testFileNotNull(){
+		assertNotNull(file);
+	}
+	
+	@Test
+	public void testFileEquality(){
+		assertEquals(file, newFile);
+	}
+	
+	@Test
+	public void testFilesNotEqual(){
+		assertNotSame(file, diffFile);
+	}
+	
+	@Test
+	public void testTwoFilesNotEquals(){
+		assertFalse(file.equals(diffFile));
+	}
+	
+	
+	@Test
+	public void testPrivateKeys(){
+		//**Alice Private key and Bobs private key not the same**//
+        assertFalse(aPrk.equals(bPrk));
 	}
 	
 	@Test
@@ -134,10 +256,24 @@ public class CryptoTest {
 	
 	
 	@Test
-	public void testSignatureFlase(){
+	public void testSignatureOfAliceAndBob(){
 		assertFalse(asignature.equals(bsignature));
 	}
-
+	
+	@Test
+	public void testBobVerifiesSigOfHashEquality(){
+		assertEquals(verification, verification);
+	}
+	
+	@Test
+	public void testBobVerifiesSigOfHashNotNull(){
+		assertNotNull(verification);
+	}
+	
+//	@Test
+//	public void testEncrypFile(){
+//		assertNotNull((alice.encryptFile(techPath, "core/sample1", aShared)), (alice.encryptFile(techPath, "core/sample1", aShared)));
+//	}
 
 
 	public String getaPbk() {
@@ -209,35 +345,44 @@ public class CryptoTest {
 		this.bhashDiffFile = bhashDiffFile;
 	}
 
-	public String getAliceCheck() {
-		return aliceCheck;
+	public File getFile() {
+		return file;
 	}
 
-	public void setAliceCheck(String aliceCheck) {
-		this.aliceCheck = aliceCheck;
+	public void setFile(File file) {
+		this.file = file;
 	}
 
-	public String getBobCheck() {
-		return bobCheck;
+	public File getNewFile() {
+		return newFile;
 	}
 
-	public void setBobCheck(String bobCheck) {
-		this.bobCheck = bobCheck;
+	public void setNewFile(File newFile) {
+		this.newFile = newFile;
 	}
 
-	public File getBobDecryptFile() {
-		return bobDecryptFile;
+	public File getDiffFile() {
+		return diffFile;
 	}
 
-	public void setBobDecryptFile(File bobDecryptFile) {
-		this.bobDecryptFile = bobDecryptFile;
+	public void setDiffFile(File diffFile) {
+		this.diffFile = diffFile;
 	}
 
-	public File getAliceEncryptFile() {
-		return aliceEncryptFile;
+	public String getVerification() {
+		return verification;
 	}
 
-	public void setAliceEncryptFile(File aliceEncryptFile) {
-		this.aliceEncryptFile = aliceEncryptFile;
+	public void setVerification(String verification) {
+		this.verification = verification;
 	}
+
+	public String getTechPath() {
+		return techPath;
+	}
+
+	public void setTechPath(String techPath) {
+		this.techPath = techPath;
+	}
+
 }
