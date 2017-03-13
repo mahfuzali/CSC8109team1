@@ -67,13 +67,18 @@ public class Client {
 	private String tds;
 	private String destination;
 	
+	private boolean abort;
+	
+	private String targetPubKey;
+	
 	/**
 	 * In instantiation, a unique id is generated; along with,
 	 * public and private key and a queue name
 	 */
-	public Client() {
+	/* For testing purpose client name is provided */
+	public Client(String clientName) {
 		try {
-			initialize();
+			initialize(clientName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -89,21 +94,22 @@ public class Client {
 	 * 
 	 * @throws IOException
 	 */
-	void initialize() throws IOException {
-	String FILENAME = "resource/UUID";
+	void initialize(String clientName) throws IOException {
+	String FILENAME = "resource/" + clientName + "/UUID";
 		
 		File uuidFile = new File(FILENAME);
 		// if file doesnt exists, then create it
 		if (!uuidFile.exists()) {
 			uuidFile.createNewFile();
+			
 			uid = UUID.randomUUID().toString();
 			write(FILENAME, uid);
 		} else {
 			uid = new String(Files.readAllBytes(Paths.get(FILENAME)));
 		}
 		
-		File pubKey = new File("resource/public.key");
-		File priKey = new File("resource/private.key");
+		File pubKey = new File( "resource/" + clientName + "/public.key");
+		File priKey = new File( "resource/" + clientName + "/private.key");
 		
 		if (pubKey.exists() && priKey.exists()) {
 			//System.out.println("Exist");
@@ -113,6 +119,9 @@ public class Client {
 			this.privateKey = crypto.getPrivateKey();
 		} else {
 			//System.out.println("Does not exist");
+			pubKey.createNewFile();
+			priKey.createNewFile();
+			
 			crypto = new Crypto();
 			crypto.storeKeyPair("resource");
 			this.publicKey = crypto.getPublicKey();
@@ -210,6 +219,31 @@ public class Client {
 	}
 	
 	/**
+	 * 
+	 * @return
+	 */
+	public boolean isAbort() {
+		return abort;
+	}
+	
+	/**
+	 * 
+	 * @param abort
+	 */
+	public void setAbort(boolean abort) {
+		this.abort = abort;
+	}
+
+	
+	public String getTargetPubKey() {
+		return targetPubKey;
+	}
+
+	public void setTargetPubKey(String key) {
+		targetPubKey = key;
+	}
+
+	/**
 	 * Writes to a file only if the data does not exists
 	 * @param <code>FILENAME<code> name of the file 
 	 * @param <code>data</code> data to write
@@ -221,6 +255,7 @@ public class Client {
 			System.out.println("Data already exists");
 		}
 	}
+	
 	
 	/**
 	 * Reads from a file
@@ -340,6 +375,16 @@ public class Client {
 	
 	/**
 	 * 
+	 * @param recipientsPublicKey
+	 * @return
+	 */
+	String sharedSecret(String recipientsPublicKey) {
+		return crypto.getSharedKey(recipientsPublicKey);
+	}
+	
+	
+	/**
+	 * 
 	 * @param file
 	 * @return
 	 */
@@ -361,7 +406,7 @@ public class Client {
 	 * @param c
 	 * @param tdsQueue
 	 */
-	public void regRequest(Client c, String tdsQueue) {
+	public void regRequestForQueue(Client c, String tdsQueue) {
 		boolean success = false;
 		
 		// Initialise queue service
@@ -407,5 +452,140 @@ public class Client {
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
         }  
 	}
+	
+	/**
+	 * 
+	 * @param exchangeQueueName
+	 * @param label
+	 * @param source
+	 * @param target
+	 * @return
+	 */
+	public boolean abortRequest(String exchangeQueueName, String label, String source, String target) {
+		boolean success = false;
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+        // Send a message
+        success = sqsx.sendMessage(exchangeQueueName, label, "Abort", source, target);
+        return success;
+	}
+	
+	/**
+	 * 
+	 */
+	public void abortResponse() {
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		// Receive message
+        String messageHandle = null;
+        Message message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            if(message.getBody() != null) {
+            	if (message.getBody().equals("Granted")) {
+            		setAbort(true);
+            	} else if (message.getBody().equals("Denied")) {
+            		setAbort(false);
+            	}
+            }
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Label:" + attributes.get("Label").getStringValue());
+            System.out.println("  Source:" + attributes.get("Source").getStringValue());
+            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+        }
+	}
+	
+	
+	public String sigMsg(String s) {
+		return crypto.getSignature(s);
+	}
+	
+	
+	public void storeQueue(String clientName, String queueName) {
+		String FILENAME = "resource/" + clientName + "/queue";
+
+		File qNameFile = new File(FILENAME);
+		if (!qNameFile.exists()) {
+			try {
+				qNameFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			write(FILENAME, queueName);
+		}
+	}
+	
+	public String readQueueNameFromFile(String clientName) throws IOException {
+		String FILENAME = "resource/" + clientName + "/queue";
+		return new String(Files.readAllBytes(Paths.get(FILENAME)));
+	}
+	
+	
+	
+	/**
+	 * Replaces specfic line from key file
+	 * 
+	 * @param startofline
+	 * @param data
+	 * @param iv
+	 * @throws IOException
+	 */
+	public void replaceSelected(String clientName, String startofline, String data) throws IOException {
+		String store = "";
+		try {
+			File file = new File("resource/" + clientName + "/record");
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String line = "", oldtext = "";
+			while ((line = reader.readLine()) != null) {
+				oldtext += line + "\r\n";
+				if (line.startsWith(startofline)) {
+					store = line;
+				}
+			}
+			reader.close();
+
+			String[] tmp = store.split(" : ");
+
+			String newtext = oldtext.replace(tmp[1], data);
+
+			FileWriter writer = new FileWriter("resource/" + clientName +  "/record");
+			writer.write(newtext);
+			writer.close();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+
+	}
+	
+	/**
+	 * Read a specific line
+	 * 
+	 * @param startofline
+	 * @return
+	 * @throws IOException
+	 */
+	public String readline(String clientName, String startofline) throws IOException {
+        String a = "";
+        	
+        File newfile = new File("resource/" + clientName + "/record");
+        BufferedReader reader = new BufferedReader(new FileReader(newfile));
+        String line = "";
+        
+        while((line = reader.readLine()) != null)
+        {
+            if(line.startsWith(startofline))
+            	a = line;
+        }
+        
+        reader.close();
+        
+        String[] tmp = a.split(" : ");
+
+        return tmp[1];
+	}
+	
+	
 	
 }

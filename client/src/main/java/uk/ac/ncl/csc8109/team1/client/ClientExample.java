@@ -31,6 +31,7 @@
 
 package uk.ac.ncl.csc8109.team1.client;
 
+
 import java.io.IOException;
 
 /** 
@@ -40,9 +41,9 @@ import java.io.IOException;
  * @Version 1.3
  * @email m.ali4@newcastle.ac.uk
  */
-public class ClientTest {
+public class ClientExample {
 	public static void main(String[] args) throws IOException {
-		Client c = new Client();
+		Client c = new Client("name");
 		c.setLabel("label6");
 		c.setDestination("source7");
 		c.setTds("tds1");
