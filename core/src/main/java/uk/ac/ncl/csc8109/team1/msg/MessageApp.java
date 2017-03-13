@@ -155,6 +155,112 @@ public class MessageApp {
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
         }
         
+        // Send a registration request
+        success = sqsx.registerRequest(queueName, "Alice", "Alice's public key");
+        System.out.println("Sent registration request for Alice to queue " + queueName + " " + success);
+        
+        // Receive it then delete it
+        messageHandle = null;
+        message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Userid:" + attributes.get("Userid").getStringValue());
+            
+            success = sqsx.deleteMessage(queueName, messageHandle);
+            System.out.println("Deleted message from queue " + queueName + " " + success);
+        }
+        
+        // Send a registration response
+        success = sqsx.registerResponse(queueName, "Alice", "Alice's queue");
+
+        // Receive it then delete it
+        messageHandle = null;
+        message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Target (TDS's POV):" + attributes.get("Target").getStringValue());
+            System.out.println("  Queue:" + attributes.get("Queue").getStringValue());
+            
+            success = sqsx.deleteMessage(queueName, messageHandle);
+            System.out.println("Deleted message from queue " + queueName + " " + success);
+        }
+        
+        // Send an exchange request
+        success = sqsx.exchangeRequest(queueName, "CoffeySaidha", "SigA('ExchangeRequest')", "Alice", "Bob");
+        
+        // Receive it then delete it
+        messageHandle = null;
+        message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Protocol:" + attributes.get("Protocol").getStringValue());
+            System.out.println("  Source:" + attributes.get("Source").getStringValue());
+            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+            
+            success = sqsx.deleteMessage(queueName, messageHandle);
+            System.out.println("Deleted message from queue " + queueName + " " + success);
+        }
+        
+        // Send an exchange response
+        success = sqsx.exchangeResponse(queueName, "Exchange #2", "ExchangeResponse", "Alice", "Bob", "Bob's public key");
+
+        // Receive it then delete it
+        messageHandle = null;
+        message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Label:" + attributes.get("Label").getStringValue());
+            System.out.println("  Source:" + attributes.get("Source").getStringValue());
+            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+            System.out.println("  TargetKey:" + attributes.get("TargetKey").getStringValue());
+            
+            success = sqsx.deleteMessage(queueName, messageHandle);
+            System.out.println("Deleted message from queue " + queueName + " " + success);
+        }
+        
+        // Send an abort request
+        success = sqsx.abortRequest(queueName, "Exchange #2", "SigA('AbortRequest')", "Alice", "Bob");
+
+        // Receive it then delete it
+        messageHandle = null;
+        message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Label:" + attributes.get("Label").getStringValue());
+            System.out.println("  Source:" + attributes.get("Source").getStringValue());
+            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+            System.out.println("  Abort:" + attributes.get("Abort").getStringValue());
+            
+            success = sqsx.deleteMessage(queueName, messageHandle);
+            System.out.println("Deleted message from queue " + queueName + " " + success);
+        }        
+      
+        
         // Delete queue
         success = sqsx.delete(queueName);
         System.out.println("Deleted queue " + queueName + " " + success);
