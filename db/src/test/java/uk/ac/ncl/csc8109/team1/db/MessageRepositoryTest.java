@@ -31,9 +31,21 @@ public class MessageRepositoryTest {
         Assert.assertNull(oo);
 
     }
+    @Test
+    public void testUpdateMessage() {
+        MessageRepository messageRepository = new MessageRepositoryImpl();
+        FairExchangeEntity fairExchangeEntity = generateFairExchangeEntity();
+        messageRepository.storeMessage(UUID.fromString(fairExchangeEntity.getUuid()), fairExchangeEntity);
+        fairExchangeEntity.setStage(1);
+        messageRepository.storeMessage(UUID.fromString(fairExchangeEntity.getUuid()), fairExchangeEntity);
+        fairExchangeEntity.setStage(2);
+        messageRepository.storeMessage(UUID.fromString(fairExchangeEntity.getUuid()), fairExchangeEntity);
+        FairExchangeEntity message = messageRepository.getMessage(UUID.fromString(fairExchangeEntity.getUuid()));
+        Assert.assertNotNull(message);
+    }
     private FairExchangeEntity generateFairExchangeEntity(){
         UUID id = UUID.randomUUID();
-        String toId = "huanhuan";
+        String toId = "stephen";
         String fromId = "huan";
         Date d = new Date();
         Long time = d.getTime();
