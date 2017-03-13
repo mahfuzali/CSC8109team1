@@ -25,4 +25,11 @@ public interface RegisterRepository {
      * @return <code>String/code>
      */
     String getPublicKeyById(String id);
+    
+    /**
+     * get queue name by given id
+     * @param id
+     * @return
+     */
+    String getQueueById(String id);
 }

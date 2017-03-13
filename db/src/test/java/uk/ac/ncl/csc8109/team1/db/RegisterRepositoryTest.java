@@ -32,13 +32,26 @@ public class RegisterRepositoryTest {
     }
 
     @Test
-    public void testResigterAndGetPublicKey(){
+    public void testRegisterAndGetPublicKey(){
         RegisterRepository registerRepository = new RegisterRepositoryImpl();
         RegisterEntity entity = new RegisterEntity();
         entity.setId(UUID.randomUUID().toString());
         entity.setPublicKey("examplepublic");
+        entity.setQueueName("examplequeue");
         registerRepository.registerUser(entity);
-        String result =  registerRepository.getPublicKeyById(entity.getId());
-        Assert.assertNotNull(result);
+        String publickey =  registerRepository.getPublicKeyById(entity.getId());
+        Assert.assertEquals("Stored public key is not the expected value", publickey, "examplepublic");
+    }
+    
+    @Test
+    public void testRegisterAndGetQueueName(){
+        RegisterRepository registerRepository = new RegisterRepositoryImpl();
+        RegisterEntity entity = new RegisterEntity();
+        entity.setId(UUID.randomUUID().toString());
+        entity.setPublicKey("examplepublic");
+        entity.setQueueName("examplequeue");
+        registerRepository.registerUser(entity);
+        String queue =  registerRepository.getQueueById(entity.getId());
+        Assert.assertEquals("Stored queuename is not the expected value", queue, "examplequeue"); 
     }
 }

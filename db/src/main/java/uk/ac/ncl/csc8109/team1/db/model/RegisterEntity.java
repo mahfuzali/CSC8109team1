@@ -15,14 +15,14 @@ public class RegisterEntity {
     private String id;
     @DynamoDBAttribute
     private String publicKey;
-    @DynamoDBIgnore
-    private String privateKey;
+    @DynamoDBAttribute
+    private String queueName;
     public RegisterEntity(){}
 
-    public RegisterEntity(String id,String publicKey, String privateKey){
+    public RegisterEntity(String id,String publicKey, String queueName){
         this.id = id;
         this.publicKey = publicKey;
-        this.privateKey = privateKey;
+        this.queueName = queueName;
     }
     public RegisterEntity(String id,String publicKey){
         this(id,publicKey,null);
@@ -44,11 +44,11 @@ public class RegisterEntity {
         this.publicKey = publicKey;
     }
 
-    public String getPrivateKey() {
-        return privateKey;
+    public String getQueueName() {
+        return queueName;
     }
 
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
+    public void setQueueName(String queueName) {
+        this.queueName = queueName;
     }
 }

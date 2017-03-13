@@ -70,4 +70,19 @@ public class RegisterRepositoryImpl implements RegisterRepository {
         return result.getPublicKey();
     }
 
+    @Override
+    public String getQueueById(String id) {
+        assert(id != null);
+        AmazonDynamoDB dbClient = DynamoDBConnectionPools.getInstance().getConnection();
+
+        DynamoDBMapper mapper = new DynamoDBMapper(dbClient);
+        RegisterEntity result = mapper.load(RegisterEntity.class,id);
+        log.info("check exist result: " + result);
+
+        if(result == null){
+            return null;
+        }
+        return result.getQueueName();
+    }
+    
 }
