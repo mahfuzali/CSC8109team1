@@ -82,12 +82,6 @@ public class Client {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		//uid = UUID.randomUUID().toString();
-		//crypto = new Crypto();
-		//this.publicKey = crypto.getPublicKey();
-		//this.privateKey = crypto.getPrivateKey();
-		//this.queueName = UUID.randomUUID().toString() + "_queue";
 	}
 
 	/**
@@ -114,7 +108,7 @@ public class Client {
 		if (pubKey.exists() && priKey.exists()) {
 			//System.out.println("Exist");
 			crypto = new Crypto();
-			crypto.loadKeyPair("resource");
+			crypto.loadKeyPair("resource/" + clientName);
 			this.publicKey = crypto.getPublicKey();
 			this.privateKey = crypto.getPrivateKey();
 		} else {
@@ -123,7 +117,7 @@ public class Client {
 			priKey.createNewFile();
 			
 			crypto = new Crypto();
-			crypto.storeKeyPair("resource");
+			crypto.storeKeyPair("resource/" + clientName);
 			this.publicKey = crypto.getPublicKey();
 			this.privateKey = crypto.getPrivateKey();
 		}
@@ -450,6 +444,7 @@ public class Client {
             System.out.println("  Queue:" + attributes.get("Queue").getStringValue());
             setQueueName(attributes.get("Queue").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
+   
         }  
 	}
 	
@@ -497,12 +492,20 @@ public class Client {
         }
 	}
 	
-	
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
 	public String sigMsg(String s) {
 		return crypto.getSignature(s);
 	}
 	
-	
+	/**
+	 * 
+	 * @param clientName
+	 * @param queueName
+	 */
 	public void storeQueue(String clientName, String queueName) {
 		String FILENAME = "resource/" + clientName + "/queue";
 
@@ -517,6 +520,12 @@ public class Client {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param clientName
+	 * @return
+	 * @throws IOException
+	 */
 	public String readQueueNameFromFile(String clientName) throws IOException {
 		String FILENAME = "resource/" + clientName + "/queue";
 		return new String(Files.readAllBytes(Paths.get(FILENAME)));
@@ -585,7 +594,5 @@ public class Client {
 
         return tmp[1];
 	}
-	
-	
 	
 }

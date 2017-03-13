@@ -68,21 +68,21 @@ public class TDSSimulation {
 	
 	private static String protocol;
 
-	private static String alice_publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE+dUUGye/jPsm/jitTL5QuOgUWEaDPYIHkllGHkXvC81X4bJTRqpHug0I5mt7yXbDjieO1CqmoA8lMzCSMwvgKw==";
-	private static String bob_publicKey =   "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEO15nt1jBK0SgA/TMZryejQOUjh9lBIaRJlERfZ7eM6ViDg1bDdsDbc5Bei8sYgDyZwO72AMHbXcoeQkpiLvJ8w==";
+	private static String alice_publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEHvUwmV+Xd0RfY2sy30MZIKKqcmmaGhovMbnlH9amAu+CZyAzLfN1RdY09QSmTN+cWcOuxQBv6FjXCHnK4eSSOQ==";
+	private static String bob_publicKey =   "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExB36U3xFK0otkAre0+pls35E0CMLycooSFTHucCCNGdSnA/8CLbgjbtKVhMz/u1crzIKaqF7qo/HQ2DrEPeqBg==";
 	
 	
 	public static void main(String[] args) throws IOException {
-		String aliceExchangeQ = "QueueNamee43a1e87-87e4-4383-86f4-c92454b6d6cf";
-		String bobExchangeQ = "QueueNameed01d0e6-7bd7-4623-9bbc-2f452a08895e";
+		String aliceExchangeQ = "QueueName-4fabc628-d20a-4cd4-904e-cd729315345e";
+		String bobExchangeQ = "QueueName-0b359e5a-6f82-47e8-bc71-3b6cc97d424e";
 		
 	// Step 1: 
 		//receiveQueueNameRequestMsg(TDS_QueueName_Reg);
 		
-		/*
+		/*	
 	// Step 2: 
-		String userid = getUserId();
-		System.out.println(userid);
+		//String userid = readline("Source");
+		String userid = readline("Target");
 		sendQueueNameToClient(TDS_QueueName_Reg, userid);
 		*/
 		
@@ -104,7 +104,7 @@ public class TDSSimulation {
 		
 	// Step 7: 
 		//File f = new File("resource/TDS/received");
-		//sendDocMsg(f, bobExchangeQ, readline("Label"), readline("Target"), readline("Source"));
+		//sendDocMsg(f, bobExchangeQ, readline("Label"), readline("Source"), readline("Target"));
 		
 	
 	// Step 8:
@@ -148,14 +148,12 @@ public class TDSSimulation {
             document = attributes.get("Document").getBinaryValue().asReadOnlyBuffer();
             document.flip();
             
-            
             replaceSelected("EOO", getEOO().trim());
             replaceSelected("Label", getLabel().trim());
             replaceSelected("Source", getSource().trim());
             replaceSelected("Target", getTarget().trim());
             replaceSelected("DocumentName", attributes.get("DocumentName").getStringValue().trim());
 
-            
             
             OutputStream outputFile;
             WritableByteChannel outputChannel = null;
@@ -256,15 +254,12 @@ public class TDSSimulation {
     		
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
             System.out.println("  Label:" + attributes.get("Label").getStringValue());
-            setLabel(attributes.get("Label").getStringValue());
+            setLabel(attributes.get("Label").getStringValue().trim());
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
-            setSource(attributes.get("Source").getStringValue());
+            setSource(attributes.get("Source").getStringValue().trim());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
-            setTarget(attributes.get("Target").getStringValue());
-            
-            
-            
-            
+            setTarget(attributes.get("Target").getStringValue().trim());
+           
         }		
 	}
 	
@@ -304,8 +299,9 @@ public class TDSSimulation {
 	/**
 	 * 
 	 * @param tdsRegistrstionQueue
+	 * @throws IOException 
 	 */
-	public static void receiveQueueNameRequestMsg(String tdsRegistrstionQueue) {
+	public static void receiveQueueNameRequestMsg(String tdsRegistrstionQueue) throws IOException {
 				
 		// Initialise queue service
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
@@ -323,6 +319,10 @@ public class TDSSimulation {
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
             System.out.println("  Userid:" + attributes.get("Userid").getStringValue());
             setUserId(attributes.get("Userid").getStringValue());
+            
+            //replaceSelected("Source", attributes.get("Userid").getStringValue().trim());
+            replaceSelected("Target", attributes.get("Userid").getStringValue().trim());
+            
         }
 	}
 
@@ -330,8 +330,9 @@ public class TDSSimulation {
 	 * 
 	 * @param tdsQueueName
 	 * @param source
+	 * @throws IOException 
 	 */
-	public static void sendQueueNameToClient(String tdsQueueName, String source) {        
+	public static void sendQueueNameToClient(String tdsQueueName, String source) throws IOException {        
 		boolean success = false;
 		
 		// Initialise queue service
@@ -339,12 +340,15 @@ public class TDSSimulation {
 		System.out.println("Initialised queue service");
 	
 		// Create a message queue name
-	    String queueName = "QueueName" + UUID.randomUUID().toString();
+	    String queueName = "QueueName-" + UUID.randomUUID().toString();
 	    
 	    // Create a queue
 	    success = sqsx.create(queueName);
         System.out.println("Created queue " + queueName + " " + success);
         
+        //replaceSelected("RecQ", queueName);
+        replaceSelected("SendQ", queueName);
+
         success = sqsx.registerResponse(tdsQueueName, source, queueName);
         System.out.println("Sent registration response (name, success): " + queueName + " " + success);
 
@@ -451,8 +455,12 @@ public class TDSSimulation {
 		protocol = p;
 	}
 	
-	
-	public static void receiveClientExchangeRequest(String tdsQueueName) {
+	/**
+	 * 
+	 * @param tdsQueueName
+	 * @throws IOException
+	 */
+	public static void receiveClientExchangeRequest(String tdsQueueName) throws IOException {
 		boolean success = false;
 		// Initialise queue service
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
@@ -472,11 +480,25 @@ public class TDSSimulation {
             setSource(attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
             setTarget(attributes.get("Target").getStringValue());
+            
+            replaceSelected("Protocol", getProtocol().trim());
+            replaceSelected("Source", attributes.get("Source").getStringValue().trim());
+            replaceSelected("Target", getTarget().trim());
+
+            
             //success = sqsx.deleteMessage(TDS_QueueName, messageHandle);
             //System.out.println("Deleted message from queue " + TDS_QueueName + " " + success);
         }
 	}
 	
+	/**
+	 * 
+	 * @param senderPrivateQueue
+	 * @param protocol
+	 * @param source
+	 * @param target
+	 * @param targetPublicKey
+	 */
 	public static void sendClientExchangeResponse(String senderPrivateQueue, String protocol, String source, String target, String targetPublicKey) {
 		boolean success = false;
 		// Initialise queue service
@@ -551,7 +573,10 @@ public class TDSSimulation {
         return tmp[1];
 	}
 	
-	
+	/**
+	 * 
+	 * @param tdsQueueName
+	 */
 	public static void receiveClientPubKeyRequest(String tdsQueueName) {
 		boolean success = false;
 		// Initialise queue service
@@ -577,16 +602,21 @@ public class TDSSimulation {
         }
 	}
 	
+	/**
+	 * 
+	 * @param senderPrivateQueue
+	 * @param label
+	 * @param source
+	 * @param target
+	 * @param targetPublicKey
+	 */
 	public static void sendClientPubKeyResponse(String senderPrivateQueue, String label, String source, String target, String targetPublicKey) {
 		boolean success = false;
 		// Initialise queue service
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		
-
         // Send an exchange response to source's queue
         success = sqsx.exchangeResponse(senderPrivateQueue, label, "PublicKeyRequest", source, target, targetPublicKey);
 	}
-	
-	
-	
+
 }

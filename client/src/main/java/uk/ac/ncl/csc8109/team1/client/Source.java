@@ -32,6 +32,8 @@ package uk.ac.ncl.csc8109.team1.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import com.amazonaws.services.sqs.model.Message;
@@ -44,7 +46,7 @@ import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
 
 
 public class Source {
-	private static final String Alice_QueueName = "csc8109_1_tds_queue_20070306_alice";
+	//private static final String Alice_QueueName = "csc8109_1_tds_queue_20070306_alice";
 	private static final String TDS_QueueName = "csc8109_1_tds_queue_20070306";
 	private static final String TDS_QueueName_Reg = "csc8109_1_tds_queue_20070306_reg";
 
@@ -54,7 +56,7 @@ public class Source {
 	private static String queue; 
 		
 	public static void main(String[] args) throws IOException {
-		String bobUUID = "7c715006-cedf-4921-a2ca-75e19e785d1c";
+		String bobUUID = "ec77742f-e977-4d53-bda0-2ae3f7a83e13";
 
 		Client alice = new Client(NAME);
 		System.out.println(NAME + "'s Information");
@@ -66,27 +68,22 @@ public class Source {
 		//alice.regRequestForQueue(alice, TDS_QueueName_Reg);
 		
 	// Step 2: 
-		//alice.getQueueNameFromTDS(TDS_QueueName_Reg, alice.getUUID());
-		//alice.storeQueue(NAME, alice.getQueueName());
-		
-		/*
-		//alice.replaceSelected(NAME, "Queue", alice.readQueueNameFromFile(NAME).trim());
+		//alice.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Alice/UUID"))).trim() );
+		//alice.replaceSelected(NAME, "Queue", alice.getQueueName());
 		//alice.replaceSelected(NAME, "Target", bobUUID);
-		System.out.println(NAME + "'s Queue Name: " + alice.readline(NAME, "Queue").trim());
-		System.out.println(NAME + "'s Target's UUID: " + alice.readline(NAME, "Target").trim());
-		*/
 		
-		
-	// Step 3: Send TDS a exchange request
 		/*
+	// Step 3: Send TDS a exchange request
 		String sigMsg =  alice.sigMsg("ExchangeRequest");
 		System.out.println("Exchange Message Signture: " + sigMsg);
 		sendExchangeRequest(TDS_QueueName, "CoffeySaidha", sigMsg, alice.getUUID(), bobUUID);
 		*/
 		
+		
 	// Step 4:
 		//receiveExchangeResponse(alice, alice.readline(NAME, "Queue"));
 
+		
 		/*
 		alice.setQueueName(alice.readline(NAME, "Queue").trim());
 		alice.setLabel(alice.readline(NAME, "Label").trim());
@@ -113,7 +110,7 @@ public class Source {
 
 	
     // Step 6:
-		//receiveEORMsg(alice, alice.readline(NAME, "Queue"));
+		receiveEORMsg(alice, alice.readline(NAME, "Queue"));
 		
 
 	}
@@ -187,6 +184,14 @@ public class Source {
         }		
 	}
 
+	/**
+	 * 
+	 * @param queueName
+	 * @param protocol
+	 * @param sigMsg
+	 * @param source
+	 * @param target
+	 */
 	public static void sendExchangeRequest(String queueName, String protocol, String sigMsg, String source, String target) {
 		boolean success = false;
 		// Initialise queue service
@@ -196,6 +201,12 @@ public class Source {
         success = sqsx.exchangeRequest(queueName, protocol, sigMsg, source, target);
 	}
 	
+	/**
+	 * 
+	 * @param c
+	 * @param myQueue
+	 * @throws IOException
+	 */
 	public static void receiveExchangeResponse(Client c, String myQueue) throws IOException {
 		boolean success = false;
 

@@ -34,6 +34,9 @@ package uk.ac.ncl.csc8109.team1.client;
 
 import java.io.IOException;
 
+import uk.ac.ncl.csc8109.team1.crypto.Crypto;
+import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
+
 /** 
  * This class shows how to use the client object
  * 
@@ -65,6 +68,9 @@ public class ClientExample {
 		//String FILENAME = "teamPath";
 		//c.writeToFile(FILENAME, l);
 		//c.readFromFile("teamPath");
+		
+		
+
 
 	}
 	

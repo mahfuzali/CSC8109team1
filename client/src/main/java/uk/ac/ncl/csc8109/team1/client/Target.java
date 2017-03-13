@@ -37,6 +37,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import com.amazonaws.services.sqs.model.Message;
@@ -55,24 +57,22 @@ public class Target {
 	private static String EOR;
 
 	public static void main(String[] args) throws IOException {
+		String aliceUUID = "dc540a17-3873-4b0c-92b0-925f1bb1259b";
+		
 		Client bob = new Client(NAME);
 		System.out.println(NAME + "'s Information:");
 		System.out.println("UUID: " + bob.getUUID().trim());
 		System.out.println("Public Key: " + bob.getPublicKey());
 		System.out.println("Private Key: " + bob.getPrivateKey());
-		
-		String aliceUUID = "aeefe21e-dbec-4dab-a1ae-ac19240675e4";
-
-		
+			
 	 // Step 1: 
 		//bob.regRequestForQueue(bob, TDS_QueueName_Reg);
-		
+	
 	 // Step 2: 
-		/*
-		bob.getQueueNameFromTDS(TDS_QueueName_Reg, bob.getUUID());
-		System.out.println(bob.getQueueName());
-		bob.storeQueue(NAME, bob.getQueueName());
-		*/
+		//bob.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Bob/UUID"))).trim() );
+		//bob.replaceSelected(NAME, "Queue", bob.getQueueName());
+		//bob.replaceSelected(NAME, "Target", aliceUUID);
+
 		
 	// Step 3: 
 		//receiveEOOMsg(bob);
@@ -85,27 +85,21 @@ public class Target {
 	// Step 5: 
 		//receiveDocMsg(bob, bob.readline(NAME, "Queue"));
 		
-		
+		/*
 	// Step 6: 
-		//String sigMsg =  bob.sigMsg("PublicKeyRequest");
-		//System.out.println("Exchange Message Signture: " + sigMsg);
-		//sendPubKeyRequest(TDS_QueueName, "PublicKeyRequest", sigMsg, bob.getUUID(), aliceUUID);
-		
+		String sigMsg =  bob.sigMsg("PublicKeyRequest");
+		System.out.println("Exchange Message Signture: " + sigMsg);
+		sendPubKeyRequest(TDS_QueueName, "PublicKeyRequest", sigMsg, bob.getUUID(), aliceUUID);
+		*/
 		
 	// Step 7:
 		//receivePubKeyResponse(bob, bob.readline(NAME, "Queue"));
-		
 
 		//String shared = bob.sharedSecret(bob.readline(NAME, "RecipientPublicKey"));
-		//System.out.println(shared);
-		
 		//bob.decrypt("resource/" + NAME + "/recClassified", "resource/" + NAME + "/deClassified", shared);
 		
-		
-
 	}
 
-	
 	
 	/**
 	 * 
@@ -156,9 +150,6 @@ public class Target {
 			}
         }
 	}
-	
-	
-	
 	
 	/**
 	 * 
@@ -259,8 +250,14 @@ public class Target {
 		EOR = eOR;
 	}
 	
-	
-	
+	/**
+	 * 
+	 * @param queueName
+	 * @param protocol
+	 * @param sigMsg
+	 * @param source
+	 * @param target
+	 */
 	public static void sendPubKeyRequest(String queueName, String protocol, String sigMsg, String source, String target) {
 		boolean success = false;
 		// Initialise queue service
@@ -270,7 +267,12 @@ public class Target {
         success = sqsx.exchangeRequest(queueName, protocol, sigMsg, source, target);
 	}
 	
-	
+	/**
+	 * 
+	 * @param c
+	 * @param myQueue
+	 * @throws IOException
+	 */
 	public static void receivePubKeyResponse(Client c, String myQueue) throws IOException {
 		boolean success = false;
 
@@ -292,9 +294,7 @@ public class Target {
             System.out.println("  TargetKey:" + attributes.get("TargetKey").getStringValue());
             c.setTargetPubKey(attributes.get("TargetKey").getStringValue());
             
-          
     		c.replaceSelected(NAME, "RecipientPublicKey", c.getTargetPubKey());
-            
             
             //success = sqsx.deleteMessage(myQueue, messageHandle);
             //System.out.println("Deleted message from queue " + myQueue + " " + success);
