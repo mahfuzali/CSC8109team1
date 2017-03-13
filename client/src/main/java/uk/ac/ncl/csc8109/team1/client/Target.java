@@ -96,30 +96,13 @@ public class Target {
 		//receivePubKeyResponse(bob, bob.readline(NAME, "Queue"));
 		
 
-		String shared = bob.sharedSecret(bob.readline(NAME, "RecipientPublicKey"));
-		System.out.println(shared);
+		//String shared = bob.sharedSecret(bob.readline(NAME, "RecipientPublicKey"));
+		//System.out.println(shared);
 		
-		bob.decrypt("resource/" + NAME + "/recClassified", "resource/" + NAME + "/deClassified", shared);
-		
-		
-		
-		/*
-		bob.regRequest(bob, TDS_QueueName_Reg);
-		
-		// Change the Alice to uuid 
-		bob.getQueueNameFromTDS(TDS_QueueName_Reg, bob.getUUID());
-		System.out.println(bob.getQueueName());
-		
-		// Exchange record between multiple clients 
-		String data = bob.getQueueName() + "," + bob.getLabel() + "," + bob.getDestination(); 
-		bob.writeToFile("resource/"+ bob.getUUID() + "-exchange", data);
+		//bob.decrypt("resource/" + NAME + "/recClassified", "resource/" + NAME + "/deClassified", shared);
 		
 		
-		receiveMsg(bob);
-		System.out.println(getEOO());
-		
-		sendMsg(bob, TDS_queueName, getEOO());	
-		*/
+
 	}
 
 	

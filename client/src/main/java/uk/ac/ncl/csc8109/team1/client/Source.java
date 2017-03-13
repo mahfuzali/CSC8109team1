@@ -115,39 +115,7 @@ public class Source {
     // Step 6:
 		//receiveEORMsg(alice, alice.readline(NAME, "Queue"));
 		
-		
-		
-		
-		
-		
-		
-		
-        
-		/*
-		alice.setLabel("label1");
-		alice.setDestination("bob");
 
-		alice.regRequest(alice, TDS_QueueName_Reg);
-		
-		// Change the Alice to uuid 
-		alice.getQueueNameFromTDS(TDS_QueueName_Reg, alice.getUUID());
-		System.out.println(alice.getQueueName());
-		
-		// Exchange record between multiple clients 
-		String data = alice.getQueueName() + "," + alice.getLabel() + "," + alice.getDestination(); 
-		alice.writeToFile("resource/"+ alice.getUUID() + "-exchange", data);
-		*/
-        
-		
-		/* Get bobs public key from the DB to compute shared key */
-		/* Encrypt the file use the shared key */ 
-		
-		
-		
-		//File f = new File("sample");
-		//System.out.println(sendDocMsg(f, alice, TDS_queueName));
-		//receiveMsg(TDS_queueName);
-		//receiveMsg(alice.getQueueName());
 	}
 	
 	/**

@@ -112,85 +112,9 @@ public class TDSSimulation {
 		
 		
 	// Step 9: 	
-		receiveClientPubKeyRequest(TDS_QueueName);
-		sendClientPubKeyResponse(bobExchangeQ, readline("Protocol"), readline("Target"), readline("Source"), alice_publicKey);
+		//receiveClientPubKeyRequest(TDS_QueueName);
+		//sendClientPubKeyResponse(bobExchangeQ, readline("Protocol"), readline("Target"), readline("Source"), alice_publicKey);
 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		//receiveMsg(TDS_QueueName);
-		//System.out.println(getEOO());
-
-		//sendMsg(Bob_QueueName);
-		
-		//receiveMsg(TDS_QueueName);
-		
-		//receiveDocMsg(TDS_QueueName);
-		
-		//File f = new File("received");
-
-		//boolean flag = sendDocMsg(f, Bob_QueueName);
-		//System.out.println(flag);
-		
-		//receiveEORMsg(TDS_QueueName);
-		//System.out.println(getEOR());
-		//sendEORMsg(Alice_QueueName);
-		
-		//receiveQueueNameRequestMsg(TDS_QueueName_Reg);
-		//String userid = getUserId();
-		//System.out.println(userid);
-		
-		//returnQueueName(TDS_QueueName_Reg, userid);
-		
-		
-		/*
-		
-		boolean success = false;
-		// Initialise queue service
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		// Receive it then delete it
-        String messageHandle = null;
-        Message message = sqsx.receiveMessage(TDS_QueueName);
-        if (message != null) {
-        	messageHandle = message.getReceiptHandle();
-        	System.out.println("Message received from queue " + TDS_QueueName);
-            System.out.println("  ID: " + message.getMessageId());
-            System.out.println("  Receipt handle: " + messageHandle);
-            System.out.println("  Message body: " + message.getBody());
-            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
-            System.out.println("  Protocol:" + attributes.get("Protocol").getStringValue());
-            setProtocol(attributes.get("Protocol").getStringValue());
-            System.out.println("  Source:" + attributes.get("Source").getStringValue());
-            setSource(attributes.get("Source").getStringValue());
-            System.out.println("  Target:" + attributes.get("Target").getStringValue());
-            setTarget(attributes.get("Target").getStringValue());
-            //success = sqsx.deleteMessage(TDS_QueueName, messageHandle);
-            //System.out.println("Deleted message from queue " + TDS_QueueName + " " + success);
-        }
-		
-        
-        // Send an exchange response to source's queue
-        success = sqsx.exchangeResponse(Alice_QueueName, getProtocol() + " Exchange", "ExchangeResponse", getSource(), getTarget(), bob_privateKey);
-        */
 		
 	}
 	
