@@ -79,16 +79,27 @@ public class CryptoTest {
 	
 	@Test
 	public void testHash(){
-//		assertEquals(ahash, bhash);
-//		assertEquals(ahash, bhashDiffFile);
-		assertFalse(ahash.equals(bhash));
+		assertEquals(ahash, bhash);
+	}
+	
+	public void testDifferentHashFile(){
+		assertFalse(ahash.equals(bhashDiffFile));
 	}
 	
 	@Test
 	public void testPublicKeys(){
-//		 assertEquals(aPbk, bPbk);
-		//Alice Publickey and Bobs publickey not the same
+		//**Alice Public key and Bobs public key not the same**//
         assertFalse(aPbk.equals(bPbk));
+	}
+	
+	@Test
+	public void testAlicePublicKeys(){
+		 assertEquals(aPbk, aPbk);
+	}
+	
+	@Test
+	public void testBobPublicKeys(){
+		 assertEquals(bPbk, bPbk);
 	}
 	
 	@Test
@@ -121,10 +132,6 @@ public class CryptoTest {
 		assertEquals(bsignature, bsignature);
 	}
 	
-	@Test
-	public void testSignatureTrue(){
-		assertEquals(asignature, bsignature);
-	}
 	
 	@Test
 	public void testSignatureFlase(){
