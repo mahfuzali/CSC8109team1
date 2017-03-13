@@ -7,22 +7,22 @@ Call the constructor to set up a connection to the messaging service.  See Messa
 
 A new client must first register by sending a registration request to the TDS registration queue
 
-Client calls `registerRequest`
-TDS receives the request message, calls `registerResponse` to send back a new queue name for the client, then deletes the request message from the queue  using `deleteMessage`
-Client receives the request response on the TDS registration queue using `receiveMyMessage`, then deletes it from the queue using `deleteMessage`
+* Client calls `registerRequest`
+* TDS receives the request message, calls `registerResponse` to send back a new queue name for the client, then deletes the request message from the queue  using `deleteMessage`
+* Client receives the request response on the TDS registration queue using `receiveMyMessage`, then deletes it from the queue using `deleteMessage`
 
 A registered client may then request a new exchange to the normal TDS message queue
 
-Client calls `exchangeRequest`
-TDS receives the request message, calls `exchangeResponse` to send back a label (exchange ID) and the public queue of the target (recipient), then deletes the request message from the queue using `deleteMessage`
-Client receives the request response on its own queue using `receiveMessage`, then deletes it from the queue using `deleteMessage`
+* Client calls `exchangeRequest`
+* TDS receives the request message, calls `exchangeResponse` to send back a label (exchange ID) and the public queue of the target (recipient), then deletes the request message from the queue using `deleteMessage`
+* Client receives the request response on its own queue using `receiveMessage`, then deletes it from the queue using `deleteMessage`
 
 The normal message sequence is:
 
-Client sends a message with `sendMessage` or `sendMsgDocument` to the TDS message queue
-TDS receives the message with `receiveMessage`, process it and then deletes the request message from the queue using `deleteMessage`
-TDS sends messages to the source or target clients using `sendMessage` to the client queue
-Clients receive messages on their own queue using `receiveMessage`, then delete them from the queue using `deleteMessage`
+* Client sends a message with `sendMessage` or `sendMsgDocument` to the TDS message queue
+* TDS receives the message with `receiveMessage`, process it and then deletes the request message from the queue using `deleteMessage`
+* TDS sends messages to the source or target clients using `sendMessage` to the client queue
+* Clients receive messages on their own queue using `receiveMessage`, then delete them from the queue using `deleteMessage`
 
 A client may attempt to abort an exchange by sending `abortRequest` to the TDS message queue
 
