@@ -156,6 +156,44 @@ public class AmazonExtendedSQS implements MessageInterface {
 	}
 
 	/**
+	 * Send a response to an exchange request - will return the target public key in a targetkey attribute
+	 * @param queueName - name of the queue
+	 * @param label - exchange label
+	 * @param message - a message "ExchangeResponse"
+	 * @param source - the userid of the original source of the message
+	 * @param target - the userid of the ultimate recipient of the message
+	 * @param targetkey - the public key of the target
+	 * @return true if successful, false otherwise
+	 */
+	public boolean exchangeResponse(String queueName, String label, String message, String source, String target, String targetkey) {
+		String queueUrl;
+		// Get the Queue URL
+		try {
+			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		// Build and send the message
+		try {
+			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("Label", new MessageAttributeValue().withDataType("String.Label").withStringValue(label));
+			messageAttributes.put("Source", new MessageAttributeValue().withDataType("String.Source").withStringValue(source));
+			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue(target));
+			messageAttributes.put("TargetKey", new MessageAttributeValue().withDataType("String.TargetKey").withStringValue(targetkey));
+		    SendMessageRequest request = new SendMessageRequest();
+		    request.withMessageBody(message);
+		    request.withQueueUrl(queueUrl);
+		    request.withMessageAttributes(messageAttributes);
+		    sqsExtended.sendMessage(request);
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    	return false;
+	    }
+		return true;
+	}
+	
+	/**
 	 * Send a message to a queue
 	 * @param queueName - name of the queue
 	 * @param label - exchange label

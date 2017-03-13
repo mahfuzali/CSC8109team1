@@ -60,6 +60,18 @@ public interface MessageInterface {
 	boolean exchangeRequest(String queueName, String protocol, String message, String source, String target);
 	
 	/**
+	 * Send a response to an exchange request - will return the target public key in a targetkey attribute
+	 * @param queueName - name of the queue
+	 * @param label - exchange label
+	 * @param message - a message "ExchangeResponse"
+	 * @param source - the userid of the original source of the message
+	 * @param target - the userid of the ultimate recipient of the message
+	 * @param targetkey - the public key of the target
+	 * @return true if successful, false otherwise
+	 */
+	boolean exchangeResponse(String queueName, String label, String message, String source, String target, String targetkey);
+	
+	/**
 	 * Send a message to a queue
 	 * @param queueName - name of the queue
 	 * @param label - exchange label
