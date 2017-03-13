@@ -123,7 +123,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 	 * Send an exchange request to the TDS queue (client request to TDS for an exchange label)
 	 * @param queueName - name of the queue
 	 * @param protocol - exchange protocol name
-	 * @param message - a message as a serialised string
+	 * @param message - a message SigA("ExchangeRequest")
 	 * @param source - the userid of the original source of the message
 	 * @param target - the userid of the ultimate recipient of the message
 	 * @return true if successful, false otherwise
@@ -176,6 +176,43 @@ public class AmazonExtendedSQS implements MessageInterface {
 		// Build and send the message
 		try {
 			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("Label", new MessageAttributeValue().withDataType("String.Label").withStringValue(label));
+			messageAttributes.put("Source", new MessageAttributeValue().withDataType("String.Source").withStringValue(source));
+			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue(target));
+		    SendMessageRequest request = new SendMessageRequest();
+		    request.withMessageBody(message);
+		    request.withQueueUrl(queueUrl);
+		    request.withMessageAttributes(messageAttributes);
+		    sqsExtended.sendMessage(request);
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    	return false;
+	    }
+		return true;
+	}
+	
+	/**
+	 * Send an abort exchange request to the TDS queue
+	 * @param queueName - name of the queue
+	 * @param label - exchange label
+	 * @param message - a message SigA("AbortRequest")
+	 * @param source - the userid of the original source of the message
+	 * @param target - the userid of the ultimate recipient of the message
+	 * @return true if successful, false otherwise
+	 */
+	public boolean abortRequest(String queueName, String label, String message, String source, String target) {
+		String queueUrl;
+		// Get the Queue URL
+		try {
+			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		// Build and send the message
+		try {
+			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("Abort", new MessageAttributeValue().withDataType("String.Abort").withStringValue("AbortRequest"));
 			messageAttributes.put("Label", new MessageAttributeValue().withDataType("String.Label").withStringValue(label));
 			messageAttributes.put("Source", new MessageAttributeValue().withDataType("String.Source").withStringValue(source));
 			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue(target));
