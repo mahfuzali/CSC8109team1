@@ -19,7 +19,9 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import uk.ac.ncl.csc8109.team1.crypto.Crypto;
 import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
 import uk.ac.ncl.csc8109.team1.db.model.FileEntity;
+import uk.ac.ncl.csc8109.team1.db.repository.FileRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.RegisterRepository;
+import uk.ac.ncl.csc8109.team1.db.repository.impl.FileRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
 import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
@@ -65,15 +67,21 @@ public class CoffeySaidha {
 		// Check EOO
         CryptoInterface crypto = new Crypto();
 		File f = new File(docName);
-		String hash = crypto.getHashOfFile(f);
-		String verification = crypto.isVerified(hash, fromPK, msgEOO);
-		System.out.println("EOO verification:" + verification);
-		if(!verification.equals("Verified")){
-			System.err.println("EOO not verified");
+		try {
+			String hash = crypto.getHashOfFile(f);
+			String verification = crypto.isVerified(hash, fromPK, msgEOO);
+			System.out.println("EOO verification:" + verification);
+			if(!verification.equals("Verified")){
+				System.err.println("EOO not verified");
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 
 		// Upload document
+        FileRepository fileRepository = new FileRepositoryImpl();
 		FileEntity fileEntity = new FileEntity();
 		File initialFile = new File(docName);
 		InputStream targetStream = null;
@@ -85,7 +93,14 @@ public class CoffeySaidha {
 		}
 		fileEntity.setFileName(initialFile.getName());
 		fileEntity.setInputStream(targetStream);
-//		String key =UUID.randomUUID().toString();
+		String fileKey = UUID.randomUUID().toString();
+		try {
+			fileRepository.storeFile(fileKey, fileEntity);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		System.out.println("Document " + fileEntity.getFileName() + " uploaded to S3 as " + fileKey);
 //
 //		if (label == uuid.toString())  {  
 //			//get time
@@ -94,7 +109,7 @@ public class CoffeySaidha {
 //			fe.setLastMessage(message);
 //			fe.setStage(3);
 //			mr.storeMessage(uuid, fe);
-//			fr.storeFile(key, fileEntity);
+			
 //
 //		}
 		
@@ -265,6 +280,28 @@ public class CoffeySaidha {
 
 	}
 
+	/**
+	 * Abort an exchange
+	 * @param label
+	 * @param step
+	 * @param message
+	 * @param source
+	 * @param target
+	 * @return
+	 */
+	public static boolean abortExchange(String label, int step, Message message, String source, String target) {
+		return true;
+	}
+	
+	/**
+	 * Run requested step of the Coffey Saidha fair exchange protocol
+	 * @param label
+	 * @param step
+	 * @param message
+	 * @param source
+	 * @param target
+	 * @return
+	 */
 	public static boolean runStep(String label, int step, Message message, String source, String target) {
 		
 		// String sourceQueue, String targetQueue, String sourcePK, String targetPK
