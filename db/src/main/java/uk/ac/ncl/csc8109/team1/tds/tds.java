@@ -45,37 +45,45 @@ public class tds {
 	static UUID uuid;
 	static FairExchangeEntity fe = new FairExchangeEntity();
 	static RegisterRepository rr = new RegisterRepositoryImpl();
-	//static RegisterEntity re = new RegisterEntity();
+	static RegisterEntity re = new RegisterEntity();
 	static MessageRepository mr = new MessageRepositoryImpl();
 	static FileRepository fr = new FileRepositoryImpl();
 	private static CryptoInterface crypto;
+	//get time
+	static long time = System.currentTimeMillis();
+			
 	/**
 	 * step 0
 	 */
 
 	public static void register(String id, String publickey) {
-		//RegisterRepository registerRepository = new RegisterRepositoryImpl();
-		RegisterEntity registerEntity = new RegisterEntity();
+		//check id
 		if(rr.checkAlreadyExist(id)){
 			throw new IllegalArgumentException("user id already exists");
 		}
 		
+		// Create a message queue name
+	    String ClientName = "ClientName" + UUID.randomUUID().toString();
+	    //send name to client
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		String queue2Name = "csc8109_1_tds_queue_20070306";
+		boolean b = sqsx.registerResponse(queue2Name, id, ClientName);
+		if(!b){
+			throw new IllegalArgumentException("send queue error");
+		}
 
-		registerEntity.setId(id);
-		registerEntity.setPublicKey(publickey);
-		rr.registerUser(registerEntity);
-
-
-		
-		//todo 
-
+		//store message
+		re.setId(id);
+		re.setPublicKey(publickey);
+		re.setQueueName(ClientName);
+		rr.registerUser(re);
 	}
 	/**
 	 * step 1
 	 * @param Alice_id, Bob_id
 	 * Alice send request 
 	 */
-	public static UUID step1(String fromId, String toId, String message, String queueName,String protocol){
+	public static void step1(String fromId, String toId, String message, String queueName,String protocol){
 
         //check id
 		if(!rr.checkAlreadyExist(fromId)){
@@ -84,50 +92,38 @@ public class tds {
 		if(!rr.checkAlreadyExist(toId)){
 			throw new IllegalArgumentException("touser id not exists");
 		}
-		//check message
-		
-		
-		//get time
-		long time = System.currentTimeMillis();
-		
+	
+		// create UUId
+		uuid = UUID.randomUUID();
+		//store message
 		fe.setTimestamp(time);
 		fe.setFromID(fromId);
 		fe.setToID(toId);
-		uuid = UUID.randomUUID();
 		fe.setUuid(uuid.toString());
 		fe.setStage(1);
 		fe.setProtocol(protocol);
 		fe.setLastMessage(message);
 		fe.setReceiverqueue(queueName);
 		mr.storeMessage(uuid,fe);
-
-
-		return uuid;
-	}
-		
-	//}
 	
 	/**
 	 * step 2
 	 * @param fe
 	 * send label to Alice
 	 */
-	public static void step2(){
-		
 		//send message
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		String queue2Name = "csc8109_1_tds_queue_20070306";
 		String label = fe.getUuid();
-		String message = fe.getLastMessage();
 		String fromid = fe.getFromID();
 		String toid = fe.getToID();
 		boolean b = sqsx.sendMessage(queue2Name, label, message, fromid, toid);
-		
+		if(!b){
+			throw new IllegalArgumentException("send message error");
+		}
 		
 		if(fe!=null){
 
-			//get time
-			long time = System.currentTimeMillis();
 			fe.setTimestamp(time);
 			fe.setLastMessage(message);
 			fe.setSenderqueue(queue2Name);
@@ -209,7 +205,7 @@ public class tds {
 //	            read protocol, step from state
              if (label.equals(uuid) && tabel_protocol == protocol) {
             	 
-            	 // boolean success = CoffeySaidha.runStep(label, stage, message, fromid, toId);
+            	 boolean success = CoffeySaidha.runStep(label, stage, message, fromid, toId,queueName);
                  
                  // Delete the message from the queue once it has been processed
                  sqsx.deleteMessage(tdsMessageQueue, messageHandle);
