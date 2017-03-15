@@ -18,16 +18,23 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
 
 import uk.ac.ncl.csc8109.team1.crypto.Crypto;
 import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
+import uk.ac.ncl.csc8109.team1.db.model.FairExchangeEntity;
 import uk.ac.ncl.csc8109.team1.db.model.FileEntity;
 import uk.ac.ncl.csc8109.team1.db.repository.FileRepository;
+import uk.ac.ncl.csc8109.team1.db.repository.MessageRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.RegisterRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.FileRepositoryImpl;
+import uk.ac.ncl.csc8109.team1.db.repository.impl.MessageRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
 import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
 
 public class CoffeySaidha {
 	
+    private static FileRepository fileRepository = new FileRepositoryImpl();
+	private static MessageRepository stateRepository = new MessageRepositoryImpl();
+	private static MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+
 	/**
 	 * Source sends document and EOO to TDS
 	 * EOO = SigA(h(doc))
@@ -36,8 +43,22 @@ public class CoffeySaidha {
 	 * @param fromid
 	 * @param fromQueue
 	 * @param fromPK
+	 * @param toid
+	 * @param toQueue
+	 * @return
 	 */
-	public static boolean sendDocEOO(Message message, String label, String fromid, String fromQueue, String fromPK){
+	public static boolean sendDocEOO(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
+		
+		// Check for valid exchange
+		FairExchangeEntity stateEntity = null;
+		UUID uuidLabel = null;
+		try {
+			uuidLabel = UUID.fromString(label);
+			stateEntity = stateRepository.getMessage(uuidLabel);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 
 		// Read message with attached document
         String msgEOO = message.getBody();
@@ -81,7 +102,6 @@ public class CoffeySaidha {
 		}
 
 		// Upload document
-        FileRepository fileRepository = new FileRepositoryImpl();
 		FileEntity fileEntity = new FileEntity();
 		File initialFile = new File(docName);
 		InputStream targetStream = null;
@@ -101,17 +121,30 @@ public class CoffeySaidha {
 			return false;
 		}
 		System.out.println("Document " + fileEntity.getFileName() + " uploaded to S3 as " + fileKey);
-//
-//		if (label == uuid.toString())  {  
-//			//get time
-//			long time = System.currentTimeMillis();
-//			fe.setTimestamp(time);
-//			fe.setLastMessage(message);
-//			fe.setStage(3);
-//			mr.storeMessage(uuid, fe);
-			
-//
-//		}
+		
+		// Update state table
+		long timestamp = System.currentTimeMillis();
+		stateEntity.setTimestamp(timestamp);
+		stateEntity.setStage(3);
+		stateEntity.setFromID(fromid);
+		stateEntity.setToID(toid);
+		stateEntity.setSenderqueue(fromQueue);
+		stateEntity.setLastMessage(msgEOO);
+		stateEntity.setFileKey(fileKey);
+		try {
+			stateRepository.storeMessage(uuidLabel, stateEntity);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		System.out.println("Updated state table for exchange " + label);
+		
+		// Send EOO to Target
+		if (!sqsx.sendMsgSourceKey(toQueue, label, msgEOO, fromid, toid, fromPK)) {
+			System.err.println("Can't send message to queue " + toQueue);
+			return false;			
+		};
+		System.out.println("Sent EOO to queue " + toQueue);
 		
 		return true;
 
@@ -314,7 +347,7 @@ public class CoffeySaidha {
 		switch (step)
 		{ 
 		case 2:
-			if (!sendDocEOO(message, label, source, sourceQueue, sourcePK)) {
+			if (!sendDocEOO(message, label, source, sourceQueue, sourcePK, target, targetQueue)) {
 				return false;
 			};
 			break;
