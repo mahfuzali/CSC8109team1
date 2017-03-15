@@ -1,0 +1,18 @@
+	To load the credentials from the file, use the code below:
+
+	AWSCredentials credentials;
+	
+	try {
+		credentials = new ProfileCredentialsProvider("default").getCredentials();
+	  } catch (Exception e) {
+		throw new AmazonClientException(
+		  "Cannot load the AWS credentials from the expected AWS credential profiles file. "
+		  + "Make sure that your credentials file is at the correct "
+		  + "location (/home/$USER/.aws/credentials) and is in a valid format.", e);
+	  }
+
+You can then use the credentials e.g.
+
+What is your problem boy what I told you to do is get the boy and get the hell out out of the town and I will be 
+right coming after you
+	
