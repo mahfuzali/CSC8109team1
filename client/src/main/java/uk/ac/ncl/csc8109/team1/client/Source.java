@@ -52,8 +52,9 @@ public class Source {
 	private static final String TDS_QueueName_Reg = "csc8109_1_tds_queue_20070306_reg";
 
 	private static final String NAME = "Alice";
-	private static String EOO;
-	private static String EOR;
+	
+	//private static String EOO;
+	//private static String EOR;
 
 	private static String queue; 
 	
@@ -65,124 +66,116 @@ public class Source {
 		System.out.println("UUID: " + alice.getUUID().trim());
 		System.out.println("Public Key: " + alice.getPublicKey());
 		System.out.println("Private Key: " + alice.getPrivateKey());
-	
-		
-		String[] items = {"Register and request for queue name",
-				  "Request for a exchange",
-				  "Send a document with EOO",
-				  "Get EOR from TDS",
-				  "Send abort message",
-				  "End program"};
+
+		String[] items = { "Register and request for queue name", 
+							"Request for a exchange", 
+							"Send a document with EOO",
+							"Get EOR from TDS", 
+							"Return label to TDS", 
+							"Send abort message", 
+							"End program" };
 
 		Scanner in = new Scanner(System.in);
-		// print menu
-		for (int i = 1; i <= 5; i++) {
-		  System.out.println(i + ". " + items[i-1]);        	
+		// Print menu
+		for (int i = 1; i <= 7; i++) {
+			System.out.println(i + ". " + items[i - 1]);
 		}
 		System.out.println("0. Quit");
-		
+
 		// handle user commands
 		boolean quit = false;
 		int menuItem;
-		
+
 		do {
-		    System.out.print("Choose menu item: ");
-		    menuItem = in.nextInt();
-		    switch (menuItem) {
-		    case 1:
-		          System.out.println("You've chosen item #1");
-		          // do something...
-		  		  while(alice.getQueueName() == null) {
-				   // Step 1: 
-					 alice.regRequestForQueue(alice, TDS_QueueName_Reg);
-					 Thread.sleep(20000);
-				   // Step 2: 
-					 alice.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Alice/UUID"))).trim() );
-					 alice.replaceSelected(NAME, "Queue", alice.getQueueName());
-					 //alice.replaceSelected(NAME, "Target", bobUUID);
-				  }
-		          
-		          break;
-		    case 2:
-		          System.out.println("You've chosen item #2");
-		          // do something...
-		          
-		          while(alice.getLabel() == null && alice.getTargetPubKey() == null) {
-		      		System.out.println(alice.getLabel() );
-		      		System.out.println(alice.getTargetPubKey());
-		        	  /**/
-		        	// Step 3: Send TDS a exchange request
-	        			String sigMsg =  alice.sigMsg("ExchangeRequest");
-	        			System.out.println("Exchange Message Signature: " + sigMsg);
-	        			sendExchangeRequest(TDS_QueueName, "CoffeySaidha", sigMsg, alice.getUUID(), bobUUID);
-						Thread.sleep(20000);
-	        		// Step 4:
-	        			receiveExchangeResponse(alice, alice.readline(NAME, "Queue"));
-		          }
+			System.out.print("Choose menu item: ");
+			menuItem = in.nextInt();
+			switch (menuItem) {
+			case 1:
+				System.out.println("You've chosen item #1");
+				// do something...
+				while (alice.getQueueName() == null) {
+					// Step 1:
+					alice.regRequestForQueue(alice, TDS_QueueName_Reg);
+					Thread.sleep(20000);
+					// Step 2:
+					alice.getQueueNameFromTDS(TDS_QueueName_Reg,
+							new String(Files.readAllBytes(Paths.get("resource/Alice/UUID"))).trim());
+					alice.replaceSelected(NAME, "Queue", alice.getQueueName());
+					// alice.replaceSelected(NAME, "Target", bobUUID);
+				}
 
-		          break;
-		    case 3:
-		          System.out.println("You've chosen item #3");
-		          // do something...
-		  		 /**/
-		  		  alice.setQueueName(alice.readline(NAME, "Queue").trim());
-		  		  alice.setLabel(alice.readline(NAME, "Label").trim());
-		  		  alice.setDestination(alice.readline(NAME, "Target").trim());
-		  		  System.out.println("Exchange Label: " + alice.readline(NAME, "Label").trim());
-		  		  System.out.println("Exchange Target: " + alice.readline(NAME, "Target").trim());
-		  		
-		  		  String bobPublicKey = alice.readline(NAME, "RecipientPublicKey").trim();
-		  		  System.out.println(bobPublicKey);
-		  		
-		  		
-		  		  String shared = alice.sharedSecret(bobPublicKey);
-		  		  System.out.println(shared);
+				break;
+			case 2:
+				System.out.println("You've chosen item #2");
+				// do something...
+				while (alice.getLabel() == null && alice.getTargetPubKey() == null) {
+					System.out.println(alice.getLabel());
+					System.out.println(alice.getTargetPubKey());
+					/**/
+					// Step 3: Send TDS a exchange request
+					String sigMsg = alice.sigMsg("ExchangeRequest");
+					System.out.println("Exchange Message Signature: " + sigMsg);
+					sendExchangeRequest(TDS_QueueName, "CoffeySaidha", sigMsg, alice.getUUID(), bobUUID);
+					Thread.sleep(20000);
+					// Step 4:
+					receiveExchangeResponse(alice, alice.readline(NAME, "Queue"));
+				}
 
-		  	
-		  		  alice.encrypt("resource/" + NAME + "/classified", "resource/" + NAME + "/enclassified", shared);
-		  		  File f = new File("resource/" + NAME + "/enclassified");
+				break;
+			case 3:
+				System.out.println("You've chosen item #3");
+				// do something...
+				/**/
+				alice.setQueueName(alice.readline(NAME, "Queue").trim());
+				alice.setLabel(alice.readline(NAME, "Label").trim());
+				alice.setDestination(alice.readline(NAME, "Target").trim());
+				System.out.println("Exchange Label: " + alice.readline(NAME, "Label").trim());
+				System.out.println("Exchange Target: " + alice.readline(NAME, "Target").trim());
 
-		  	// Step 5: encrypt file 	
-		  		  System.out.println(alice.readline(NAME, "Queue"));
-		  		  System.out.println("Message send status: " + sendDocMsg(f, alice, alice.readline(NAME, "Queue")));
+				String bobPublicKey = alice.readline(NAME, "RecipientPublicKey").trim();
+				System.out.println(bobPublicKey);
 
-		          break;
-		    case 4:
-		          System.out.println("You've chosen item #4");
-		          // do something...
-		          while (getEOR() == null) {
-		        	  receiveEORMsg(alice, alice.readline(NAME, "Queue"));
-		          }
-		          break;
-		    case 5:
-		          System.out.println("You've chosen item #5");
-		          // do something...
-		          break;
-		    case 0:
-		          quit = true;
-		          break;
-		    default:
-		          System.out.println("Invalid choice.");
-		    }
+				String shared = alice.sharedSecret(bobPublicKey);
+				System.out.println(shared);
+
+				alice.encrypt("resource/" + NAME + "/classified", "resource/" + NAME + "/enclassified", shared);
+				File f = new File("resource/" + NAME + "/enclassified");
+
+				// Step 5: encrypt file
+				System.out.println(alice.readline(NAME, "Queue"));
+				System.out.println("Message send status: " + sendDocMsg(f, alice, alice.readline(NAME, "Queue")));
+
+				break;
+			case 4:
+				System.out.println("You've chosen item #4");
+				// do something...
+				while (alice.getEOR() == null) {
+					receiveEORMsg(alice, alice.readline(NAME, "Queue"));
+				}
+				break;
+			case 5:
+				System.out.println("You've chosen item #5");
+				// do something...
+				
+				alice.returnLabelToTds(alice.readline(NAME, "Queue").trim(), alice.readline(NAME, "Label").trim(), alice.getUUID(), alice.readline(NAME, "Target").trim());
+				
+				break;
+			case 6:
+				System.out.println("You've chosen item #6");
+				// do something...
+				break;
+			case 7:
+				System.out.println("You've chosen item #7");
+				// do something...
+				break;
+			case 0:
+				quit = true;
+				break;
+			default:
+				System.out.println("Invalid choice.");
+			}
 		} while (!quit);
 		System.out.println("Bye-bye!");
-				
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		
 		
 		
@@ -313,8 +306,8 @@ public class Source {
 		
 		String queue = tds_queue;
 		String label = source.getLabel();
-		String eoo = source.getEOO(f);
-		setEOO(eoo);
+		String eoo = source.generateEOO(f);
+		source.setEOO(eoo);
 		String uuid = source.getUUID();
 		String target = source.getDestination();
 
@@ -362,7 +355,7 @@ public class Source {
             System.out.println("  Message body: " + message.getBody());
             
             c.replaceSelected(NAME, "EOR", message.getBody());
-            setEOR(message.getBody());
+            c.setEOR(message.getBody());
             
             
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
@@ -434,49 +427,7 @@ public class Source {
         }
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getEOO() {
-		return EOO;
-	}
 
-	/**
-	 * 
-	 * @param eOO
-	 */
-	static void setEOO(String eOO) {
-		EOO = eOO;
-	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	public static String getQueue() {
-		return queue;
-	}
-
-	/**
-	 * 
-	 * @param q
-	 */
-	static void setQueue(String q) {
-		queue = q;
-	}
-
-	
-	public static String getEOR() {
-		return EOR;
-	}
-
-	
-	static void setEOR(String eOR) {
-		EOR = eOR;
-	}
-	
-	
-	
 	
 }

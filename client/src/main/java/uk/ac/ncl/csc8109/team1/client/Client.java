@@ -69,7 +69,11 @@ public class Client {
 	
 	private boolean abort;
 	
+	private String sourcePubKey;
 	private String targetPubKey;
+	
+	private String EOO;
+	private String EOR;
 	
 	/**
 	 * In instantiation, a unique id is generated; along with,
@@ -160,7 +164,7 @@ public class Client {
 	 * 
 	 * @param queueName
 	 */
-	public void setQueueName(String queueName) {
+	void setQueueName(String queueName) {
 		this.queueName = queueName;
 	}
 
@@ -176,7 +180,7 @@ public class Client {
 	 * Sets the label for exchange
 	 * @param <code>label</code> label for exchange
 	 */
-	public void setLabel(String label) {
+	void setLabel(String label) {
 		this.label = label;
 	}
 
@@ -192,7 +196,7 @@ public class Client {
 	 * Sets the value name of the tds
 	 * @param <code>tds<code> name of tds
 	 */
-	public void setTds(String tds) {
+	void setTds(String tds) {
 		this.tds = tds;
 	}
 
@@ -208,7 +212,7 @@ public class Client {
 	 * Sets the name of the destination
 	 * @param <code>source</code> destination name
 	 */
-	public void setDestination(String destination) {
+	void setDestination(String destination) {
 		this.destination = destination;
 	}
 	
@@ -224,17 +228,66 @@ public class Client {
 	 * 
 	 * @param abort
 	 */
-	public void setAbort(boolean abort) {
+	void setAbort(boolean abort) {
 		this.abort = abort;
 	}
 
 	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getSourcePubKey() {
+		return sourcePubKey;
+	}
+
+	/**
+	 * 
+	 * @param sourcePubKey
+	 */
+	void setSourcePubKey(String sourcePubKey) {
+		this.sourcePubKey = sourcePubKey;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	public String getTargetPubKey() {
 		return targetPubKey;
 	}
 
-	public void setTargetPubKey(String key) {
+	/**
+	 * 
+	 * @param key
+	 */
+	void setTargetPubKey(String key) {
 		targetPubKey = key;
+	}
+
+	
+	
+	
+	
+	
+
+
+	
+	
+	public String getEOO() {
+		return EOO;
+	}
+
+	public void setEOO(String eOO) {
+		EOO = eOO;
+	}
+
+	public String getEOR() {
+		return EOR;
+	}
+
+	public void setEOR(String eOR) {
+		EOR = eOR;
 	}
 
 	/**
@@ -382,7 +435,7 @@ public class Client {
 	 * @param file
 	 * @return
 	 */
-	public String getEOO(File file) {
+	public String generateEOO(File file) {
 		return crypto.getSignature(crypto.getHashOfFile(file));
 	}
 
@@ -391,7 +444,7 @@ public class Client {
 	 * @param str
 	 * @return
 	 */
-	public String getEOR(String str) {
+	public String generateEOR(String str) {
 		return crypto.getSignature(str);
 	}
 
@@ -540,7 +593,6 @@ public class Client {
 	}
 	
 	
-	
 	/**
 	 * Replaces specfic line from key file
 	 * 
@@ -600,6 +652,24 @@ public class Client {
         String[] tmp = a.split(" : ");
 
         return tmp[1];
+	}
+	
+	/**
+	 * 
+	 * @param queueName
+	 * @param label
+	 * @param source
+	 * @param target
+	 */
+	public void returnLabelToTds(String queueName, String label, String source, String target) {
+		String signlbl = sigMsg(label);
+		
+		boolean success = false;
+		// Initialise queue service
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		// Send a message
+        success = sqsx.sendMessage(queueName, label, signlbl, source, target);
+        System.out.println("Sent message to queue " + queueName + " " + success);
 	}
 	
 }

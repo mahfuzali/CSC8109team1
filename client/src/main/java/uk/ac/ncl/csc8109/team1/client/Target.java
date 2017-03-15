@@ -54,9 +54,6 @@ public class Target {
 
 	private static final String NAME = "Bob";
 	
-	private static String EOO;
-	private static String EOR;
-
 	public static void main(String[] args) throws IOException, InterruptedException {
 		String aliceUUID = "2ed5457b-9c94-4979-baec-9e9e786d8508";
 		
@@ -65,23 +62,21 @@ public class Target {
 		System.out.println("UUID: " + bob.getUUID().trim());
 		System.out.println("Public Key: " + bob.getPublicKey());
 		System.out.println("Private Key: " + bob.getPrivateKey());
-			
-		
 		
 		
 		String[] items = {"Register and request for queue name",
 				  "Get EOO from TDS",
 				  "Send EOR message to TDS",
 				  "Check TDS for a document",
+				  "Return label to TDS", 
 				  "Send abort message",
 				  "End program"};
 		
 		Scanner in = new Scanner(System.in);
 		// print menu
-		for (int i = 1; i <= 6; i++) {
+		for (int i = 1; i <= 7; i++) {
 		  System.out.println(i + ". " + items[i-1]);        	
 		}
-		
 		System.out.println("0. Quit");
 		
 		// handle user commands
@@ -106,23 +101,37 @@ public class Target {
 					 //bob.replaceSelected(NAME, "Target", aliceUUID);
 				  }
 		          
-		          
 		          break;
 		    case 2:
 		          System.out.println("You've chosen item #2");
 		          // do something...
+		          
+		          while(bob.getEOO() == null){
+			      	  // Step 3: 
+			  		  receiveEOOMsg(bob);  
+		          }
+		
 		          break;
 		    case 3:
 		          System.out.println("You've chosen item #3");
 		          // do something...
+		          
+		          String eoo = bob.readline(NAME, "EOO");
+		  		  sendEORMsg(bob.readline(NAME, "Queue"), bob.readline(NAME, "Label"), bob.generateEOR(eoo), bob.getUUID().trim(), bob.readline(NAME, "Target"));
+		  		
 		          break;
 		    case 4:
 		          System.out.println("You've chosen item #4");
 		          // do something...
+		          // Step 5: 
+		      	  receiveDocMsg(bob, bob.readline(NAME, "Queue"));
+		          
 		          break;
 		    case 5:
 		          System.out.println("You've chosen item #5");
-		          // do something...
+		          // do something...		          
+		          bob.returnLabelToTds(bob.readline(NAME, "Queue"), bob.readline(NAME, "Label"), bob.getUUID(), bob.readline(NAME, "Target"));
+
 		          break;
 		    case 6:
 		          System.out.println("You've chosen item #6");
@@ -136,58 +145,11 @@ public class Target {
 		    }
 		} while (!quit);
 		System.out.println("Bye-bye!");
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-	 // Step 1: 
-		//bob.regRequestForQueue(bob, TDS_QueueName_Reg);
-	
-	 // Step 2: 
-		//bob.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Bob/UUID"))).trim() );
-		//bob.replaceSelected(NAME, "Queue", bob.getQueueName());
-		//bob.replaceSelected(NAME, "Target", aliceUUID);
 
-		
-	// Step 3: 
-		//receiveEOOMsg(bob);
-		
-    // Step 4: 
-		//String eoo = bob.readline(NAME, "EOO");
-		//sendEORMsg(bob.readline(NAME, "Queue"), bob.readline(NAME, "Label"), bob.getEOR(eoo), bob.getUUID().trim(), bob.readline(NAME, "Target"));
-		
-		
-	// Step 5: 
-		//receiveDocMsg(bob, bob.readline(NAME, "Queue"));
-		
-		/**/
-	// Step 6: 
-		//String sigMsg =  bob.sigMsg("PublicKeyRequest");
-		//System.out.println("Exchange Message Signture: " + sigMsg);
-		//sendPubKeyRequest(TDS_QueueName, "PublicKeyRequest", sigMsg, bob.getUUID(), aliceUUID);
-		
-		
-	// Step 7:
-		//receivePubKeyResponse(bob, bob.readline(NAME, "Queue"));
-
-		//String shared = bob.sharedSecret(bob.readline(NAME, "RecipientPublicKey"));
-		//bob.decrypt("resource/" + NAME + "/recClassified", "resource/" + NAME + "/deClassified", shared);
-		
 	}
 
 	
 	public static void exchange() {
-		
 	 // Step 1: 
 		//bob.regRequestForQueue(bob, TDS_QueueName_Reg);
 	
@@ -241,7 +203,7 @@ public class Target {
             System.out.println("  ID: " + message.getMessageId());
             System.out.println("  Receipt handle: " + messageHandle);
             System.out.println("  Message body: " + message.getBody());
-            setEOO(message.getBody());
+            //setEOO(message.getBody());
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
             System.out.println("  Label:" + attributes.get("Label").getStringValue());
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
@@ -293,24 +255,28 @@ public class Target {
             System.out.println("  ID: " + message.getMessageId());
             System.out.println("  Receipt handle: " + messageHandle);
             System.out.println("  Message body: " + message.getBody());
-            setEOO(message.getBody());
+            target.setEOO(message.getBody());
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
             System.out.println("  Label:" + attributes.get("Label").getStringValue());
             
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
+            System.out.println("  SourceKey:" + attributes.get("SourceKey").getStringValue());
             
-            target.replaceSelected(NAME, "Label", attributes.get("Label").getStringValue());
-            target.replaceSelected(NAME, "Target", attributes.get("Source").getStringValue());
-            target.replaceSelected(NAME, "EOO", getEOO());
-
+            target.setLabel(attributes.get("Label").getStringValue().trim());
+            target.setDestination(attributes.get("Source").getStringValue().trim());
+            target.setSourcePubKey(attributes.get("SourceKey").getStringValue().trim());
+            
+            target.replaceSelected(NAME, "Label", target.getLabel());
+            target.replaceSelected(NAME, "Target", target.getDestination());
+            target.replaceSelected(NAME, "EOO", target.getEOO());
+            target.replaceSelected(NAME, "RecipientPublicKey", target.getSourcePubKey());
+            
         }		
-        
-        
+       
         // Delete message
         //success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
         //System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
-        
 	}
 	
 	/**
@@ -332,8 +298,6 @@ public class Target {
 		//String uuid = source.getUUID();
 		//String target = source.getDestination();
 
-
-		
 		if ((queue != null && !queue.isEmpty()) 
 				&& (label != null && !label.isEmpty())
 				&& (eor != null && !eor.isEmpty())
@@ -348,37 +312,6 @@ public class Target {
 		return success;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
-	public static String getEOO() {
-		return EOO;
-	}
-
-	/**
-	 * 
-	 * @param eOO
-	 */
-	static void setEOO(String eOO) {
-		EOO = eOO;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public static String getEOR() {
-		return EOR;
-	}
-
-	/**
-	 * 
-	 * @param eOR
-	 */
-	static void setEOR(String eOR) {
-		EOR = eOR;
-	}
 	
 	/**
 	 * 
