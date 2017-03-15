@@ -57,17 +57,21 @@ public class tds {
 	 */
 
 	public static void register(String id, String publickey) {
+
 		//check id
 		if(rr.checkAlreadyExist(id)){
 			throw new IllegalArgumentException("user id already exists");
 		}
-		
+    	System.out.println(id);
 		// Create a message queue name
-	    String ClientName = "ClientName" + UUID.randomUUID().toString();
+	    String ClientName = "ClientName" + UUID.randomUUID().toString();	    
 	    //send name to client
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		String queue2Name = "csc8109_1_tds_queue_20070306";
+		//create queue
+	    boolean success = sqsx.create(ClientName);
+		String queue2Name = "csc8109_1_tds_queue_20070306_reg";
 		boolean b = sqsx.registerResponse(queue2Name, id, ClientName);
+		System.out.println(b);
 		if(!b){
 			throw new IllegalArgumentException("send queue error");
 		}
@@ -77,14 +81,18 @@ public class tds {
 		re.setPublicKey(publickey);
 		re.setQueueName(ClientName);
 		rr.registerUser(re);
+		String id2 = re.getId();
+		System.out.println(id2);
+		System.out.println("regist successful");
 	}
 	/**
 	 * step 1
 	 * @param Alice_id, Bob_id
 	 * Alice send request 
 	 */
-	public static void step1(String fromId, String toId, String message, String queueName,String protocol){
-
+	public static void exchangeRequest(String fromId, String toId, String message, String queueName,String protocol){
+         System.out.println(fromId);
+         System.out.println(toId);
         //check id
 		if(!rr.checkAlreadyExist(fromId)){
 			throw new IllegalArgumentException("fromuser id not exists");
@@ -113,11 +121,15 @@ public class tds {
 	 */
 		//send message
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		String queue2Name = "csc8109_1_tds_queue_20070306";
+		String fromId_queue = rr.getQueueById(fromId);
+//		String queue2Name = "csc8109_1_tds_queue_20070306";
 		String label = fe.getUuid();
 		String fromid = fe.getFromID();
 		String toid = fe.getToID();
-		boolean b = sqsx.sendMessage(queue2Name, label, message, fromid, toid);
+		String toid_publickey = rr.getPublicKeyById(toid);
+		System.out.println(toid_publickey);
+		boolean b = sqsx.exchangeResponse(fromId_queue, label, message, fromid, toid, toid_publickey);
+		System.out.println(b);
 		if(!b){
 			throw new IllegalArgumentException("send message error");
 		}
@@ -126,13 +138,15 @@ public class tds {
 
 			fe.setTimestamp(time);
 			fe.setLastMessage(message);
-			fe.setSenderqueue(queue2Name);
+			fe.setSenderqueue(fromId_queue);
 		    fe.setStage(2);
 			mr.storeMessage(uuid, fe);
+			System.out.println("request successful");
 		}
 		else
 			System.out.println("Step 2 Error!");
 		
+		System.out.println("change sucessful");
 	}
 	
 	public static void main(String[] args) {
@@ -151,23 +165,25 @@ public class tds {
 		  Message message = null;
 		        
 		  // Count how many message poll attempts we have made in between registration poll attempts
-		  int messagePollCount = 0;
+		  int messagePollCount = 10;
 
 		      // Message polling
 		  boolean running = true;
 		  while(running) {
 		  try {
-		  // If we have made 10 message poll attempts since the last registration poll attempt
+//		  // If we have made 10 message poll attempts since the last registration poll attempt
 		  if (messagePollCount==10) {
 		  // Check for a registration message
 		  message = sqsx.receiveMessage(tdsRegistrationQueue);
 		  if (message!=null) {
+			
 			  messageHandle = message.getReceiptHandle();
 			  Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
 		      // Read message
 //			  String queueName = queueName;
-			  String publickey = message.getBody();
+//			  String publickey = message.getBody();
 	          String userid = attributes.get("Userid").getStringValue();
+	          String publickey = attributes.get("PublicKey").getStringValue();
 		      // Register user
 	          register(userid, publickey);
 		      // Delete message from the queue
@@ -183,38 +199,56 @@ public class tds {
         message = sqsx.receiveMessage(tdsMessageQueue);
         ByteBuffer document;
 	        if (message != null) {
+	        	System.out.println("begin");
 	        	messageHandle = message.getReceiptHandle();
 	            attributes = message.getMessageAttributes();
 	       // If the message is a request for an exchange, it will have a non-null protocol attribute
-            String protocol = attributes.get("Protocol").getStringValue();
-          //	get exchange label
-            String label = attributes.get("Label").getStringValue();
+           
           //	check state of exchange from database matching label
              int stage = fe.getStage();
              String tabel_protocol = fe.getProtocol();
            // get the from id
-            String fromid = attributes.get("Source").getStringValue();  
+            String fromid = attributes.get("Source").getStringValue().trim();  
            // get the toId
-            String toId = attributes.get("Target").getStringValue();
+            String toId = attributes.get("Target").getStringValue().trim();
            //get the message body
             String Message = message.getBody();
             //queueName
             String queueName = tdsMessageQueue;
-
             
 //	            read protocol, step from state
-             if (label.equals(uuid) && tabel_protocol == protocol) {
+          
+            	if(attributes.get("Protocol") != null) {
+            		String protocol = attributes.get("Protocol").getStringValue();
+            		
+            if(tabel_protocol == null) {
+            	System.out.println("begin exchange");
+            	exchangeRequest(fromid, toId, Message, queueName, protocol);
+            }
+            
+            // if protocol null
+            // read the label from message
+            // lookup the label in fe table
+            // get protocol name from fe table
+            // if protocol == CoffeySaidha
+            // get step number from fe table
+            
+            	
+            	
+            else if (tabel_protocol.equals(protocol)) {
             	 
-            	 boolean success = CoffeySaidha.runStep(label, stage, message, fromid, toId,queueName);
+                //	get exchange label
+                  String label = attributes.get("Label").getStringValue().trim();
+            	 
+//            	 boolean success = CoffeySaidha.runStep(label, stage, message, fromid, toId,queueName);
                  
                  // Delete the message from the queue once it has been processed
                  sqsx.deleteMessage(tdsMessageQueue, messageHandle);
-           	 
-
              }
 	        }
              messagePollCount++;
              Thread.sleep(1000);
+		  }
 		  }
              catch (InterruptedException e) {
          		running = false;
@@ -223,5 +257,5 @@ public class tds {
 
     }
 	}	
-	
 }
+	
