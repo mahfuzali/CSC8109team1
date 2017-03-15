@@ -10,6 +10,10 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,7 +40,8 @@ public class CoffeySaidha {
 	private static MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
 	/**
-	 * Alice (source) sends document and EOO to TDS
+	 * TDS receives document and EOO from Alice
+	 * TDS sends EOO to Bob
 	 * EOO = SigA(h(doc))
 	 * @param message
 	 * @param label
@@ -47,7 +52,7 @@ public class CoffeySaidha {
 	 * @param toQueue
 	 * @return
 	 */
-	public static boolean sendDocEOO(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
+	public static boolean receiveDocEOO(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
 		
 		// Check for valid exchange
 		FairExchangeEntity stateEntity = null;
@@ -152,7 +157,8 @@ public class CoffeySaidha {
 	}
 
 	/**
-	 * Bob (source) sends EOR to TDS and TDS sends it to Alice (target)
+	 * Bob (source) sends EOR to TDS
+	 * TDS sends Doc to Bob and EOR to Alice
 	 * EOR = SigB(SigA(h(doc)))
 	 * @param message
 	 * @param label
@@ -163,7 +169,7 @@ public class CoffeySaidha {
 	 * @param toQueue
 	 * @return
 	 */
-	public static boolean exchangeEOR(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
+	public static boolean receiveEOR(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
 
 		// Check for valid exchange
 		FairExchangeEntity stateEntity = null;
@@ -213,6 +219,30 @@ public class CoffeySaidha {
 		}
 		System.out.println("Updated state table for exchange " + label);
 		
+		// Send Doc to Source
+		String fileKey = stateEntity.getFileKey();
+		FileEntity S3document = fileRepository.getFile(fileKey);
+		
+		// Download document from S3		
+		InputStream docInputStream = S3document.getInputStream();
+		String docFileName = S3document.getFileName();
+		
+		Path docDownload = Paths.get(docFileName);
+		try {
+			Files.copy(docInputStream, docDownload, StandardCopyOption.REPLACE_EXISTING);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		System.out.println("Downloaded document " + docDownload.toString() + " from S3");
+		
+		// Send document to source
+        if (!sqsx.sendMsgDocument(fromQueue, label, "Document", docFileName, toid, fromid)) {
+			System.err.println("Can't send document to queue " + fromQueue);
+			return false;	
+        };
+        System.out.println("Sent document to queue " + fromQueue);
+		
 		// Send EOO to Target
 		if (!sqsx.sendMessage(toQueue, label, msgEOO, fromid, toid)) {
 			System.err.println("Can't send message to queue " + toQueue);
@@ -220,62 +250,18 @@ public class CoffeySaidha {
 		};
 		System.out.println("Sent EOR to queue " + toQueue);
 		
+		// Delete document from S3
+		try {
+			fileRepository.deleteFile(fileKey);
+		} catch (Exception e) {
+			// Not great if we can't delete the file but shouldn't end the exchange
+			e.printStackTrace();
+		}
+		
 		return true;
 	}
 	
-//	/**
-//	 * step 6
-//	 * send doc to Bob
-//	 */
-////		//get the doc
-//		FileEntity f = fr.getFile(uuid.toString());
-//		//send doc to Bob
-//		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-//		String queueName = "csc8109_1_tds_queue_20070306";
-//		String ClientqueueName = rr.getQueueById(toId);
-//		String fromid = fe.getFromID();
-//		String toid = fe.getToID();
-//		boolean b = sqsx.sendMsgDocument(ClientqueueName, label, "f", "f", fromid, toid);
-//		if(!b){
-//			throw new IllegalArgumentException("send message error");
-//		}
-//
-//		if(fe!=null) {
-//			fe.setTimestamp(time);
-//			fe.setLastMessage("f");
-//			fe.setStage(6);
-//			fe.setSenderqueue(ClientqueueName);
-//			mr.storeMessage(uuid, fe);
-//		}
-//		else
-//			System.out.println("Step 6 Error!");
-//
-//	/**
-//	 * step 7
-//	 * @param fe
-//	 * send EOR,label to alice
-//	 */
-//
-//		//send Eor to alice
-//		String ClientqueueName2 = rr.getQueueById(fromId);
-//		boolean c = sqsx.sendMessage(ClientqueueName2, label, eor, fromid, toid);
-//		if(!c){
-//			throw new IllegalArgumentException("send message error");
-//		}
-//
-//		if(fe!=null) {
-//			fe.setTimestamp(time);
-//			fe.setLastMessage(eor);
-//			fe.setSenderqueue(ClientqueueName2);
-//			fe.setStage(7);
-//			mr.storeMessage(uuid, fe);
-//		}
-//		else
-//			System.out.println("Step 7 Error!");
-//		
-//		return true;
-//
-//	}
+
 //
 //	/**
 //	 * step 8
@@ -356,13 +342,13 @@ public class CoffeySaidha {
 		switch (step)
 		{ 
 		case 1:
-			if (!sendDocEOO(message, label, source, sourceQueue, sourcePK, target, targetQueue)) {
+			if (!receiveDocEOO(message, label, source, sourceQueue, sourcePK, target, targetQueue)) {
 				return false;
 			};
 			break;
 
 		case 2:
-			if (!exchangeEOR(message, label, source, sourceQueue, sourcePK, target, targetQueue)) {
+			if (!receiveEOR(message, label, source, sourceQueue, sourcePK, target, targetQueue)) {
 				return false;
 			};
 			break;
