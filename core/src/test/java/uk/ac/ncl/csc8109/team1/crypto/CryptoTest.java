@@ -230,9 +230,9 @@ public class CryptoTest {
 	@Test
 	public void testEncrypFile(){
 		System.out.println("Alice encrypts the file using the computes shared key");
-		alice.encryptFile("core/tech", "core/techEncrypted", aShared);
+		alice.encryptFile("tech", "techEncrypted", aShared);
 		System.out.println("Bob decrypts the file using the computes shared key");
-		bob.decryptFile("core/techEncrypted", "core/techDecrypted", bShared);
+		bob.decryptFile("techEncrypted", "techDecrypted", bShared);
 	}
 
 
