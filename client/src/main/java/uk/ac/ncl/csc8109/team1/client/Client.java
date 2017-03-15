@@ -597,7 +597,6 @@ public class Client {
         }
         
         reader.close();
-        
         String[] tmp = a.split(" : ");
 
         return tmp[1];

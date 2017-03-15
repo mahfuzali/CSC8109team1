@@ -153,8 +153,6 @@ public class Source {
 		          while (getEOR() == null) {
 		        	  receiveEORMsg(alice, alice.readline(NAME, "Queue"));
 		          }
-
-		          
 		          break;
 		    case 5:
 		          System.out.println("You've chosen item #5");
@@ -365,6 +363,7 @@ public class Source {
             
             c.replaceSelected(NAME, "EOR", message.getBody());
             setEOR(message.getBody());
+            
             
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
             System.out.println("  Label:" + attributes.get("Label").getStringValue());
