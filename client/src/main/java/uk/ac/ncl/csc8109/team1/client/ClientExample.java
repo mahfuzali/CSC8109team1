@@ -33,6 +33,7 @@ package uk.ac.ncl.csc8109.team1.client;
 
 
 import java.io.IOException;
+import java.util.Scanner;
 
 import uk.ac.ncl.csc8109.team1.crypto.Crypto;
 import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
@@ -45,7 +46,8 @@ import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
  * @email m.ali4@newcastle.ac.uk
  */
 public class ClientExample {
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
+		/*
 		Client c = new Client("name");
 		c.setLabel("label6");
 		c.setDestination("source7");
@@ -55,8 +57,6 @@ public class ClientExample {
 		System.out.println(c.getPublicKey());
 		System.out.println(c.getPrivateKey());
 		
-		
-		/*
 		System.out.println(c.getQueueName());
 		System.out.println(c.getLabel());
 		System.out.println(c.getTds());
@@ -69,9 +69,74 @@ public class ClientExample {
 		//c.writeToFile(FILENAME, l);
 		//c.readFromFile("teamPath");
 		
+		/*
+		while(c.getQueueName() == null) {
+			c.regRequestForQueue(c, "");
+			Thread.sleep(5000);
+			c.getQueueNameFromTDS("", c.getUUID());
+		}
+		*/
 		
+		/*
+		System.out.println("1. Request for queue name");
+		System.out.println("2. Request for a exchange");
+		System.out.println("3. Send a document with EOO");
+		System.out.println("4. Get EOR from TDS");
+		System.out.println("9. End program");
+		*/
+		
+		String[] items = {"Register and request for queue name",
+						  "Request for a exchange",
+						  "Send a document with EOO",
+						  "Get EOR from TDS",
+						  "Send abort message",
+						  "End program"};
+		
+		Scanner in = new Scanner(System.in);
+        // print menu
+        for (int i = 1; i <= 5; i++) {
+            System.out.println(i + ". " + items[i-1]);        	
+        }
 
+        System.out.println("0. Quit");
 
+        // handle user commands
+        boolean quit = false;
+        int menuItem;
+
+        do {
+              System.out.print("Choose menu item: ");
+              menuItem = in.nextInt();
+              switch (menuItem) {
+              case 1:
+                    System.out.println("You've chosen item #1");
+                    // do something...
+                    break;
+              case 2:
+                    System.out.println("You've chosen item #2");
+                    // do something...
+                    break;
+              case 3:
+                    System.out.println("You've chosen item #3");
+                    // do something...
+                    break;
+              case 4:
+                    System.out.println("You've chosen item #4");
+                    // do something...
+                    break;
+              case 5:
+                    System.out.println("You've chosen item #5");
+                    // do something...
+                    break;
+              case 0:
+                    quit = true;
+                    break;
+              default:
+                    System.out.println("Invalid choice.");
+              }
+        } while (!quit);
+        System.out.println("Bye-bye!");
+		
 	}
 	
 	

@@ -417,6 +417,8 @@ public class Client {
         // Send a registration request
         success = sqsx.registerRequest(queueName, c.getUUID() /*"Alice"*/, c.getPublicKey());
         System.out.println("Sent registration request to queue " + queueName + " " + success);
+        
+        
 	}
 	
 	/**
@@ -425,6 +427,8 @@ public class Client {
 	 * @param userid
 	 */
 	public void getQueueNameFromTDS(String tdsQueue, String userid) {
+		boolean success = false;
+
 		// Initialise queue service
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		System.out.println("Initialised queue service");
@@ -444,8 +448,12 @@ public class Client {
             System.out.println("  Queue:" + attributes.get("Queue").getStringValue());
             setQueueName(attributes.get("Queue").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
-   
-        }  
+        }
+        
+        // Delete registration request
+        // success = sqsx.deleteMessage(tdsQueue, messageHandle);
+        // System.out.println("Deleted registration request from queue " + queueName + " " + success);
+        
 	}
 	
 	/**

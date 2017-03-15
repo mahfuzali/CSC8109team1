@@ -40,6 +40,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
@@ -56,8 +57,8 @@ public class Target {
 	private static String EOO;
 	private static String EOR;
 
-	public static void main(String[] args) throws IOException {
-		String aliceUUID = "dc540a17-3873-4b0c-92b0-925f1bb1259b";
+	public static void main(String[] args) throws IOException, InterruptedException {
+		String aliceUUID = "2ed5457b-9c94-4979-baec-9e9e786d8508";
 		
 		Client bob = new Client(NAME);
 		System.out.println(NAME + "'s Information:");
@@ -65,6 +66,90 @@ public class Target {
 		System.out.println("Public Key: " + bob.getPublicKey());
 		System.out.println("Private Key: " + bob.getPrivateKey());
 			
+		
+		
+		
+		String[] items = {"Register and request for queue name",
+				  "Get EOO from TDS",
+				  "Send EOR message to TDS",
+				  "Check TDS for a document",
+				  "Send abort message",
+				  "End program"};
+		
+		Scanner in = new Scanner(System.in);
+		// print menu
+		for (int i = 1; i <= 6; i++) {
+		  System.out.println(i + ". " + items[i-1]);        	
+		}
+		
+		System.out.println("0. Quit");
+		
+		// handle user commands
+		boolean quit = false;
+		int menuItem;
+		
+		do {
+		    System.out.print("Choose menu item: ");
+		    menuItem = in.nextInt();
+		    switch (menuItem) {
+		    case 1:
+		          System.out.println("You've chosen item #1");
+		          // do something...
+		          
+		  		  while(bob.getQueueName() == null) {
+				   // Step 1: 
+		  			 bob.regRequestForQueue(bob, TDS_QueueName_Reg);
+					 Thread.sleep(20000);
+				   // Step 2: 
+					 bob.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Bob/UUID"))).trim() );
+					 bob.replaceSelected(NAME, "Queue", bob.getQueueName());
+					 //bob.replaceSelected(NAME, "Target", aliceUUID);
+				  }
+		          
+		          
+		          break;
+		    case 2:
+		          System.out.println("You've chosen item #2");
+		          // do something...
+		          break;
+		    case 3:
+		          System.out.println("You've chosen item #3");
+		          // do something...
+		          break;
+		    case 4:
+		          System.out.println("You've chosen item #4");
+		          // do something...
+		          break;
+		    case 5:
+		          System.out.println("You've chosen item #5");
+		          // do something...
+		          break;
+		    case 6:
+		          System.out.println("You've chosen item #6");
+		          // do something...
+		          break;
+		    case 0:
+		          quit = true;
+		          break;
+		    default:
+		          System.out.println("Invalid choice.");
+		    }
+		} while (!quit);
+		System.out.println("Bye-bye!");
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	 // Step 1: 
 		//bob.regRequestForQueue(bob, TDS_QueueName_Reg);
 	
@@ -85,12 +170,12 @@ public class Target {
 	// Step 5: 
 		//receiveDocMsg(bob, bob.readline(NAME, "Queue"));
 		
-		/*
+		/**/
 	// Step 6: 
-		String sigMsg =  bob.sigMsg("PublicKeyRequest");
-		System.out.println("Exchange Message Signture: " + sigMsg);
-		sendPubKeyRequest(TDS_QueueName, "PublicKeyRequest", sigMsg, bob.getUUID(), aliceUUID);
-		*/
+		//String sigMsg =  bob.sigMsg("PublicKeyRequest");
+		//System.out.println("Exchange Message Signture: " + sigMsg);
+		//sendPubKeyRequest(TDS_QueueName, "PublicKeyRequest", sigMsg, bob.getUUID(), aliceUUID);
+		
 		
 	// Step 7:
 		//receivePubKeyResponse(bob, bob.readline(NAME, "Queue"));
@@ -100,6 +185,43 @@ public class Target {
 		
 	}
 
+	
+	public static void exchange() {
+		
+	 // Step 1: 
+		//bob.regRequestForQueue(bob, TDS_QueueName_Reg);
+	
+	 // Step 2: 
+		//bob.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Bob/UUID"))).trim() );
+		//bob.replaceSelected(NAME, "Queue", bob.getQueueName());
+		//bob.replaceSelected(NAME, "Target", aliceUUID);
+
+		
+	// Step 3: 
+		//receiveEOOMsg(bob);
+		
+    // Step 4: 
+		//String eoo = bob.readline(NAME, "EOO");
+		//sendEORMsg(bob.readline(NAME, "Queue"), bob.readline(NAME, "Label"), bob.getEOR(eoo), bob.getUUID().trim(), bob.readline(NAME, "Target"));
+		
+		
+	// Step 5: 
+		//receiveDocMsg(bob, bob.readline(NAME, "Queue"));
+		
+		/**/
+	// Step 6: 
+		//String sigMsg =  bob.sigMsg("PublicKeyRequest");
+		//System.out.println("Exchange Message Signture: " + sigMsg);
+		//sendPubKeyRequest(TDS_QueueName, "PublicKeyRequest", sigMsg, bob.getUUID(), aliceUUID);
+		
+		
+	// Step 7:
+		//receivePubKeyResponse(bob, bob.readline(NAME, "Queue"));
+
+		//String shared = bob.sharedSecret(bob.readline(NAME, "RecipientPublicKey"));
+		//bob.decrypt("resource/" + NAME + "/recClassified", "resource/" + NAME + "/deClassified", shared);
+	}
+	
 	
 	/**
 	 * 
@@ -157,6 +279,8 @@ public class Target {
 	 * @throws IOException 
 	 */
 	public static void receiveEOOMsg(Client target) throws IOException {
+		boolean success = false;
+
 		String queue = target.readline(NAME, "Queue");
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
@@ -181,6 +305,12 @@ public class Target {
             target.replaceSelected(NAME, "EOO", getEOO());
 
         }		
+        
+        
+        // Delete message
+        //success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
+        //System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
+        
 	}
 	
 	/**

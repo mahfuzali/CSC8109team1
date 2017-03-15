@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
@@ -52,17 +53,142 @@ public class Source {
 
 	private static final String NAME = "Alice";
 	private static String EOO;
-	
+	private static String EOR;
+
 	private static String queue; 
-		
-	public static void main(String[] args) throws IOException {
-		String bobUUID = "ec77742f-e977-4d53-bda0-2ae3f7a83e13";
+	
+	public static void main(String[] args) throws IOException, InterruptedException {
+		String bobUUID = "deae6d74-80cb-43dd-b913-c66e0dd8bb40";
 
 		Client alice = new Client(NAME);
 		System.out.println(NAME + "'s Information");
 		System.out.println("UUID: " + alice.getUUID().trim());
 		System.out.println("Public Key: " + alice.getPublicKey());
 		System.out.println("Private Key: " + alice.getPrivateKey());
+	
+		
+		String[] items = {"Register and request for queue name",
+				  "Request for a exchange",
+				  "Send a document with EOO",
+				  "Get EOR from TDS",
+				  "Send abort message",
+				  "End program"};
+
+		Scanner in = new Scanner(System.in);
+		// print menu
+		for (int i = 1; i <= 5; i++) {
+		  System.out.println(i + ". " + items[i-1]);        	
+		}
+		System.out.println("0. Quit");
+		
+		// handle user commands
+		boolean quit = false;
+		int menuItem;
+		
+		do {
+		    System.out.print("Choose menu item: ");
+		    menuItem = in.nextInt();
+		    switch (menuItem) {
+		    case 1:
+		          System.out.println("You've chosen item #1");
+		          // do something...
+		  		  while(alice.getQueueName() == null) {
+				   // Step 1: 
+					 alice.regRequestForQueue(alice, TDS_QueueName_Reg);
+					 Thread.sleep(20000);
+				   // Step 2: 
+					 alice.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Alice/UUID"))).trim() );
+					 alice.replaceSelected(NAME, "Queue", alice.getQueueName());
+					 //alice.replaceSelected(NAME, "Target", bobUUID);
+				  }
+		          
+		          break;
+		    case 2:
+		          System.out.println("You've chosen item #2");
+		          // do something...
+		          
+		          while(alice.getLabel() == null && alice.getTargetPubKey() == null) {
+		      		System.out.println(alice.getLabel() );
+		      		System.out.println(alice.getTargetPubKey());
+		        	  /**/
+		        	// Step 3: Send TDS a exchange request
+	        			String sigMsg =  alice.sigMsg("ExchangeRequest");
+	        			System.out.println("Exchange Message Signature: " + sigMsg);
+	        			sendExchangeRequest(TDS_QueueName, "CoffeySaidha", sigMsg, alice.getUUID(), bobUUID);
+						Thread.sleep(20000);
+	        		// Step 4:
+	        			receiveExchangeResponse(alice, alice.readline(NAME, "Queue"));
+		          }
+
+		          break;
+		    case 3:
+		          System.out.println("You've chosen item #3");
+		          // do something...
+		  		 /**/
+		  		  alice.setQueueName(alice.readline(NAME, "Queue").trim());
+		  		  alice.setLabel(alice.readline(NAME, "Label").trim());
+		  		  alice.setDestination(alice.readline(NAME, "Target").trim());
+		  		  System.out.println("Exchange Label: " + alice.readline(NAME, "Label").trim());
+		  		  System.out.println("Exchange Target: " + alice.readline(NAME, "Target").trim());
+		  		
+		  		  String bobPublicKey = alice.readline(NAME, "RecipientPublicKey").trim();
+		  		  System.out.println(bobPublicKey);
+		  		
+		  		
+		  		  String shared = alice.sharedSecret(bobPublicKey);
+		  		  System.out.println(shared);
+
+		  	
+		  		  alice.encrypt("resource/" + NAME + "/classified", "resource/" + NAME + "/enclassified", shared);
+		  		  File f = new File("resource/" + NAME + "/enclassified");
+
+		  	// Step 5: encrypt file 	
+		  		  System.out.println(alice.readline(NAME, "Queue"));
+		  		  System.out.println("Message send status: " + sendDocMsg(f, alice, alice.readline(NAME, "Queue")));
+
+		          break;
+		    case 4:
+		          System.out.println("You've chosen item #4");
+		          // do something...
+		          while (getEOR() == null) {
+		        	  receiveEORMsg(alice, alice.readline(NAME, "Queue"));
+		          }
+
+		          
+		          break;
+		    case 5:
+		          System.out.println("You've chosen item #5");
+		          // do something...
+		          break;
+		    case 0:
+		          quit = true;
+		          break;
+		    default:
+		          System.out.println("Invalid choice.");
+		    }
+		} while (!quit);
+		System.out.println("Bye-bye!");
+				
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 	// Step 1: 
 		//alice.regRequestForQueue(alice, TDS_QueueName_Reg);
@@ -72,6 +198,8 @@ public class Source {
 		//alice.replaceSelected(NAME, "Queue", alice.getQueueName());
 		//alice.replaceSelected(NAME, "Target", bobUUID);
 		
+		
+
 		/*
 	// Step 3: Send TDS a exchange request
 		String sigMsg =  alice.sigMsg("ExchangeRequest");
@@ -110,10 +238,68 @@ public class Source {
 
 	
     // Step 6:
-		receiveEORMsg(alice, alice.readline(NAME, "Queue"));
+		//receiveEORMsg(alice, alice.readline(NAME, "Queue"));
 		
 
 	}
+	
+	public static void exchange() {
+	
+		
+	// Step 1: 
+		//alice.regRequestForQueue(alice, TDS_QueueName_Reg);
+		
+	// Step 2: 
+		//alice.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Alice/UUID"))).trim() );
+		//alice.replaceSelected(NAME, "Queue", alice.getQueueName());
+		//alice.replaceSelected(NAME, "Target", bobUUID);
+		
+		
+
+		/*
+	// Step 3: Send TDS a exchange request
+		String sigMsg =  alice.sigMsg("ExchangeRequest");
+		System.out.println("Exchange Message Signture: " + sigMsg);
+		sendExchangeRequest(TDS_QueueName, "CoffeySaidha", sigMsg, alice.getUUID(), bobUUID);
+		*/
+		
+		
+	// Step 4:
+		//receiveExchangeResponse(alice, alice.readline(NAME, "Queue"));
+
+		
+		/*
+		alice.setQueueName(alice.readline(NAME, "Queue").trim());
+		alice.setLabel(alice.readline(NAME, "Label").trim());
+		alice.setDestination(alice.readline(NAME, "Target").trim());
+		System.out.println("Exchange Label: " + alice.readline(NAME, "Label").trim());
+		System.out.println("Exchange Target: " + alice.readline(NAME, "Target").trim());
+		
+		String bobPublicKey = alice.readline(NAME, "RecipientPublicKey").trim();
+		System.out.println(bobPublicKey);
+		
+		
+		String shared = alice.sharedSecret(bobPublicKey);
+		System.out.println(shared);
+
+	
+		alice.encrypt("resource/" + NAME + "/classified", "resource/" + NAME + "/enclassified", shared);
+		File f = new File("resource/" + NAME + "/enclassified");
+		*/
+		
+		
+	// Step 5: encrypt file 	
+		//System.out.println(alice.readline(NAME, "Queue"));
+		//System.out.println("Message send status: " + sendDocMsg(f, alice, alice.readline(NAME, "Queue")));
+
+	
+    // Step 6:
+		//receiveEORMsg(alice, alice.readline(NAME, "Queue"));
+		
+
+	}
+	
+	
 	
 	/**
 	 * 
@@ -162,6 +348,8 @@ public class Source {
 	 * @throws IOException 
 	 */
 	public static void receiveEORMsg(Client c, String tds_queue) throws IOException {
+		boolean success = false;
+
 		String queue = tds_queue;
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
@@ -176,12 +364,17 @@ public class Source {
             System.out.println("  Message body: " + message.getBody());
             
             c.replaceSelected(NAME, "EOR", message.getBody());
+            setEOR(message.getBody());
             
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
             System.out.println("  Label:" + attributes.get("Label").getStringValue());
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
         }		
+        
+        // Delete message
+        success = sqsx.deleteMessage(tds_queue, messageHandle);
+        System.out.println("Deleted message from queue " + tds_queue + " " + success);
 	}
 
 	/**
@@ -270,8 +463,21 @@ public class Source {
 	 * 
 	 * @param q
 	 */
-	public static void setQueue(String q) {
+	static void setQueue(String q) {
 		queue = q;
 	}
+
+	
+	public static String getEOR() {
+		return EOR;
+	}
+
+	
+	static void setEOR(String eOR) {
+		EOR = eOR;
+	}
+	
+	
+	
 	
 }

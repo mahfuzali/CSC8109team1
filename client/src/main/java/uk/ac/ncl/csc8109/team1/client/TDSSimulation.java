@@ -77,18 +77,18 @@ public class TDSSimulation {
 		String bobExchangeQ = "QueueName-0b359e5a-6f82-47e8-bc71-3b6cc97d424e";
 		
 	// Step 1: 
-		//receiveQueueNameRequestMsg(TDS_QueueName_Reg);
+		receiveQueueNameRequestMsg(TDS_QueueName_Reg);
 		
-		/*	
+		/**/	
 	// Step 2: 
 		//String userid = readline("Source");
 		String userid = readline("Target");
 		sendQueueNameToClient(TDS_QueueName_Reg, userid);
-		*/
+		
 		
 	// Step 3: 
-		//receiveClientExchangeRequest(TDS_QueueName);
-		//sendClientExchangeResponse(aliceExchangeQ, readline("Protocol"), readline("Source"), readline("Target"), bob_publicKey);
+		 receiveClientExchangeRequest(TDS_QueueName);
+		sendClientExchangeResponse(aliceExchangeQ, readline("Protocol"), readline("Source"), readline("Target"), bob_publicKey);
 		
 		
 	//Step 4: 
@@ -96,7 +96,7 @@ public class TDSSimulation {
 		
 		
 	//Step 5: 
-		//sendEOOMsg(bobExchangeQ, readline("Label"), readline("EOO"), readline("Source"), readline("Target"));
+		sendEOOMsg(bobExchangeQ, readline("Label"), readline("EOO"), readline("Source"), readline("Target"));
 
 		
 	// Step 6:
@@ -115,6 +115,8 @@ public class TDSSimulation {
 		//receiveClientPubKeyRequest(TDS_QueueName);
 		//sendClientPubKeyResponse(bobExchangeQ, readline("Protocol"), readline("Target"), readline("Source"), alice_publicKey);
 
+		
+		
 		
 	}
 	
@@ -321,9 +323,11 @@ public class TDSSimulation {
             setUserId(attributes.get("Userid").getStringValue());
             
             //replaceSelected("Source", attributes.get("Userid").getStringValue().trim());
-            replaceSelected("Target", attributes.get("Userid").getStringValue().trim());
-            
+            replaceSelected("Target", attributes.get("Userid").getStringValue().trim()); 
         }
+        
+        
+        
 	}
 
 	/**
