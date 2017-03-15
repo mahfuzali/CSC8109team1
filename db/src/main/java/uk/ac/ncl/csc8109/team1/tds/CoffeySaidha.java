@@ -18,26 +18,47 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
 
 import uk.ac.ncl.csc8109.team1.crypto.Crypto;
 import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
+import uk.ac.ncl.csc8109.team1.db.model.FairExchangeEntity;
 import uk.ac.ncl.csc8109.team1.db.model.FileEntity;
 import uk.ac.ncl.csc8109.team1.db.repository.FileRepository;
+import uk.ac.ncl.csc8109.team1.db.repository.MessageRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.RegisterRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.FileRepositoryImpl;
+import uk.ac.ncl.csc8109.team1.db.repository.impl.MessageRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
 import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
 
 public class CoffeySaidha {
 	
+    private static FileRepository fileRepository = new FileRepositoryImpl();
+	private static MessageRepository stateRepository = new MessageRepositoryImpl();
+	private static MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+
 	/**
-	 * Source sends document and EOO to TDS
+	 * Alice (source) sends document and EOO to TDS
 	 * EOO = SigA(h(doc))
 	 * @param message
 	 * @param label
 	 * @param fromid
 	 * @param fromQueue
 	 * @param fromPK
+	 * @param toid
+	 * @param toQueue
+	 * @return
 	 */
-	public static boolean sendDocEOO(Message message, String label, String fromid, String fromQueue, String fromPK){
+	public static boolean sendDocEOO(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
+		
+		// Check for valid exchange
+		FairExchangeEntity stateEntity = null;
+		UUID uuidLabel = null;
+		try {
+			uuidLabel = UUID.fromString(label);
+			stateEntity = stateRepository.getMessage(uuidLabel);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 
 		// Read message with attached document
         String msgEOO = message.getBody();
@@ -81,7 +102,6 @@ public class CoffeySaidha {
 		}
 
 		// Upload document
-        FileRepository fileRepository = new FileRepositoryImpl();
 		FileEntity fileEntity = new FileEntity();
 		File initialFile = new File(docName);
 		InputStream targetStream = null;
@@ -101,86 +121,108 @@ public class CoffeySaidha {
 			return false;
 		}
 		System.out.println("Document " + fileEntity.getFileName() + " uploaded to S3 as " + fileKey);
-//
-//		if (label == uuid.toString())  {  
-//			//get time
-//			long time = System.currentTimeMillis();
-//			fe.setTimestamp(time);
-//			fe.setLastMessage(message);
-//			fe.setStage(3);
-//			mr.storeMessage(uuid, fe);
-			
-//
-//		}
+		
+		// Update state table
+		long timestamp = System.currentTimeMillis();
+		stateEntity.setTimestamp(timestamp);
+		stateEntity.setStage(2);
+		stateEntity.setFromID(fromid);
+		stateEntity.setToID(toid);
+		stateEntity.setSenderqueue(fromQueue);
+		stateEntity.setReceiverqueue(toQueue);
+		stateEntity.setLastMessage(msgEOO);
+		stateEntity.setFileKey(fileKey);
+		try {
+			stateRepository.storeMessage(uuidLabel, stateEntity);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		System.out.println("Updated state table for exchange " + label);
+		
+		// Send EOO to Target
+		if (!sqsx.sendMsgSourceKey(toQueue, label, msgEOO, fromid, toid, fromPK)) {
+			System.err.println("Can't send message to queue " + toQueue);
+			return false;			
+		};
+		System.out.println("Sent EOO to queue " + toQueue);
 		
 		return true;
 
 	}
+
+	/**
+	 * Bob (source) sends EOR to TDS and TDS sends it to Alice (target)
+	 * EOR = SigB(SigA(h(doc)))
+	 * @param message
+	 * @param label
+	 * @param fromid
+	 * @param fromQueue
+	 * @param fromPK
+	 * @param toid
+	 * @param toQueue
+	 * @return
+	 */
+	public static boolean exchangeEOR(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
+
+		// Check for valid exchange
+		FairExchangeEntity stateEntity = null;
+		UUID uuidLabel = null;
+		try {
+			uuidLabel = UUID.fromString(label);
+			stateEntity = stateRepository.getMessage(uuidLabel);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		// Get EOO from last message
+		String msgEOO = stateEntity.getLastMessage();
+		
+		// Get EOR from current message
+        String msgEOR = message.getBody();
+		
+		// Check EOR
+        CryptoInterface crypto = new Crypto();
+		try {
+			String verification = crypto.isVerified(msgEOO, fromPK, msgEOR);
+			System.out.println("EOR verification:" + verification);
+			if(!verification.equals("Verified")){
+				System.err.println("EOR not verified");
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		// Update state table
+		long timestamp = System.currentTimeMillis();
+		stateEntity.setTimestamp(timestamp);
+		stateEntity.setStage(3);
+		stateEntity.setFromID(fromid);
+		stateEntity.setToID(toid);
+		stateEntity.setSenderqueue(fromQueue);
+		stateEntity.setReceiverqueue(toQueue);
+		stateEntity.setLastMessage(msgEOR);
+		try {
+			stateRepository.storeMessage(uuidLabel, stateEntity);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		System.out.println("Updated state table for exchange " + label);
+		
+		// Send EOO to Target
+		if (!sqsx.sendMessage(toQueue, label, msgEOO, fromid, toid)) {
+			System.err.println("Can't send message to queue " + toQueue);
+			return false;			
+		};
+		System.out.println("Sent EOR to queue " + toQueue);
+		
+		return true;
+	}
 	
-//	/**
-//	 * step 4
-//	 * send EOO and lable to BOb
-//	 * eoo--publick key
-//	 */
-//
-//		//send message(eoo) and label to BOb
-//		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-//		String queueName = "csc8109_1_tds_queue_20070306";
-//		String ClientqueueName = rr.getQueueById(toId);
-//		boolean b = sqsx.sendMessage(ClientqueueName, label, Eoo, fromid, toId);
-//		if(!b){
-//			throw new IllegalArgumentException("send message error");
-//		}
-//
-//		if(fe!=null) {
-//			fe.setTimestamp(time);
-//			fe.setLastMessage(Eoo);
-//			fe.setSenderqueue(ClientqueueName);
-//			fe.setStage(4);
-//			mr.storeMessage(uuid, fe);
-//		}
-//		else
-//			System.out.println("Step 4 Error!");
-//		return true;
-//
-//	}
-//
-//	/**
-//	 * step 5
-//	 * receive EOR from Bob
-//	 * EOR=Bobpublic key = sigb(siga(hash(doc)))
-//	 */
-//	public static boolean step5(String label,Message message, String fromId, String toId, String queuename){
-////		//check id 
-//		if(!rr.checkAlreadyExist(fromId)){
-//			throw new IllegalArgumentException("fromuser id not exists");
-//		}
-//		if(!rr.checkAlreadyExist(toId)){
-//			throw new IllegalArgumentException("touser id not exists");
-//		}
-//
-//		//check eor
-//		String eoo =fe.getLastMessage();
-//		String eor = message.getBody();
-//		String fromId_publickey = rr.getPublicKeyById(fromId); 
-//		String verification = crypto.isVerified(eoo, fromId_publickey, eor);
-//		if(!verification.equals("verified")){
-//			throw new IllegalArgumentException("eor is wrong!");
-//		}
-//
-//		//check label and public key
-//		if(label == uuid.toString()) {
-//			fe.setTimestamp(time);
-//			fe.setLastMessage(eor);
-//			fe.setFromID(fromId);
-//			fe.setReceiverqueue(queuename);
-//			fe.setToID(toId);
-//			fe.setStage(5);
-//			mr.storeMessage(uuid, fe);
-//		}
-//		else
-//			System.out.println("Step 5 Error!");
-//
 //	/**
 //	 * step 6
 //	 * send doc to Bob
@@ -313,14 +355,18 @@ public class CoffeySaidha {
 		
 		switch (step)
 		{ 
-		case 2:
-			if (!sendDocEOO(message, label, source, sourceQueue, sourcePK)) {
+		case 1:
+			if (!sendDocEOO(message, label, source, sourceQueue, sourcePK, target, targetQueue)) {
 				return false;
 			};
 			break;
 
-		case 3:
-			//step4();
+		case 2:
+			if (!exchangeEOR(message, label, source, sourceQueue, sourcePK, target, targetQueue)) {
+				return false;
+			};
+			break;
+			
 		case 4:
 //			step5(source, target, Message, label, queueName, protocol);
 			//               	 case stage=5:

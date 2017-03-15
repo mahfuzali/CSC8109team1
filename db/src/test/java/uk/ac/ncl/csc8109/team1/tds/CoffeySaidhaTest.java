@@ -40,7 +40,7 @@ public class CoffeySaidhaTest {
 	@Before
 	public void setup() {
 		sqsx = new AmazonExtendedSQS("csc8109team1");
-		TDS_QueueName = "csc8109_1_tds_queue_20070306";
+		TDS_QueueName = "csc8109_1_tds_queue_coffeysaidha_test";
 		source = "Alice";
 		target = "Bob";
 		sourceQueueName = "csc8109_1_tds_queue_20070306_alice";
@@ -62,8 +62,8 @@ public class CoffeySaidhaTest {
 	}
 
 	@Test
-	public void testRunStep2() {
-		label = "Exchange test #1";
+	public void testRunStep1() {
+		label = "e401ee10-e2ff-437f-ab0e-ce2038681d98";
 		String filename = "src/main/resources/sample.txt";
 		
 		// Generate EOO message
@@ -77,15 +77,15 @@ public class CoffeySaidhaTest {
         message = sqsx.receiveMessage(TDS_QueueName);
         if (message != null) {
             sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
-        }   
+        }
 		
-		boolean result = CoffeySaidha.runStep(label, 2, message, source, target);       
+		boolean result = CoffeySaidha.runStep(label, 1, message, source, target);       
 		assertTrue(result);
 	}
 	
 	@Test
-	public void testRunStep2FakeEOO() {
-		label = "Exchange test #2";
+	public void testRunStep1FakeEOO() {
+		label = "e401ee10-e2ff-437f-ab0e-ce2038681d98";
 		String filename = "src/main/resources/sample.txt";
 		
 		// Generate EOO message
@@ -97,10 +97,80 @@ public class CoffeySaidhaTest {
         message = sqsx.receiveMessage(TDS_QueueName);
         if (message != null) {
             sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
-        }   
+        }
 		
 		boolean result = CoffeySaidha.runStep(label, 2, message, source, target);       
 		assertFalse(result);
 	}
 
+	@Test
+	public void testRunStep2() {
+		label = "e401ee10-e2ff-437f-ab0e-ce2038681d98";
+		String filename = "src/main/resources/sample.txt";
+		
+		// Generate EOO message
+		File docFile = new File(filename);
+		String hash = sourceCrypto.getHashOfFile(docFile);
+		String msgEOO = sourceCrypto.getSignature(hash);
+		
+        // Send a message with attached document
+        sqsx.sendMsgDocument(TDS_QueueName, label, msgEOO, filename, source, target);       
+        // Receive message back from queue
+        message = sqsx.receiveMessage(TDS_QueueName);
+        if (message != null) {
+            sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
+        }
+		
+		CoffeySaidha.runStep(label, 1, message, source, target);
+		
+		// Generate EOR message
+		String msgEOR = targetCrypto.getSignature(msgEOO);
+		
+		// Send EOR message to TDS
+		sqsx.sendMessage(TDS_QueueName, label, msgEOR, target, source);
+        // Receive message back from queue
+        message = sqsx.receiveMessage(TDS_QueueName);
+        if (message != null) {
+            sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
+        }
+		
+		boolean result = CoffeySaidha.runStep(label, 2, message, target, source);       
+		assertTrue(result);
+	}
+	
+	@Test
+	public void testRunStep2WrongSig() {
+		label = "e401ee10-e2ff-437f-ab0e-ce2038681d98";
+		String filename = "src/main/resources/sample.txt";
+		
+		// Generate EOO message
+		File docFile = new File(filename);
+		String hash = sourceCrypto.getHashOfFile(docFile);
+		String msgEOO = sourceCrypto.getSignature(hash);
+		
+        // Send a message with attached document
+        sqsx.sendMsgDocument(TDS_QueueName, label, msgEOO, filename, source, target);       
+        // Receive message back from queue
+        message = sqsx.receiveMessage(TDS_QueueName);
+        if (message != null) {
+            sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
+        }
+		
+		CoffeySaidha.runStep(label, 1, message, source, target);
+		
+		// Generate EOR message
+		// This time, Alice has signed the EOO again instead of Bob
+		String msgEOR = sourceCrypto.getSignature(msgEOO);
+		
+		// Send EOR message to TDS
+		sqsx.sendMessage(TDS_QueueName, label, msgEOR, target, source);
+        // Receive message back from queue
+        message = sqsx.receiveMessage(TDS_QueueName);
+        if (message != null) {
+            sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
+        }
+		
+		boolean result = CoffeySaidha.runStep(label, 2, message, target, source);       
+		assertFalse(result);
+	}
 }
