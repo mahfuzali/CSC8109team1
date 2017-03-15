@@ -106,6 +106,18 @@ public interface MessageInterface {
 	boolean sendMsgDocument(String queueName, String label, String message, String document, String source, String target);
 	
 	/**
+	 * Send a message and source's public key to a queue
+	 * @param queueName - name of the queue
+	 * @param label - exchange label
+	 * @param message - a message as a serialised string
+	 * @param source - the userid of the original source of the message
+	 * @param target - the userid of the ultimate recipient of the message
+	 * @param sourcekey - the source's public key
+	 * @return true if successful, false otherwise
+	 */
+	boolean sendMsgSourceKey(String queueName, String label, String message, String source, String target, String sourcekey);
+	
+	/**
 	 * Receive a message from a queue
 	 * @param queueName - name of the queue
 	 * @return a message object, or null if none

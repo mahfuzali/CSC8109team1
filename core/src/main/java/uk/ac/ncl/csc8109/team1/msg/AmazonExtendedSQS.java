@@ -230,6 +230,44 @@ public class AmazonExtendedSQS implements MessageInterface {
 	}
 	
 	/**
+	 * Send a message and source's public key to a queue
+	 * @param queueName - name of the queue
+	 * @param label - exchange label
+	 * @param message - a message as a serialised string
+	 * @param source - the userid of the original source of the message
+	 * @param target - the userid of the ultimate recipient of the message
+	 * @param sourcekey - the source's public key
+	 * @return true if successful, false otherwise
+	 */
+	public boolean sendMsgSourceKey(String queueName, String label, String message, String source, String target, String sourcekey) {
+		String queueUrl;
+		// Get the Queue URL
+		try {
+			queueUrl = sqsExtended.getQueueUrl(queueName).getQueueUrl();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		// Build and send the message
+		try {
+			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+			messageAttributes.put("Label", new MessageAttributeValue().withDataType("String.Label").withStringValue(label));
+			messageAttributes.put("Source", new MessageAttributeValue().withDataType("String.Source").withStringValue(source));
+			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue(target));
+			messageAttributes.put("SourceKey", new MessageAttributeValue().withDataType("String.SourceKey").withStringValue(sourcekey));
+		    SendMessageRequest request = new SendMessageRequest();
+		    request.withMessageBody(message);
+		    request.withQueueUrl(queueUrl);
+		    request.withMessageAttributes(messageAttributes);
+		    sqsExtended.sendMessage(request);
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    	return false;
+	    }
+		return true;
+	}
+	
+	/**
 	 * Send an abort exchange request to the TDS queue
 	 * @param queueName - name of the queue
 	 * @param label - exchange label

@@ -258,7 +258,29 @@ public class MessageApp {
             
             success = sqsx.deleteMessage(queueName, messageHandle);
             System.out.println("Deleted message from queue " + queueName + " " + success);
-        }        
+        }
+        
+        // Send a message with Alice's public key
+        success = sqsx.sendMsgSourceKey(queueName, "Exchange #3", "Test message", "Alice", "Bob", "ALICEKEY");
+
+        // Receive it then delete it
+        messageHandle = null;
+        message = sqsx.receiveMessage(queueName);
+        if (message != null) {
+        	messageHandle = message.getReceiptHandle();
+        	System.out.println("Message received from queue " + queueName);
+            System.out.println("  ID: " + message.getMessageId());
+            System.out.println("  Receipt handle: " + messageHandle);
+            System.out.println("  Message body: " + message.getBody());
+            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+            System.out.println("  Label:" + attributes.get("Label").getStringValue());
+            System.out.println("  Source:" + attributes.get("Source").getStringValue());
+            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+            System.out.println("  SourceKey:" + attributes.get("SourceKey").getStringValue());
+            
+            success = sqsx.deleteMessage(queueName, messageHandle);
+            System.out.println("Deleted message from queue " + queueName + " " + success);
+        } 
       
         
         // Delete queue
