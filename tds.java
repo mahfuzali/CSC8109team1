@@ -1,9 +1,16 @@
 package uk.ac.ncl.csc8109.team1.tds;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +33,7 @@ import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
 import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
 import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
 import uk.ac.ncl.csc8109.team1.crypto.Crypto;
+import uk.ac.ncl.csc8109.team1.tds.CoffeySaidha;
 
 /**
  * Created by Yue on 2017/3/2.
@@ -37,38 +45,54 @@ public class tds {
 	static UUID uuid;
 	static FairExchangeEntity fe = new FairExchangeEntity();
 	static RegisterRepository rr = new RegisterRepositoryImpl();
-	//static RegisterEntity re = new RegisterEntity();
+	static RegisterEntity re = new RegisterEntity();
 	static MessageRepository mr = new MessageRepositoryImpl();
 	static FileRepository fr = new FileRepositoryImpl();
-	private CryptoInterface crypto;
+	private static CryptoInterface crypto;
+	//get time
+	static long time = System.currentTimeMillis();
+			
 	/**
 	 * step 0
 	 */
 
 	public static void register(String id, String publickey) {
-		//RegisterRepository registerRepository = new RegisterRepositoryImpl();
-		RegisterEntity registerEntity = new RegisterEntity();
+
+		//check id
 		if(rr.checkAlreadyExist(id)){
 			throw new IllegalArgumentException("user id already exists");
 		}
-		//check id and public key 
-//		String rightpublicKey = 
+    	System.out.println(id);
+		// Create a message queue name
+	    String ClientName = "ClientName" + UUID.randomUUID().toString();	    
+	    //send name to client
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		//create queue
+	    boolean success = sqsx.create(ClientName);
+		String queue2Name = "csc8109_1_tds_queue_20070306_reg";
+		boolean b = sqsx.registerResponse(queue2Name, id, ClientName);
+		System.out.println(b);
+		if(!b){
+			throw new IllegalArgumentException("send queue error");
+		}
 
-		registerEntity.setId(id);
-		registerEntity.setPublicKey(publickey);
-		rr.registerUser(registerEntity);
-
-
-		//todo 
-
+		//store message
+		re.setId(id);
+		re.setPublicKey(publickey);
+		re.setQueueName(ClientName);
+		rr.registerUser(re);
+		String id2 = re.getId();
+		System.out.println(id2);
+		System.out.println("regist successful");
 	}
 	/**
 	 * step 1
 	 * @param Alice_id, Bob_id
 	 * Alice send request 
 	 */
-	public static UUID step1(String fromId, String toId, String message, String queueName,String protocol){
-
+	public static void exchangeRequest(String fromId, String toId, String message, String queueName,String protocol){
+         System.out.println(fromId);
+         System.out.println(toId);
         //check id
 		if(!rr.checkAlreadyExist(fromId)){
 			throw new IllegalArgumentException("fromuser id not exists");
@@ -76,265 +100,53 @@ public class tds {
 		if(!rr.checkAlreadyExist(toId)){
 			throw new IllegalArgumentException("touser id not exists");
 		}
-		//check message
-		
-		
-		//get time
-		long time = System.currentTimeMillis();
-		
+	
+		// create UUId
+		uuid = UUID.randomUUID();
+		//store message
 		fe.setTimestamp(time);
 		fe.setFromID(fromId);
 		fe.setToID(toId);
-		uuid = UUID.randomUUID();
 		fe.setUuid(uuid.toString());
 		fe.setStage(1);
 		fe.setProtocol(protocol);
 		fe.setLastMessage(message);
 		fe.setReceiverqueue(queueName);
 		mr.storeMessage(uuid,fe);
-
-
-		return uuid;
-	}
-		
-	//}
 	
 	/**
 	 * step 2
 	 * @param fe
 	 * send label to Alice
 	 */
-	public static void step2(){
-		
 		//send message
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		String queue2Name = "csc8109_1_tds_queue_20070306";
+		String fromId_queue = rr.getQueueById(fromId);
+//		String queue2Name = "csc8109_1_tds_queue_20070306";
 		String label = fe.getUuid();
-		String message = fe.getLastMessage();
 		String fromid = fe.getFromID();
 		String toid = fe.getToID();
-		boolean b = sqsx.sendMessage(queue2Name, label, message, fromid, toid);
-		
+		String toid_publickey = rr.getPublicKeyById(toid);
+		System.out.println(toid_publickey);
+		boolean b = sqsx.exchangeResponse(fromId_queue, label, message, fromid, toid, toid_publickey);
+		System.out.println(b);
+		if(!b){
+			throw new IllegalArgumentException("send message error");
+		}
 		
 		if(fe!=null){
 
-			//get time
-			long time = System.currentTimeMillis();
 			fe.setTimestamp(time);
 			fe.setLastMessage(message);
-			fe.setSenderqueue(queue2Name);
+			fe.setSenderqueue(fromId_queue);
 		    fe.setStage(2);
 			mr.storeMessage(uuid, fe);
+			System.out.println("request successful");
 		}
 		else
 			System.out.println("Step 2 Error!");
 		
-	}
-	
-	/**
-	 * step 3
-	 * Alice send doc, eoo, L to TDS
-	 * eoo--siga(h(doc))--publickey
-	 * @param protocol 
-	 * @param queueName 
-	 * @param toId 
-	 * @param fromid 
-	 * @param label 
-	 * @param message 
-	 */
-	public static void step3(String message, String label, String fromid, String toId, String queueName, String protocol){
-		
-		//check id
-		if(!rr.checkAlreadyExist(fromid)){
-			throw new IllegalArgumentException("fromuser id not exists");
-		}
-		if(!rr.checkAlreadyExist(toId)){
-			throw new IllegalArgumentException("touser id not exists");
-		}
-        // save doc
-		FileEntity fileEntity = new FileEntity();
-		File initialFile = new File("src/main/resources/sample.txt");
-        InputStream targetStream = null;
-        try {
-            targetStream = new FileInputStream(initialFile);
-        } catch (FileNotFoundException e) {
-
-        }
-        fileEntity.setFileName(initialFile.getName());
-        fileEntity.setInputStream(targetStream);
-        String key =UUID.randomUUID().toString();
-		
-        //check eoo
-        
-        
-     if ()    
-      //get time
-		long time = System.currentTimeMillis();
-		fe.setTimestamp(time);
-        fe.setLastMessage(message);
-        fe.setStage(3);
-		mr.storeMessage(uuid, fe);
-        fr.storeFile(key, fileEntity);
-        
-		}
-
-	
-	/**
-	 * step 4
-	 * send EOO and lable to BOb
-	 * eoo--publick key
-	 */
-	public static void step4(){
-		
-		
-		//get message(EOO) from last step
-	     String message = fe.getLastMessage();
-	     String label = fe.getUuid();
-		 String fromid = fe.getFromID();
-		 String toid = fe.getToID();
-		//send message(eoo) and label to BOb
-	     MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-			String queueName = "csc8109_1_tds_queue_20070306";
-			boolean b = sqsx.sendMessage(queueName, label, message, fromid, toid);
-				
-		
-		
-				
-		if(fe!=null) {
-			//get time
-			long time = System.currentTimeMillis();
-			fe.setTimestamp(time);
-			fe.setLastMessage(message);
-			fe.setSenderqueue(queueName);
-		    fe.setStage(4);
-			mr.storeMessage(uuid, fe);
-		}
-		else
-			System.out.println("Step 4 Error!");
-				
-	}
-	
-	/**
-	 * step 5
-	 * receive EOR from Bob
-	 * EOR=Bobpublic key = sigb(siga(hash(doc)))
-	 */
-	public static void step5(String toId, String fromId, String message, String label, String queuename, String protocol){
-	   //check id 
-		if(!rr.checkAlreadyExist(fromId)){
-			throw new IllegalArgumentException("fromuser id not exists");
-		}
-		if(!rr.checkAlreadyExist(toId)){
-			throw new IllegalArgumentException("touser id not exists");
-		}
-		
-		//check eor and id
-		
-		
-		//check label and public key
-		if(label == uuid.toString()) {
-			//get time
-			long time = System.currentTimeMillis();
-			fe.setTimestamp(time);
-			fe.setLastMessage(message);
-		    fe.setStage(5);
-			mr.storeMessage(uuid, fe);
-		}
-		else
-			System.out.println("Step 5 Error!");
-				
-	}
-	
-	/**
-	 * step 6
-	 * send doc to Bob
-	 */
-	public static void step6(){
-		 
-		//get the doc
-		FileEntity f = fr.getFile(uuid.toString());
-		//send doc to Bob
-		//send message
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		String queueName = "csc8109_1_tds_queue_20070306";
-		String label = fe.getUuid();
-		String message = fe.getLastMessage();
-		String fromid = fe.getFromID();
-		String toid = fe.getToID();
-		boolean b = sqsx.sendMsgDocument(queueName, label, message, "f", fromid, toid);
-		
-		if(fe!=null) {
-			//get time
-			long time = System.currentTimeMillis();
-			fe.setTimestamp(time);
-	        fe.setLastMessage(message);
-	        fe.setStage(6);
-			mr.storeMessage(uuid, fe);
-		}
-		else
-			System.out.println("Step 6 Error!");
-		
-	}
-	
-	/**
-	 * step 7
-	 * @param fe
-	 * send EOR,label to alice
-	 */
-	public static void step7(){
-	   //get the EOR
-		//get message(EOO) from last step
-	     String message = fe.getLastMessage();
-	     String label = fe.getUuid();
-		 String fromid = fe.getFromID();
-		 String toid = fe.getToID();
-		//send message(eoo) and label to BOb
-	     MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-			String queueName = "csc8109_1_tds_queue_20070306";
-			boolean b = sqsx.sendMessage(queueName, label, message, fromid, toid);
-				
-		
-		if(fe!=null) {
-			//get time
-			long time = System.currentTimeMillis();
-			fe.setTimestamp(time);
-			fe.setLastMessage(message);
-			fe.setSenderqueue(queueName);
-		    fe.setStage(7);
-			mr.storeMessage(uuid, fe);
-		}
-		else
-			System.out.println("Step 7 Error!");
-		
-	}
-	
-	/**
-	 * step 8
-	 * @param Alice_label
-	 * @param Bob_label
-	 */
-	public static void step8(String fromId, String toId, String message, String label, String queueName, String protocol){
-		// receive alice and bob send label to tds
-		
-		
-	   // //check id 
-		if(!rr.checkAlreadyExist(fromId)){
-			throw new IllegalArgumentException("fromuser id not exists");
-		}
-		if(!rr.checkAlreadyExist(toId)){
-			throw new IllegalArgumentException("touser id not exists");
-		}
-		if(fe!=null && message == uuid.toString() && message == uuid.toString()) {
-			//get time
-			long time = System.currentTimeMillis();
-			fe.setTimestamp(time);
-			fe.setLastMessage("label");
-		    fe.setStage(8);
-			mr.storeMessage(uuid, fe);
-		}
-		else
-			System.out.println("Step 8 Error!");
-				
+		System.out.println("change sucessful");
 	}
 	
 	public static void main(String[] args) {
@@ -353,23 +165,25 @@ public class tds {
 		  Message message = null;
 		        
 		  // Count how many message poll attempts we have made in between registration poll attempts
-		  int messagePollCount = 0;
+		  int messagePollCount = 10;
 
 		      // Message polling
 		  boolean running = true;
 		  while(running) {
 		  try {
-		  // If we have made 10 message poll attempts since the last registration poll attempt
+//		  // If we have made 10 message poll attempts since the last registration poll attempt
 		  if (messagePollCount==10) {
 		  // Check for a registration message
 		  message = sqsx.receiveMessage(tdsRegistrationQueue);
 		  if (message!=null) {
+			
 			  messageHandle = message.getReceiptHandle();
 			  Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
 		      // Read message
 //			  String queueName = queueName;
-			  String publickey = message.getBody();
+//			  String publickey = message.getBody();
 	          String userid = attributes.get("Userid").getStringValue();
+	          String publickey = attributes.get("PublicKey").getStringValue();
 		      // Register user
 	          register(userid, publickey);
 		      // Delete message from the queue
@@ -383,75 +197,59 @@ public class tds {
 	    
 	    messageHandle = null;
         message = sqsx.receiveMessage(tdsMessageQueue);
+        ByteBuffer document;
 	        if (message != null) {
+	        	System.out.println("begin");
 	        	messageHandle = message.getReceiptHandle();
-//        	System.out.println("Message received from queue " + queueName);
-//	            System.out.println("  ID: " + message.getMessageId());
-//	            System.out.println("  Receipt handle: " + messageHandle);
-//	            System.out.println("  Message body: " + message.getBody());
 	            attributes = message.getMessageAttributes();
-//	            System.out.println("  Label:" + attributes.get("Label").getStringValue());
-//	            System.out.println("  Source:" + attributes.get("Source").getStringValue());
-//	            System.out.println("  Target:" + attributes.get("Target").getStringValue());
-	        }
-
-	     // If the message is a request for an exchange, it will have a non-null protocol attribute
-            String protocol = attributes.get("Protocol").getStringValue();
-//	        get exchange label
-            String label = attributes.get("Label").getStringValue();
-            
-//	        check state of exchange from database matching label
+	       // If the message is a request for an exchange, it will have a non-null protocol attribute
+           
+          //	check state of exchange from database matching label
              int stage = fe.getStage();
              String tabel_protocol = fe.getProtocol();
-           
-         // get the from id
-            String fromid = attributes.get("Source").getStringValue();
-            
-         // get the toId
-            String toId = attributes.get("Target").getStringValue();
-            
-         //get the message body
+           // get the from id
+            String fromid = attributes.get("Source").getStringValue().trim();  
+           // get the toId
+            String toId = attributes.get("Target").getStringValue().trim();
+           //get the message body
             String Message = message.getBody();
             //queueName
             String queueName = tdsMessageQueue;
-             
+            
 //	            read protocol, step from state
-             if (label.equals(uuid) && tabel_protocol == protocol) {
+          
+            	if(attributes.get("Protocol") != null) {
+            		String protocol = attributes.get("Protocol").getStringValue();
+            		
+            if(tabel_protocol == null) {
+            	System.out.println("begin exchange");
+            	exchangeRequest(fromid, toId, Message, queueName, protocol);
+            }
+            
+            // if protocol null
+            // read the label from message
+            // lookup the label in fe table
+            // get protocol name from fe table
+            // if protocol == CoffeySaidha
+            // get step number from fe table
+            
+            	
+            	
+            else if (tabel_protocol.equals(protocol)) {
             	 
-            	 switch (stage)
-            	 { 
-            	 case 0:
-            	 step1(fromid, toId, Message, queueName, protocol);
-//            	 step2();
-            	 case 2:
-                 step3(Message, label, fromid, toId, queueName, protocol);
+                //	get exchange label
+                  String label = attributes.get("Label").getStringValue().trim();
             	 
-//                 case stage=3:
-                 step4();
-                 case 4:
-                 step5(toId, fromid, Message, label, queueName, protocol);
-//               	 case stage=5:
-               	 step6();
-//               	 case stage=6:
-                 step7();
-               	 case 7:
-                 step8(fromid, toId, Message, label, queueName,protocol);
-                 case 8:
-                 System.out.println("exchange finish");
-                 default:
-                System.out.println("error");
+//            	 boolean success = CoffeySaidha.runStep(label, stage, message, fromid, toId,queueName);
                  
                  // Delete the message from the queue once it has been processed
                  sqsx.deleteMessage(tdsMessageQueue, messageHandle);
-            	 
-            	 }
              }
+	        }
              messagePollCount++;
              Thread.sleep(1000);
 		  }
-//             } catch (InterruptedException e) {
-//                 e.printStackTrace();
-//             }
+		  }
              catch (InterruptedException e) {
          		running = false;
 	    }
@@ -459,5 +257,5 @@ public class tds {
 
     }
 	}	
-	
 }
+	
