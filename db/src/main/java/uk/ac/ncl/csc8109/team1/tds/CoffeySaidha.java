@@ -117,48 +117,41 @@ public class CoffeySaidha {
 
 	}
 	
-	/**
-	 * step 4
-	 * send EOO and lable to BOb
-	 * eoo--publick key
-	 */
-	public static void step4(){
-
-
-//		//get message(EOO) from last step
-//		String message = fe.getLastMessage();
-//		String label = fe.getUuid();
-//		String fromid = fe.getFromID();
-//		String toid = fe.getToID();
+//	/**
+//	 * step 4
+//	 * send EOO and lable to BOb
+//	 * eoo--publick key
+//	 */
+//
 //		//send message(eoo) and label to BOb
 //		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 //		String queueName = "csc8109_1_tds_queue_20070306";
-//		boolean b = sqsx.sendMessage(queueName, label, message, fromid, toid);
-//
-//
-//
+//		String ClientqueueName = rr.getQueueById(toId);
+//		boolean b = sqsx.sendMessage(ClientqueueName, label, Eoo, fromid, toId);
+//		if(!b){
+//			throw new IllegalArgumentException("send message error");
+//		}
 //
 //		if(fe!=null) {
-//			//get time
-//			long time = System.currentTimeMillis();
 //			fe.setTimestamp(time);
-//			fe.setLastMessage(message);
-//			fe.setSenderqueue(queueName);
+//			fe.setLastMessage(Eoo);
+//			fe.setSenderqueue(ClientqueueName);
 //			fe.setStage(4);
 //			mr.storeMessage(uuid, fe);
 //		}
 //		else
 //			System.out.println("Step 4 Error!");
-
-	}
-
-	/**
-	 * step 5
-	 * receive EOR from Bob
-	 * EOR=Bobpublic key = sigb(siga(hash(doc)))
-	 */
-	public static void step5(String toId, String fromId, String message, String label, String queuename, String protocol){
-//		//check id 
+//		return true;
+//
+//	}
+//
+//	/**
+//	 * step 5
+//	 * receive EOR from Bob
+//	 * EOR=Bobpublic key = sigb(siga(hash(doc)))
+//	 */
+//	public static boolean step5(String label,Message message, String fromId, String toId, String queuename){
+////		//check id 
 //		if(!rr.checkAlreadyExist(fromId)){
 //			throw new IllegalArgumentException("fromuser id not exists");
 //		}
@@ -167,99 +160,87 @@ public class CoffeySaidha {
 //		}
 //
 //		//check eor
-//		String eoo = fe.getLastMessage();
+//		String eoo =fe.getLastMessage();
+//		String eor = message.getBody();
 //		String fromId_publickey = rr.getPublicKeyById(fromId); 
-//		String verification = crypto.isVerified(eoo, fromId_publickey, message);
-//		if(!verification.equals("if successful")){
-//			throw new IllegalArgumentException("touser id not exists");
+//		String verification = crypto.isVerified(eoo, fromId_publickey, eor);
+//		if(!verification.equals("verified")){
+//			throw new IllegalArgumentException("eor is wrong!");
 //		}
 //
 //		//check label and public key
 //		if(label == uuid.toString()) {
-//			//get time
-//			long time = System.currentTimeMillis();
 //			fe.setTimestamp(time);
-//			fe.setLastMessage(message);
+//			fe.setLastMessage(eor);
+//			fe.setFromID(fromId);
+//			fe.setReceiverqueue(queuename);
+//			fe.setToID(toId);
 //			fe.setStage(5);
 //			mr.storeMessage(uuid, fe);
 //		}
 //		else
 //			System.out.println("Step 5 Error!");
-
-	}
-
-	/**
-	 * step 6
-	 * send doc to Bob
-	 */
-	public static void step6(){
-
-//		//get the doc
+//
+//	/**
+//	 * step 6
+//	 * send doc to Bob
+//	 */
+////		//get the doc
 //		FileEntity f = fr.getFile(uuid.toString());
 //		//send doc to Bob
-//		//send message
 //		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 //		String queueName = "csc8109_1_tds_queue_20070306";
-//		String label = fe.getUuid();
-//		String message = fe.getLastMessage();
+//		String ClientqueueName = rr.getQueueById(toId);
 //		String fromid = fe.getFromID();
 //		String toid = fe.getToID();
-//		boolean b = sqsx.sendMsgDocument(queueName, label, message, "f", fromid, toid);
+//		boolean b = sqsx.sendMsgDocument(ClientqueueName, label, "f", "f", fromid, toid);
+//		if(!b){
+//			throw new IllegalArgumentException("send message error");
+//		}
 //
 //		if(fe!=null) {
-//			//get time
-//			long time = System.currentTimeMillis();
 //			fe.setTimestamp(time);
-//			fe.setLastMessage(message);
+//			fe.setLastMessage("f");
 //			fe.setStage(6);
+//			fe.setSenderqueue(ClientqueueName);
 //			mr.storeMessage(uuid, fe);
 //		}
 //		else
 //			System.out.println("Step 6 Error!");
-
-	}
-
-	/**
-	 * step 7
-	 * @param fe
-	 * send EOR,label to alice
-	 */
-	public static void step7(){
-//		//get the EOR
-//		//get message(EOO) from last step
-//		String message = fe.getLastMessage();
-//		String label = fe.getUuid();
-//		String fromid = fe.getFromID();
-//		String toid = fe.getToID();
-//		//send message(eoo) and label to BOb
-//		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-//		String queueName = "csc8109_1_tds_queue_20070306";
-//		boolean b = sqsx.sendMessage(queueName, label, message, fromid, toid);
 //
+//	/**
+//	 * step 7
+//	 * @param fe
+//	 * send EOR,label to alice
+//	 */
+//
+//		//send Eor to alice
+//		String ClientqueueName2 = rr.getQueueById(fromId);
+//		boolean c = sqsx.sendMessage(ClientqueueName2, label, eor, fromid, toid);
+//		if(!c){
+//			throw new IllegalArgumentException("send message error");
+//		}
 //
 //		if(fe!=null) {
-//			//get time
-//			long time = System.currentTimeMillis();
 //			fe.setTimestamp(time);
-//			fe.setLastMessage(message);
-//			fe.setSenderqueue(queueName);
+//			fe.setLastMessage(eor);
+//			fe.setSenderqueue(ClientqueueName2);
 //			fe.setStage(7);
 //			mr.storeMessage(uuid, fe);
 //		}
 //		else
 //			System.out.println("Step 7 Error!");
-
-	}
-
-	/**
-	 * step 8
-	 * @param Alice_label
-	 * @param Bob_label
-	 */
-	public static void step8(String fromId, String toId, String message, String label, String queueName, String protocol){
-		// receive alice and bob send label to tds
-
-
+//		
+//		return true;
+//
+//	}
+//
+//	/**
+//	 * step 8
+//	 * @param Alice_label
+//	 * @param Bob_label
+//	 */
+//	public static boolean step8(String label, Message message, String fromId, String toId, String FromqueueName){
 //		// //check id 
 //		if(!rr.checkAlreadyExist(fromId)){
 //			throw new IllegalArgumentException("fromuser id not exists");
@@ -267,9 +248,9 @@ public class CoffeySaidha {
 //		if(!rr.checkAlreadyExist(toId)){
 //			throw new IllegalArgumentException("touser id not exists");
 //		}
-//		if(fe!=null && message == uuid.toString() && message == uuid.toString()) {
-//			//get time
-//			long time = System.currentTimeMillis();
+//		//check message
+//		String messsage2 = message.getBody();
+//		if(fe!=null && messsage2 == uuid.toString()) {
 //			fe.setTimestamp(time);
 //			fe.setLastMessage("label");
 //			fe.setStage(8);
@@ -277,8 +258,9 @@ public class CoffeySaidha {
 //		}
 //		else
 //			System.out.println("Step 8 Error!");
-
-	}
+//		
+//		return true;
+//	}
 
 	/**
 	 * Abort an exchange
@@ -338,13 +320,13 @@ public class CoffeySaidha {
 			break;
 
 		case 3:
-			step4();
+			//step4();
 		case 4:
 //			step5(source, target, Message, label, queueName, protocol);
 			//               	 case stage=5:
-			step6();
+			//step6();
 			//               	 case stage=6:
-			step7();
+			//step7();
 		case 7:
 //			step8(source, target, Message, label, queueName,protocol);
 		case 8:
