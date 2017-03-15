@@ -55,16 +55,6 @@ public class CryptoTest {
 	File f2 = new File("sample");
 	File f1 = new File("Untitled 2");
 	File tech1 = new File("tech");
-	
-//	private String str;
-//	
-//	public String getStr() {
-//		return str;
-//	}
-//
-//	public void setStr(String str) {
-//		this.str = str;
-//	}
 
 	@Before
 	public void setUp(){
@@ -91,39 +81,6 @@ public class CryptoTest {
 	    
 	    techPath = "tech";
 		Path tech = Paths.get(techPath);
-		String techPath2 = "tech2";
-		Path tech2 = Paths.get(techPath2);
-	    
-//	   String str = alice.encryptFile("core/tech", "core/tech1", aShared);
-//	    
-//	    FileInputStream fis = null;
-//        String str = "";
-//
-//        try {
-//            fis = new FileInputStream(tech1);
-//            int content;
-//            while ((content = fis.read()) != -1) {
-//                // convert to char and display it
-//                str += (char) content;
-//            }
-//
-//            System.out.println("After reading file");
-//            System.out.println(str);
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                if (fis != null)
-//                    fis.close();
-//            } catch (IOException ex) {
-//                ex.printStackTrace();
-//            }
-//        }
-	    
-	    
-	    
-	    
 
 	}
 	
@@ -270,10 +227,13 @@ public class CryptoTest {
 		assertNotNull(verification);
 	}
 	
-//	@Test
-//	public void testEncrypFile(){
-//		assertNotNull((alice.encryptFile(techPath, "core/sample1", aShared)), (alice.encryptFile(techPath, "core/sample1", aShared)));
-//	}
+	@Test
+	public void testEncrypFile(){
+		System.out.println("Alice encrypts the file using the computes shared key");
+		alice.encryptFile("core/tech", "core/techEncrypted", aShared);
+		System.out.println("Bob decrypts the file using the computes shared key");
+		bob.decryptFile("core/techEncrypted", "core/techDecrypted", bShared);
+	}
 
 
 	public String getaPbk() {
