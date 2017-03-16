@@ -22,11 +22,14 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import uk.ac.ncl.csc8109.team1.db.model.FairExchangeEntity;
 import uk.ac.ncl.csc8109.team1.db.model.FairExchangeStage;
 import uk.ac.ncl.csc8109.team1.db.model.FileEntity;
+import uk.ac.ncl.csc8109.team1.db.model.LogEntity;
 import uk.ac.ncl.csc8109.team1.db.model.RegisterEntity;
 import uk.ac.ncl.csc8109.team1.db.repository.FileRepository;
+import uk.ac.ncl.csc8109.team1.db.repository.LogRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.MessageRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.RegisterRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.FileRepositoryImpl;
+import uk.ac.ncl.csc8109.team1.db.repository.impl.LogRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.MessageRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
@@ -47,8 +50,9 @@ public class tds {
 	static RegisterRepository rr = new RegisterRepositoryImpl();
 	static RegisterEntity re = new RegisterEntity();
 	static MessageRepository mr = new MessageRepositoryImpl();
+	static LogRepository lr = new LogRepositoryImpl();
+	static LogEntity le = new LogEntity();
 	static FileRepository fr = new FileRepositoryImpl();
-	private static CryptoInterface crypto;
 	//get time
 	static long time = System.currentTimeMillis();
 			
@@ -69,9 +73,10 @@ public class tds {
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		//create queue
 	    boolean success = sqsx.create(ClientName);
+	    System.out.println("careate client queue: " + success);
 		String queue2Name = "csc8109_1_tds_queue_20070306_reg";
 		boolean b = sqsx.registerResponse(queue2Name, id, ClientName);
-		System.out.println(b);
+		System.out.println("send client queue Name" + b);
 		if(!b){
 			throw new IllegalArgumentException("send queue error");
 		}
@@ -86,7 +91,7 @@ public class tds {
 		System.out.println("regist successful");
 	}
 	/**
-	 * step 1
+	 * exchange request
 	 * @param Alice_id, Bob_id
 	 * Alice send request 
 	 */
@@ -103,44 +108,49 @@ public class tds {
 	
 		// create UUId
 		uuid = UUID.randomUUID();
-		//store message
-		fe.setTimestamp(time);
-		fe.setFromID(fromId);
-		fe.setToID(toId);
-		fe.setUuid(uuid.toString());
-		fe.setStage(1);
-		fe.setProtocol(protocol);
-		fe.setLastMessage(message);
-		fe.setReceiverqueue(queueName);
-		mr.storeMessage(uuid,fe);
+		
 	
 	/**
-	 * step 2
 	 * @param fe
 	 * send label to Alice
 	 */
 		//send message
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		String fromId_queue = rr.getQueueById(fromId);
-//		String queue2Name = "csc8109_1_tds_queue_20070306";
-		String label = fe.getUuid();
-		String fromid = fe.getFromID();
-		String toid = fe.getToID();
-		String toid_publickey = rr.getPublicKeyById(toid);
+		String label = uuid.toString();
+		String toid_publickey = rr.getPublicKeyById(toId);
 		System.out.println(toid_publickey);
-		boolean b = sqsx.exchangeResponse(fromId_queue, label, message, fromid, toid, toid_publickey);
-		System.out.println(b);
+		boolean b = sqsx.exchangeResponse(fromId_queue, label, message, fromId, toId, toid_publickey);
+		System.out.println("send exchange response: " + b);
 		if(!b){
 			throw new IllegalArgumentException("send message error");
 		}
 		
-		if(fe!=null){
-
+		if(message!=null){
+			//store message to mr
 			fe.setTimestamp(time);
+			fe.setFromID(fromId);
+			fe.setToID(toId);
+			fe.setUuid(uuid.toString());
+			fe.setStage(1);
+			fe.setProtocol(protocol);
+			fe.setReceiverqueue(queueName);
 			fe.setLastMessage(message);
 			fe.setSenderqueue(fromId_queue);
-		    fe.setStage(2);
 			mr.storeMessage(uuid, fe);
+			System.out.println("store message to mr");
+			//store message to log
+			le.setFromID(fromId);
+			le.setLastMessage(message);
+			le.setProtocol(protocol);
+			le.setUuid(uuid.toString());
+			le.setReceiverqueue(queueName);
+			le.setTimestamp(time);
+			le.setToID(toId);
+			le.setSenderqueue(fromId_queue);
+			le.setStage(1);
+			lr.storeLog(le);
+			System.out.println("store message to log");
 			System.out.println("request successful");
 		}
 		else
@@ -148,6 +158,7 @@ public class tds {
 		
 		System.out.println("change sucessful");
 	}
+	
 	
 	public static void main(String[] args) {
 		System.out.println("Hello world");
@@ -175,57 +186,97 @@ public class tds {
 		  if (messagePollCount==10) {
 		  // Check for a registration message
 		  message = sqsx.receiveMessage(tdsRegistrationQueue);
-		  if (message!=null) {
-			
+		  System.out.println("receive registe message");
+		  if (message!=null) {			
 			  messageHandle = message.getReceiptHandle();
 			  Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
 		      // Read message
-//			  String queueName = queueName;
-//			  String publickey = message.getBody();
-	          String userid = attributes.get("Userid").getStringValue();
-	          String publickey = attributes.get("PublicKey").getStringValue();
-		      // Register user
-	          register(userid, publickey);
-		      // Delete message from the queue
-		      sqsx.deleteMessage(tdsRegistrationQueue, messageHandle);
+			  //read user id
+			  System.out.println("begin registe");
+			  if(attributes.get("userid")!= null) {
+				  String userid = attributes.get("userid").getStringValue();
+				  if(attributes.get("PublicKey") != null) {
+		          		String publickey = attributes.get("PublicKey").getStringValue();
+		          		 // Register user
+		  	          register(userid, publickey);
+		  		      // Delete message from the queue
+		  		      sqsx.deleteMessage(tdsRegistrationQueue, messageHandle);		
+			  }
+		  }
 		  }
 		  messagePollCount = 0;
 		  }
 		        		
 		// Poll for normal message
-	    Map<String, MessageAttributeValue> attributes = null;
-	    
+	    Map<String, MessageAttributeValue> attributes = null;	    
 	    messageHandle = null;
         message = sqsx.receiveMessage(tdsMessageQueue);
-        ByteBuffer document;
 	        if (message != null) {
-	        	System.out.println("begin");
+	        	System.out.println("begin receive message");
 	        	messageHandle = message.getReceiptHandle();
 	            attributes = message.getMessageAttributes();
-	       // If the message is a request for an exchange, it will have a non-null protocol attribute
-           
-          //	check state of exchange from database matching label
-             int stage = fe.getStage();
-             String tabel_protocol = fe.getProtocol();
+         
            // get the from id
+             if(attributes.get("Source")!= null){
             String fromid = attributes.get("Source").getStringValue().trim();  
-           // get the toId
-            String toId = attributes.get("Target").getStringValue().trim();
-           //get the message body
-            String Message = message.getBody();
-            //queueName
-            String queueName = tdsMessageQueue;
-            
-//	            read protocol, step from state
-          
-            	if(attributes.get("Protocol") != null) {
-            		String protocol = attributes.get("Protocol").getStringValue();
-            		
-            if(tabel_protocol == null) {
-            	System.out.println("begin exchange");
-            	exchangeRequest(fromid, toId, Message, queueName, protocol);
-            }
-            
+         // get the toId
+            if(attributes.get("Target")!= null){
+            	 String toId = attributes.get("Target").getStringValue().trim();
+            	//get the message body
+            	if(message.getBody() != null) {
+            		  String Message = message.getBody();
+            		//queueName	  
+            		  if(tdsMessageQueue != null) {
+            			  String queueName = tdsMessageQueue;
+            			  //read protocol
+            			  if(attributes.get("Protocol") != null) {
+                      		String protocol = attributes.get("Protocol").getStringValue();
+                      	 //read label from message
+                      		if(attributes.get("Label") != null) {
+                          		String Label = attributes.get("Label").getStringValue();
+                      	            //exchange request
+                                    String table_label = fe.getUuid();
+                                    String tabel_protocol = fe.getProtocol();
+                      		if(tabel_protocol == null)
+                      		{
+                            	System.out.println("begin exchange");
+                            	exchangeRequest(fromid, toId, Message, queueName, protocol);
+                      		}
+                			int stage = fe.getStage();
+                            if (protocol.equals(null)) {
+                            	if(table_label == Label) {
+                            		if(tabel_protocol == "CoffeySaidha") {
+                            			System.out.println("begin CoffeySaidha");
+                            			 boolean success = CoffeySaidha.runStep(Label, stage, message, fromid,toId);
+                                         System.out.println(success);
+                            			 // Delete the message from the queue once it has been processed
+                                         sqsx.deleteMessage(tdsMessageQueue, messageHandle);
+                            		}
+                            		
+                            	}
+                            }
+                            
+                           if (table_label == Label){
+                        	   if(tabel_protocol==protocol) {
+                        		   System.out.println("bigin CoffeySaidha 2");
+                        		   boolean success = CoffeySaidha.runStep(Label, stage, message, fromid,toId);
+                        		   System.out.println(success);
+                        		// Delete the message from the queue once it has been processed
+                                   sqsx.deleteMessage(tdsMessageQueue, messageHandle);             		   
+                        	   }
+                           }
+                           
+                           if (protocol.equals(null)&&Label.equals(null)){
+                        	   System.out.println("protocol and label are both null");
+                           }
+                          		}   
+                            }
+                            }
+            		  }
+            		  }
+            	}
+             }
+          System.out.println(messagePollCount);
             // if protocol null
             // read the label from message
             // lookup the label in fe table
@@ -233,22 +284,9 @@ public class tds {
             // if protocol == CoffeySaidha
             // get step number from fe table
             
-            	
-            	
-            else if (tabel_protocol.equals(protocol)) {
-            	 
-                //	get exchange label
-                  String label = attributes.get("Label").getStringValue().trim();
-            	 
-//            	 boolean success = CoffeySaidha.runStep(label, stage, message, fromid, toId,queueName);
-                 
-                 // Delete the message from the queue once it has been processed
-                 sqsx.deleteMessage(tdsMessageQueue, messageHandle);
-             }
-	        }
+	       
              messagePollCount++;
              Thread.sleep(1000);
-		  }
 		  }
              catch (InterruptedException e) {
          		running = false;
