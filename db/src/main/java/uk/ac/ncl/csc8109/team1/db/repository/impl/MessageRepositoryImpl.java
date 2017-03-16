@@ -21,13 +21,26 @@ public class MessageRepositoryImpl implements MessageRepository{
     private String tableName = "message_table";
     private Logger log = Logger.getLogger(MessageRepositoryImpl.class);
     private FileRepository fileDao = new FileRepositoryImpl();
-
+    private LogRepository logRepositury = new LogRepositoryImpl();
 
     @Override
     public void storeMessage(UUID uuid, FairExchangeEntity entity) {
         AmazonDynamoDB dbClient = DynamoDBConnectionPools.getInstance().getConnection();
         DynamoDBMapper mapper = new DynamoDBMapper(dbClient);
         mapper.save(entity);
+        LogEntity logEntity = new LogEntity();
+        logEntity.setUuidlabel(entity.getUuid()+entity.getStage());
+        logEntity.setToID(entity.getToID());
+        logEntity.setLastMessage(entity.getLastMessage());
+        logEntity.setFromID(entity.getFromID());
+        logEntity.setFileKey(entity.getFileKey());
+        logEntity.setProtocol(entity.getProtocol());
+        logEntity.setReceiverqueue(entity.getSenderqueue());
+        logEntity.setSenderqueue(entity.getSenderqueue());
+        logEntity.setStage(entity.getStage());
+        logEntity.setUuid(entity.getUuid());
+        logEntity.setTimestamp(entity.getTimestamp());
+        logRepositury.storeLog(logEntity);
         DynamoDBConnectionPools.getInstance().returnConnection(dbClient);
     }
 
@@ -61,5 +74,7 @@ public class MessageRepositoryImpl implements MessageRepository{
     @Override
     public void deleteExpiredMessage() {
         //todo set expired time
+
     }
+
 }
