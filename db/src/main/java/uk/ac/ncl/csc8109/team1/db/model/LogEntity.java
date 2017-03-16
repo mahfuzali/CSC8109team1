@@ -10,9 +10,11 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 @DynamoDBTable(tableName = "log_table")
 public class LogEntity {
     @DynamoDBHashKey
-    private long timestamp;
+    private String uuidlabel;
     @DynamoDBAttribute
     private String uuid;
+    @DynamoDBAttribute
+    private long timestamp;
     @DynamoDBAttribute
     private String toID;
     @DynamoDBAttribute
@@ -109,4 +111,9 @@ public class LogEntity {
     public void setReceiverqueue(String receiverqueue) {
         this.receiverqueue = receiverqueue;
     }
+
+    public void setUuidlabel(String uuidlabel) {this.uuidlabel = uuidlabel;}
+
+    public String getUuidlabel() {return uuidlabel;}
 }
+
