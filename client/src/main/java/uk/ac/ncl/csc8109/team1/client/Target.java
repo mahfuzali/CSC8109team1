@@ -97,11 +97,11 @@ public class Target {
 		    case 1:
 		          System.out.println("You've chosen item #1");
 		          // do something...
-		          
+				  // Step 1: 
+		  		  bob.regRequestForQueue(bob, TDS_QueueName_Reg);
 		  		  while(bob.getQueueName() == null) {
-				   // Step 1: 
-		  			 bob.regRequestForQueue(bob, TDS_QueueName_Reg);
-					 Thread.sleep(20000);
+
+					 //Thread.sleep(20000);
 				   // Step 2: 
 					 bob.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Bob/UUID"))).trim() );
 					 bob.replaceSelected(NAME, "Queue", bob.getQueueName());
@@ -240,11 +240,15 @@ public class Target {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+            
+            // Delete message
+            success = sqsx.deleteMessage(myQueue, messageHandle);
+            System.out.println("Deleted message from queue " + myQueue + " " + success);
+            
+            
         }
         
-        // Delete message
-        success = sqsx.deleteMessage(myQueue, messageHandle);
-        System.out.println("Deleted message from queue " + myQueue + " " + success);
+
 	}
 	
 	/**
@@ -282,11 +286,15 @@ public class Target {
             target.replaceSelected(NAME, "Target", target.getDestination());
             target.replaceSelected(NAME, "EOO", target.getEOO());
             target.replaceSelected(NAME, "RecipientPublicKey", target.getSourcePubKey());
+            
+            
+            // Delete message
+            success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
+            System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
+            
         }		
        
-        // Delete message
-        success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
-        System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
+
 	}
 	
 	/**

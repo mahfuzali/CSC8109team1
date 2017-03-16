@@ -509,11 +509,11 @@ public class Client {
             System.out.println("  Queue:" + attributes.get("Queue").getStringValue());
             setQueueName(attributes.get("Queue").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
+            
+        	success = sqsx.deleteMessage(tdsQueue, messageHandle);
+        	System.out.println("Deleted registration request from queue " + tdsQueue + " " + success);
+            
         }
-        
-        // Delete registration request
-        success = sqsx.deleteMessage(tdsQueue, messageHandle);
-        System.out.println("Deleted registration request from queue " + tdsQueue + " " + success);
         
 	}
 	

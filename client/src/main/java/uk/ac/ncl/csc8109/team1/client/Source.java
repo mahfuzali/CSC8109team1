@@ -64,7 +64,7 @@ public class Source {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		/* Needs changing */
-		String bobUUID = "deae6d74-80cb-43dd-b913-c66e0dd8bb40";
+		String bobUUID = "5e869ef4-f37d-4d65-a74b-3e5c188bbdf9";
 
 		Client alice = new Client(NAME);
 		System.out.println(NAME + "'s Information");
@@ -101,7 +101,8 @@ public class Source {
 				// Step 1: Register with TDS and request for a queue name
 				alice.regRequestForQueue(alice, TDS_QueueName_Reg);
 				while (alice.getQueueName() == null) {
-					//Thread.sleep(20000);
+					
+					Thread.sleep(20000);
 					// Step 2: Get a queue name from the TDS
 					alice.getQueueNameFromTDS(TDS_QueueName_Reg,
 							new String(Files.readAllBytes(Paths.get("resource/Alice/UUID"))).trim());
@@ -279,11 +280,15 @@ public class Source {
             System.out.println("  Label:" + attributes.get("Label").getStringValue());
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
+            
+            
+            // Delete message
+            success = sqsx.deleteMessage(tds_queue, messageHandle);
+            System.out.println("Deleted message from queue " + tds_queue + " " + success);
+            
         }		
         
-        // Delete message
-        success = sqsx.deleteMessage(tds_queue, messageHandle);
-        System.out.println("Deleted message from queue " + tds_queue + " " + success);
+
 	}
 
 	/**
