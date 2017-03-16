@@ -47,9 +47,14 @@ import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
  */
 public class ClientExample {
 	public static void main(String[] args) throws IOException, InterruptedException {
-		/*
-		Client c = new Client("name");
-		c.setLabel("label6");
+		CryptoInterface crypto = new Crypto();
+		String bobUUID = "deae6d74-80cb-43dd-b913-c66e0dd8bb40";
+		
+		String sign = crypto.getSignature(bobUUID);
+		System.out.println(sign);
+		
+		//Client c = new Client("name");
+		/*c.setLabel("label6");
 		c.setDestination("source7");
 		c.setTds("tds1");
 		

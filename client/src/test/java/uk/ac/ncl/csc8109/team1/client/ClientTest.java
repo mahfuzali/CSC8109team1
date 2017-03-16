@@ -33,8 +33,8 @@ public class ClientTest extends TestCase{
 		System.out.println(alice.getPrivateKey());
 		f = new File("teampath");
 
-		eoo = alice.getEOO(f);
-		eor = alice.getEOR(eoo);
+		eoo = alice.generateEOO(f);
+		eor = alice.generateEOR(eoo);
     }
 
     

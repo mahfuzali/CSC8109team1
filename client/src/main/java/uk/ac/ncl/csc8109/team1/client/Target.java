@@ -97,11 +97,11 @@ public class Target {
 		    case 1:
 		          System.out.println("You've chosen item #1");
 		          // do something...
-		          
+				  // Step 1: 
+		  		  bob.regRequestForQueue(bob, TDS_QueueName_Reg);
 		  		  while(bob.getQueueName() == null) {
-				   // Step 1: 
-		  			 bob.regRequestForQueue(bob, TDS_QueueName_Reg);
-					 Thread.sleep(20000);
+
+					 //Thread.sleep(20000);
 				   // Step 2: 
 					 bob.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Bob/UUID"))).trim() );
 					 bob.replaceSelected(NAME, "Queue", bob.getQueueName());
