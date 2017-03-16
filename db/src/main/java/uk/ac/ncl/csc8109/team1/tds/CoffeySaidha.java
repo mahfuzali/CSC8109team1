@@ -250,45 +250,103 @@ public class CoffeySaidha {
 		};
 		System.out.println("Sent EOR to queue " + toQueue);
 		
+		return true;
+	}
+	
+	/**
+	 * Receive labels from Alice and Bob at the end of the exchange
+	 * Called on steps 3 & 4
+	 * Message should be SigA(label) or SigB(label)
+	 * @param step
+	 * @param message
+	 * @param label
+	 * @param fromid
+	 * @param fromPK
+	 * @return
+	 */
+	public static boolean receiveLabel(int step, Message message, String label, String fromid, String fromPK, String toid) {
+		
+		// Check for valid exchange
+		FairExchangeEntity stateEntity = null;
+		UUID uuidLabel = null;
+		try {
+			uuidLabel = UUID.fromString(label);
+			stateEntity = stateRepository.getMessage(uuidLabel);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		// Get signed label from current message
+        String msgLabel = message.getBody();
+        System.out.println("Received label " + msgLabel + " from " + fromid);
+		
+		// Check that signed label matches the sender and their public key
+        CryptoInterface crypto = new Crypto();
+		try {
+			String verification = crypto.isVerified(label.replaceAll("-",""), fromPK, msgLabel);
+			System.out.println("Label verification:" + verification);
+			if(!verification.equals("Verified")){
+				System.err.println("Label not verified");
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+			
+		// If step 3, then update state to step 4, save the message and record who sent it
+		if (step == 3) {
+			// Update state table
+			long timestamp = System.currentTimeMillis();
+			stateEntity.setTimestamp(timestamp);
+			stateEntity.setStage(4);
+			stateEntity.setFromID(fromid);
+			stateEntity.setToID(toid);
+			stateEntity.setSenderqueue("");
+			stateEntity.setReceiverqueue("");
+			stateEntity.setLastMessage(msgLabel);
+			try {
+				stateRepository.storeMessage(uuidLabel, stateEntity);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+			System.out.println("Updated state table for exchange " + label);
+			
+			return true;
+		}
+		
+		// If at final step, then check that the current sender matches the recipient of the last step
+		// i.e. if Alice sent the label at step 3, check that this label is from Bob
+		// This is because Alice and Bob can send back labels in any order, but both must do so
+		if (!fromid.equals(stateEntity.getToID())) {
+			// Label not from previous recipient
+			System.err.println("Label received from unexpected sender " + fromid + "(expected " + stateEntity.getToID() + ")");
+			return false;
+		}
+
 		// Delete document from S3
+		String fileKey = stateEntity.getFileKey();
 		try {
 			fileRepository.deleteFile(fileKey);
 		} catch (Exception e) {
 			// Not great if we can't delete the file but shouldn't end the exchange
 			e.printStackTrace();
 		}
+		System.out.println("Deleted document " + fileKey + " from S3");
+		
+		// Remove entry from state table
+		try {
+			stateRepository.deleteMessage(uuidLabel);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		System.out.println("Delete state table entry for exchange " + label);
 		
 		return true;
 	}
-	
-
-//
-//	/**
-//	 * step 8
-//	 * @param Alice_label
-//	 * @param Bob_label
-//	 */
-//	public static boolean step8(String label, Message message, String fromId, String toId, String FromqueueName){
-//		// //check id 
-//		if(!rr.checkAlreadyExist(fromId)){
-//			throw new IllegalArgumentException("fromuser id not exists");
-//		}
-//		if(!rr.checkAlreadyExist(toId)){
-//			throw new IllegalArgumentException("touser id not exists");
-//		}
-//		//check message
-//		String messsage2 = message.getBody();
-//		if(fe!=null && messsage2 == uuid.toString()) {
-//			fe.setTimestamp(time);
-//			fe.setLastMessage("label");
-//			fe.setStage(8);
-//			mr.storeMessage(uuid, fe);
-//		}
-//		else
-//			System.out.println("Step 8 Error!");
-//		
-//		return true;
-//	}
 
 	/**
 	 * Abort an exchange
@@ -353,18 +411,15 @@ public class CoffeySaidha {
 			};
 			break;
 			
+		case 3:
 		case 4:
-//			step5(source, target, Message, label, queueName, protocol);
-			//               	 case stage=5:
-			//step6();
-			//               	 case stage=6:
-			//step7();
-		case 7:
-//			step8(source, target, Message, label, queueName,protocol);
-		case 8:
-			System.out.println("exchange finish");
+			if (!receiveLabel(step, message, label, source, sourcePK, target)) {
+				return false;
+			};
+			break;
+
 		default:
-			System.out.println("error");
+			System.err.println("Unknown step");
 		}
 		
 		return true;
