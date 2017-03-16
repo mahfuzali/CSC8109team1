@@ -6,8 +6,10 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import org.apache.log4j.Logger;
 
 import uk.ac.ncl.csc8109.team1.db.model.FairExchangeEntity;
+import uk.ac.ncl.csc8109.team1.db.model.LogEntity;
 import uk.ac.ncl.csc8109.team1.db.repository.DynamoDBConnectionPools;
 import uk.ac.ncl.csc8109.team1.db.repository.FileRepository;
+import uk.ac.ncl.csc8109.team1.db.repository.LogRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.MessageRepository;
 
 import java.util.Map;
