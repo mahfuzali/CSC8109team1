@@ -33,7 +33,7 @@ public class tdsTest {
 		String message = "request";
 		String queueName = "csc8109_1_tds_queue_20070306";
 		String protocol = "CoffeySaidha";
-		tds.step1(fromId, toId, message, queueName, protocol);
+		tds.exchangeRequest(fromId, toId, message, queueName, protocol);
 	}
 
 }
