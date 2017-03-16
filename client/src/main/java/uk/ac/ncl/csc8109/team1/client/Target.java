@@ -48,6 +48,13 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
 import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
 
+/** 
+ * This class represents a target client i.e. the receiver
+ * 
+ * @author Mahfuz Ali
+ * @Version 1.3
+ * @email m.ali4@newcastle.ac.uk
+ */
 public class Target {
 	private static final String TDS_QueueName = "csc8109_1_tds_queue_20070306";
 	private static final String TDS_QueueName_Reg = "csc8109_1_tds_queue_20070306_reg";
@@ -187,19 +194,20 @@ public class Target {
 	
 	/**
 	 * 
-	 * @param queueName
+	 * @param myQueue
 	 * @throws IOException 
 	 */
-	public static void receiveDocMsg(Client c, String queueName) throws IOException {
-        // Receive message with attached document
+	public static void receiveDocMsg(Client c, String myQueue) throws IOException {
+        boolean success = false;
+		// Receive message with attached document
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
 		String messageHandle = null;
-        Message message = sqsx.receiveMessage(queueName);
+        Message message = sqsx.receiveMessage(myQueue);
         ByteBuffer document;
         if (message != null) {
         	messageHandle = message.getReceiptHandle();
-        	System.out.println("Message received from queue " + queueName);
+        	System.out.println("Message received from queue " + myQueue);
             System.out.println("  ID: " + message.getMessageId());
             System.out.println("  Receipt handle: " + messageHandle);
             System.out.println("  Message body: " + message.getBody());
@@ -233,6 +241,10 @@ public class Target {
 				e.printStackTrace();
 			}
         }
+        
+        // Delete message
+        success = sqsx.deleteMessage(myQueue, messageHandle);
+        System.out.println("Deleted message from queue " + myQueue + " " + success);
 	}
 	
 	/**
@@ -242,7 +254,6 @@ public class Target {
 	 */
 	public static void receiveEOOMsg(Client target) throws IOException {
 		boolean success = false;
-
 		String queue = target.readline(NAME, "Queue");
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
@@ -271,40 +282,34 @@ public class Target {
             target.replaceSelected(NAME, "Target", target.getDestination());
             target.replaceSelected(NAME, "EOO", target.getEOO());
             target.replaceSelected(NAME, "RecipientPublicKey", target.getSourcePubKey());
-            
         }		
        
         // Delete message
-        //success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
-        //System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
+        success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
+        System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
 	}
 	
 	/**
 	 * 
-	 * @param c
-	 * @param q
-	 * @param eoo
+	 * @param tdsQueue
+	 * @param label
+	 * @param eor
+	 * @param uuid
+	 * @param target
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public static boolean sendEORMsg(String queue, String label, String eor, String uuid, String target) throws IOException {
+	public static boolean sendEORMsg(String tdsQueue, String label, String eor, String uuid, String target) throws IOException {
 		boolean success = false;
-
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		
-		//String queue = q;
-		//String label = source.getLabel();
-		//String eor = source.getEOR(eoo);
-		//String uuid = source.getUUID();
-		//String target = source.getDestination();
 
-		if ((queue != null && !queue.isEmpty()) 
+		if ((tdsQueue != null && !tdsQueue.isEmpty()) 
 				&& (label != null && !label.isEmpty())
 				&& (eor != null && !eor.isEmpty())
 				&& (uuid != null && !uuid.isEmpty())
 				&& (target != null && !target.isEmpty())) {
 			
-			success = sqsx.sendMessage(queue, label, eor, uuid, target);
+			success = sqsx.sendMessage(tdsQueue, label, eor, uuid, target);
 			if (!success)
 				throw new IllegalArgumentException("null or empty value is passed");
 		}
@@ -312,22 +317,21 @@ public class Target {
 		return success;
 	}
 	
-	
 	/**
 	 * 
-	 * @param queueName
+	 * @param tdsQueue
 	 * @param protocol
 	 * @param sigMsg
 	 * @param source
 	 * @param target
 	 */
-	public static void sendPubKeyRequest(String queueName, String protocol, String sigMsg, String source, String target) {
+	public static void sendPubKeyRequest(String tdsQueue, String protocol, String sigMsg, String source, String target) {
 		boolean success = false;
 		// Initialise queue service
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
         
         // Send an exchange request
-        success = sqsx.exchangeRequest(queueName, protocol, sigMsg, source, target);
+        success = sqsx.exchangeRequest(tdsQueue, protocol, sigMsg, source, target);
 	}
 	
 	/**
@@ -359,8 +363,8 @@ public class Target {
             
     		c.replaceSelected(NAME, "RecipientPublicKey", c.getTargetPubKey());
             
-            //success = sqsx.deleteMessage(myQueue, messageHandle);
-            //System.out.println("Deleted message from queue " + myQueue + " " + success);
+            success = sqsx.deleteMessage(myQueue, messageHandle);
+            System.out.println("Deleted message from queue " + myQueue + " " + success);
         }
 	}
 	

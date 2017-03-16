@@ -78,6 +78,7 @@ public class Client {
 	/**
 	 * In instantiation, a unique id is generated; along with,
 	 * public and private key and a queue name
+	 * @param clientName
 	 */
 	/* For testing purpose client name is provided */
 	public Client(String clientName) {
@@ -88,8 +89,10 @@ public class Client {
 		}
 	}
 
+
 	/**
 	 * 
+	 * @param clientName
 	 * @throws IOException
 	 */
 	void initialize(String clientName) throws IOException {
@@ -125,7 +128,6 @@ public class Client {
 			this.publicKey = crypto.getPublicKey();
 			this.privateKey = crypto.getPrivateKey();
 		}
-			
 	}
 	
 	/**
@@ -161,7 +163,7 @@ public class Client {
 	}
 
 	/**
-	 * 
+	 * Sets the queue
 	 * @param queueName
 	 */
 	void setQueueName(String queueName) {
@@ -265,27 +267,34 @@ public class Client {
 		targetPubKey = key;
 	}
 
-	
-	
-	
-	
-	
-
-
-	
-	
+	/**
+	 * 
+	 * @return
+	 */
 	public String getEOO() {
 		return EOO;
 	}
 
+	/**
+	 * 
+	 * @param eOO
+	 */
 	public void setEOO(String eOO) {
 		EOO = eOO;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getEOR() {
 		return EOR;
 	}
 
+	/**
+	 * 
+	 * @param eOR
+	 */
 	public void setEOR(String eOR) {
 		EOR = eOR;
 	}
@@ -429,13 +438,12 @@ public class Client {
 		return crypto.getSharedKey(recipientsPublicKey);
 	}
 	
-	
 	/**
 	 * 
 	 * @param file
 	 * @return
 	 */
-	public String generateEOO(File file) {
+	String generateEOO(File file) {
 		return crypto.getSignature(crypto.getHashOfFile(file));
 	}
 
@@ -444,7 +452,7 @@ public class Client {
 	 * @param str
 	 * @return
 	 */
-	public String generateEOR(String str) {
+	String generateEOR(String str) {
 		return crypto.getSignature(str);
 	}
 
@@ -453,7 +461,7 @@ public class Client {
 	 * @param c
 	 * @param tdsQueue
 	 */
-	public void regRequestForQueue(Client c, String tdsQueue) {
+	 void regRequestForQueue(Client c, String tdsQueue) {
 		boolean success = false;
 		
 		// Initialise queue service
@@ -479,7 +487,7 @@ public class Client {
 	 * @param tdsQueue
 	 * @param userid
 	 */
-	public void getQueueNameFromTDS(String tdsQueue, String userid) {
+	 void getQueueNameFromTDS(String tdsQueue, String userid) {
 		boolean success = false;
 
 		// Initialise queue service
@@ -504,8 +512,8 @@ public class Client {
         }
         
         // Delete registration request
-        // success = sqsx.deleteMessage(tdsQueue, messageHandle);
-        // System.out.println("Deleted registration request from queue " + queueName + " " + success);
+        success = sqsx.deleteMessage(tdsQueue, messageHandle);
+        System.out.println("Deleted registration request from queue " + tdsQueue + " " + success);
         
 	}
 	
@@ -517,7 +525,7 @@ public class Client {
 	 * @param target
 	 * @return
 	 */
-	public boolean abortRequest(String exchangeQueueName, String label, String source, String target) {
+	boolean abortRequest(String exchangeQueueName, String label, String source, String target) {
 		boolean success = false;
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
         // Send a message
@@ -528,7 +536,7 @@ public class Client {
 	/**
 	 * 
 	 */
-	public void abortResponse() {
+	void abortResponse() {
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		// Receive message
         String messageHandle = null;
@@ -551,6 +559,7 @@ public class Client {
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
         }
+        
 	}
 	
 	/**
@@ -558,7 +567,7 @@ public class Client {
 	 * @param s
 	 * @return
 	 */
-	public String sigMsg(String s) {
+	String sigMsg(String s) {
 		return crypto.getSignature(s);
 	}
 	
@@ -567,7 +576,7 @@ public class Client {
 	 * @param clientName
 	 * @param queueName
 	 */
-	public void storeQueue(String clientName, String queueName) {
+	void storeQueue(String clientName, String queueName) {
 		String FILENAME = "resource/" + clientName + "/queue";
 
 		File qNameFile = new File(FILENAME);
@@ -587,7 +596,7 @@ public class Client {
 	 * @return
 	 * @throws IOException
 	 */
-	public String readQueueNameFromFile(String clientName) throws IOException {
+	String readQueueNameFromFile(String clientName) throws IOException {
 		String FILENAME = "resource/" + clientName + "/queue";
 		return new String(Files.readAllBytes(Paths.get(FILENAME)));
 	}
@@ -601,7 +610,7 @@ public class Client {
 	 * @param iv
 	 * @throws IOException
 	 */
-	public void replaceSelected(String clientName, String startofline, String data) throws IOException {
+	void replaceSelected(String clientName, String startofline, String data) throws IOException {
 		String store = "";
 		try {
 			File file = new File("resource/" + clientName + "/record");
@@ -635,7 +644,7 @@ public class Client {
 	 * @return
 	 * @throws IOException
 	 */
-	public String readline(String clientName, String startofline) throws IOException {
+	String readline(String clientName, String startofline) throws IOException {
         String a = "";
         	
         File newfile = new File("resource/" + clientName + "/record");
@@ -661,7 +670,7 @@ public class Client {
 	 * @param source
 	 * @param target
 	 */
-	public void returnLabelToTds(String queueName, String label, String source, String target) {
+	void returnLabelToTds(String queueName, String label, String source, String target) {
 		String signlbl = sigMsg(label);
 		
 		boolean success = false;
