@@ -240,11 +240,15 @@ public class Target {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+            
+            // Delete message
+            success = sqsx.deleteMessage(myQueue, messageHandle);
+            System.out.println("Deleted message from queue " + myQueue + " " + success);
+            
+            
         }
         
-        // Delete message
-        success = sqsx.deleteMessage(myQueue, messageHandle);
-        System.out.println("Deleted message from queue " + myQueue + " " + success);
+
 	}
 	
 	/**
@@ -282,11 +286,15 @@ public class Target {
             target.replaceSelected(NAME, "Target", target.getDestination());
             target.replaceSelected(NAME, "EOO", target.getEOO());
             target.replaceSelected(NAME, "RecipientPublicKey", target.getSourcePubKey());
+            
+            
+            // Delete message
+            success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
+            System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
+            
         }		
        
-        // Delete message
-        success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
-        System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
+
 	}
 	
 	/**
