@@ -302,4 +302,73 @@ public class CoffeySaidhaTest {
         
 		assertFalse(result);
 	}
+	
+	@Test
+	public void testAbortStep1() {	
+		// Generate Abort message
+		String msgAbort = sourceCrypto.getSignature("AbortRequest");
+		
+        // Send an abort message with attached document
+		sqsx.abortRequest(TDS_QueueName, label, msgAbort, source, target);   
+        // Receive message back from queue
+        message = sqsx.receiveMessage(TDS_QueueName);
+        if (message != null) {
+            sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
+        }
+		
+		boolean result = CoffeySaidha.abortExchange(label, 1, message, source);
+		assertTrue(result);
+	}
+	
+	@Test
+	public void testAbortStep2() {
+		String filename = "src/main/resources/sample.txt";
+		
+		// Generate EOO message
+		File docFile = new File(filename);
+		String hash = sourceCrypto.getHashOfFile(docFile);
+		String msgEOO = sourceCrypto.getSignature(hash);
+		
+        // Send a message with attached document
+        sqsx.sendMsgDocument(TDS_QueueName, label, msgEOO, filename, source, target);       
+        // Receive message back from queue
+        message = sqsx.receiveMessage(TDS_QueueName);
+        if (message != null) {
+            sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
+        }
+		
+		CoffeySaidha.runStep(label, 1, message, source, target);  
+		
+		
+		// Generate Abort message
+		String msgAbort = sourceCrypto.getSignature("AbortRequest");
+		
+        // Send an abort message with attached document
+		sqsx.abortRequest(TDS_QueueName, label, msgAbort, source, target);   
+        // Receive message back from queue
+        message = sqsx.receiveMessage(TDS_QueueName);
+        if (message != null) {
+            sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
+        }
+		
+		boolean result = CoffeySaidha.abortExchange(label, 2, message, source);
+		assertTrue(result);
+	}
+	
+	@Test
+	public void testAbortStep3() {	
+		// Generate Abort message
+		String msgAbort = sourceCrypto.getSignature("AbortRequest");
+		
+        // Send an abort message with attached document
+		sqsx.abortRequest(TDS_QueueName, label, msgAbort, source, target);   
+        // Receive message back from queue
+        message = sqsx.receiveMessage(TDS_QueueName);
+        if (message != null) {
+            sqsx.deleteMessage(TDS_QueueName, message.getReceiptHandle());
+        }
+		
+		boolean result = CoffeySaidha.abortExchange(label, 3, message, source);
+		assertFalse(result);
+	}
 }

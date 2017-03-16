@@ -352,12 +352,77 @@ public class CoffeySaidha {
 	 * Abort an exchange
 	 * @param label
 	 * @param step
-	 * @param message
+	 * @param message - SigA("AbortRequest")
 	 * @param source
-	 * @param target
 	 * @return
 	 */
-	public static boolean abortExchange(String label, int step, Message message, String source, String target) {
+	public static boolean abortExchange(String label, int step, Message message, String source) {
+		
+		// Abort only allowed for step 1 or 2
+		if (step != 1 && step != 2) {
+			System.err.println("Abort not allowed at this step");
+			return false;
+		}
+		
+		RegisterRepository userRegistry = new RegisterRepositoryImpl();
+		
+		// Get public key for source
+		String sourcePK = userRegistry.getPublicKeyById(source);
+		if (sourcePK == null) {
+			System.err.println("Can't find public key for user " + source);
+			return false;
+		}
+
+		// Check for valid exchange
+		FairExchangeEntity stateEntity = null;
+		UUID uuidLabel = null;
+		try {
+			uuidLabel = UUID.fromString(label);
+			stateEntity = stateRepository.getMessage(uuidLabel);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		// Get signed abort request from current message
+        String msgAbort = message.getBody();
+        System.out.println("Received message " + msgAbort + " from " + source);
+		
+		// Check that signed label matches the sender and their public key
+        CryptoInterface crypto = new Crypto();
+		try {
+			String verification = crypto.isVerified("AbortRequest", sourcePK, msgAbort);
+			System.out.println("Abort message verification:" + verification);
+			if(!verification.equals("Verified")){
+				System.err.println("Abort message not verified");
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		// Delete document from S3 if it exists
+		String fileKey = stateEntity.getFileKey();
+		if (fileKey != null) {
+			try {
+				fileRepository.deleteFile(fileKey);
+			} catch (Exception e) {
+				// Not great if we can't delete the file but shouldn't end the exchange
+				e.printStackTrace();
+			}
+			System.out.println("Deleted document " + fileKey + " from S3");
+		}
+		
+		// Remove entry from state table
+		try {
+			stateRepository.deleteMessage(uuidLabel);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		System.out.println("Delete state table entry for exchange " + label);
+		
 		return true;
 	}
 	
@@ -372,7 +437,6 @@ public class CoffeySaidha {
 	 */
 	public static boolean runStep(String label, int step, Message message, String source, String target) {
 		
-		// String sourceQueue, String targetQueue, String sourcePK, String targetPK
 		RegisterRepository userRegistry = new RegisterRepositoryImpl();
 		
 		// Get public key, queue names for source and target
