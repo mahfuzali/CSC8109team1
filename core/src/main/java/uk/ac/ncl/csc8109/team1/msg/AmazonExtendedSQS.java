@@ -325,6 +325,7 @@ public class AmazonExtendedSQS implements MessageInterface {
 			Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
 			messageAttributes.put("Userid", new MessageAttributeValue().withDataType("String.Userid").withStringValue(userid));
 			messageAttributes.put("PublicKey", new MessageAttributeValue().withDataType("String.PublicKey").withStringValue(publicKey));
+			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue("TDSUSER"));
 		    SendMessageRequest request = new SendMessageRequest();
 		    request.withMessageBody("Registration Request");
 		    request.withQueueUrl(queueUrl);
