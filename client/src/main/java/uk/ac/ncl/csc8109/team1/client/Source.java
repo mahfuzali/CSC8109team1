@@ -64,7 +64,7 @@ public class Source {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		/* Needs changing */
-		String bobUUID = "5ddf9afd-2796-4e44-b20b-d642462ba1d1";
+		String bobUUID = "2a497f70-7921-4115-b2a6-c1fa645bcacd";
 
 
 		Client alice = new Client();
@@ -120,7 +120,7 @@ public class Source {
 				String sigMsg = alice.sigMsg("ExchangeRequest");
 				System.out.println("Exchange Message Signature: " + sigMsg);
 				sendExchangeRequest(TDS_QueueName, PROTOCOL_NAME, sigMsg, alice.getUUID(), bobUUID);
-				while (alice.getLabel() == null && alice.getTargetPubKey() == null) {
+				while (alice.getLabel() == null && alice.getTargetPubKey() == null && alice.getDestination() == null) {
 					Thread.sleep(5000);
 					// Step 4: Receive response with a label and receiver's public key 
 					receiveExchangeResponse(alice, alice.readline("Queue").trim());
@@ -169,7 +169,7 @@ public class Source {
 				// Step 8: Send an abort message to TDS
 				alice.abortRequest(TDS_QueueName, alice.readline("Label").trim(), alice.getUUID(), alice.readline("Target").trim()); 
 
-				while (alice.getAbort() != null) {
+				while (alice.getAbort() == null) {
 					Thread.sleep(5000);
 					alice.abortResponse(alice, alice.readline("Queue").trim());
 				}
@@ -185,53 +185,8 @@ public class Source {
 			}
 		} while (!quit);
 		System.out.println("End of program");
-		
 	}
-	
-	public static void exchange() {
-	// Step 1: 
-		//alice.regRequestForQueue(alice, TDS_QueueName_Reg);
-		
-	// Step 2: 
-		//alice.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Alice/UUID"))).trim() );
-		//alice.replaceSelected(NAME, "Queue", alice.getQueueName());
-		//alice.replaceSelected(NAME, "Target", bobUUID);
-		
-		/*
-	// Step 3: Send TDS a exchange request
-		String sigMsg =  alice.sigMsg("ExchangeRequest");
-		System.out.println("Exchange Message Signture: " + sigMsg);
-		sendExchangeRequest(TDS_QueueName, "CoffeySaidha", sigMsg, alice.getUUID(), bobUUID);
-		*/
-				
-	// Step 4:
-		//receiveExchangeResponse(alice, alice.readline(NAME, "Queue"));
 
-		/*
-		alice.setQueueName(alice.readline(NAME, "Queue").trim());
-		alice.setLabel(alice.readline(NAME, "Label").trim());
-		alice.setDestination(alice.readline(NAME, "Target").trim());
-		System.out.println("Exchange Label: " + alice.readline(NAME, "Label").trim());
-		System.out.println("Exchange Target: " + alice.readline(NAME, "Target").trim());
-		
-		String bobPublicKey = alice.readline(NAME, "RecipientPublicKey").trim();
-		System.out.println(bobPublicKey);
-		
-		String shared = alice.sharedSecret(bobPublicKey);
-		System.out.println(shared);
-
-		alice.encrypt("resource/" + NAME + "/classified", "resource/" + NAME + "/enclassified", shared);
-		File f = new File("resource/" + NAME + "/enclassified");
-		*/
-		
-	// Step 5: encrypt file 	
-		//System.out.println(alice.readline(NAME, "Queue"));
-		//System.out.println("Message send status: " + sendDocMsg(f, alice, alice.readline(NAME, "Queue")));
-	
-    // Step 6:
-		//receiveEORMsg(alice, alice.readline(NAME, "Queue"));
-	}
-	
 	/**
 	 * 
 	 * @param f

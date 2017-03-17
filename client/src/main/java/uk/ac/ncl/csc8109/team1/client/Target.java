@@ -152,7 +152,7 @@ public class Target {
 
 				  bob.abortRequest(TDS_QueueName, bob.readline("Label").trim(), bob.getUUID(), bob.readline("Target").trim()); 
 
-				  while (bob.getAbort() != null) {
+				  while (bob.getAbort() == null) {
 					Thread.sleep(5000);
 					bob.abortResponse(bob, bob.readline("Queue").trim());
 				  }
@@ -169,45 +169,7 @@ public class Target {
 		    }
 		} while (!quit);
 		System.out.println("Bye-bye!");
-
 	}
-
-	
-	public static void exchange() {
-	 // Step 1: 
-		//bob.regRequestForQueue(bob, TDS_QueueName_Reg);
-	
-	 // Step 2: 
-		//bob.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Bob/UUID"))).trim() );
-		//bob.replaceSelected(NAME, "Queue", bob.getQueueName());
-		//bob.replaceSelected(NAME, "Target", aliceUUID);
-
-		
-	// Step 3: 
-		//receiveEOOMsg(bob);
-		
-    // Step 4: 
-		//String eoo = bob.readline(NAME, "EOO");
-		//sendEORMsg(bob.readline(NAME, "Queue"), bob.readline(NAME, "Label"), bob.getEOR(eoo), bob.getUUID().trim(), bob.readline(NAME, "Target"));
-		
-		
-	// Step 5: 
-		//receiveDocMsg(bob, bob.readline(NAME, "Queue"));
-		
-		/**/
-	// Step 6: 
-		//String sigMsg =  bob.sigMsg("PublicKeyRequest");
-		//System.out.println("Exchange Message Signture: " + sigMsg);
-		//sendPubKeyRequest(TDS_QueueName, "PublicKeyRequest", sigMsg, bob.getUUID(), aliceUUID);
-		
-		
-	// Step 7:
-		//receivePubKeyResponse(bob, bob.readline(NAME, "Queue"));
-
-		//String shared = bob.sharedSecret(bob.readline(NAME, "RecipientPublicKey"));
-		//bob.decrypt("resource/" + NAME + "/recClassified", "resource/" + NAME + "/deClassified", shared);
-	}
-	
 	
 	/**
 	 * 

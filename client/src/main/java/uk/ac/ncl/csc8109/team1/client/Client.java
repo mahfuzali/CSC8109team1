@@ -565,14 +565,9 @@ public class Client {
             System.out.println("  Label:" + attributes.get("Label").getStringValue());
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
-            System.out.println("  Abort:" + attributes.get("Abort").getStringValue());
-            
-            
-            if(attributes.get("Abort").getStringValue() == "Success") {
-            	c.setAbort(attributes.get("Abort").getStringValue());
-            } else if (attributes.get("Abort").getStringValue() == "Denied") {
-            	c.setAbort(attributes.get("Abort").getStringValue());
-            }
+
+            c.setAbort(message.getBody());
+
             
             success = sqsx.deleteMessage(queueName, messageHandle);
             System.out.println("Deleted message from queue " + queueName + " " + success);
