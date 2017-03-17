@@ -183,8 +183,10 @@ public class Target {
 	}
 
 	/**
+	 * Receives a document from the queue
 	 * 
-	 * @param myQueue
+	 * @param <code>target</code> target client
+	 * @param <code>myQueue</code> target's queue
 	 * @throws IOException
 	 */
 	public static void receiveDocMsg(Client target, String myQueue) throws IOException {
@@ -219,13 +221,11 @@ public class Target {
 				outputFile = new FileOutputStream("recClassified");
 				outputChannel = Channels.newChannel(outputFile);
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				outputChannel.write(document);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -243,8 +243,8 @@ public class Target {
 	}
 
 	/**
-	 * 
-	 * @param target
+	 * Receives EOO from TDS
+	 * @param <code>target</code> target client
 	 * @throws IOException
 	 */
 	public static void receiveEOOMsg(Client target) throws IOException {
@@ -287,12 +287,13 @@ public class Target {
 	}
 
 	/**
+	 * Send the EOR message to TDS
 	 * 
-	 * @param tdsQueue
-	 * @param label
-	 * @param eor
-	 * @param uuid
-	 * @param target
+	 * @param <code>tdsQueue</code> TDS's queue
+	 * @param </code>label</code> exchange label
+	 * @param </code>eor</code> eor to be send to TDS
+	 * @param <code>uuid</code> source's uuid
+	 * @param <code>target</code> target's uuid
 	 * @return
 	 * @throws IOException
 	 */
@@ -312,56 +313,5 @@ public class Target {
 
 		return success;
 	}
-
-	/**
-	 * 
-	 * @param tdsQueue
-	 * @param protocol
-	 * @param sigMsg
-	 * @param source
-	 * @param target
-	 */
-	public static boolean sendPubKeyRequest(String tdsQueue, String protocol, String sigMsg, String source,
-			String target) {
-		// Initialise queue service
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-
-		// Send an exchange request
-		return sqsx.exchangeRequest(tdsQueue, protocol, sigMsg, source, target);
-	}
-
-	/**
-	 * 
-	 * @param target
-	 * @param myQueue
-	 * @throws IOException
-	 */
-	public static void receivePubKeyResponse(Client target, String myQueue) throws IOException {
-		boolean success = false;
-
-		// Receive it then delete it
-		String messageHandle = null;
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		Message message = sqsx.receiveMessage(myQueue);
-		if (message != null) {
-			messageHandle = message.getReceiptHandle();
-			System.out.println("Message received from queue " + myQueue);
-			System.out.println("  ID: " + message.getMessageId());
-			System.out.println("  Receipt handle: " + messageHandle);
-			System.out.println("  Message body: " + message.getBody());
-			Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
-			System.out.println("  Label:" + attributes.get("Label").getStringValue());
-			System.out.println("  Source:" + attributes.get("Source").getStringValue());
-			System.out.println("  Target:" + attributes.get("Target").getStringValue());
-
-			System.out.println("  TargetKey:" + attributes.get("TargetKey").getStringValue());
-			target.setTargetPubKey(attributes.get("TargetKey").getStringValue());
-
-			target.replaceSelected("RecipientPublicKey", target.getTargetPubKey());
-
-			success = sqsx.deleteMessage(myQueue, messageHandle);
-			System.out.println("Deleted message from queue " + myQueue + " " + success);
-		}
-	}
-
+	
 }
