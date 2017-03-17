@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple App.
+ * Unit test for client.
  */
 public class ClientTest extends TestCase{
     
@@ -46,49 +46,78 @@ public class ClientTest extends TestCase{
         return new TestSuite( ClientTest.class );
     }
 
-    
+    /**
+     * 
+     */
     public void testDestination()
     {
         assertEquals("Bob", alice.getDestination());
     }
 
+    /**
+     * 
+     */
     public void testQueueName()
     {
         assertEquals("queue", alice.getQueueName());
     }
     
+    /**
+     * 
+     */
     public void testUUID()
     {
         assertTrue(alice.getUUID() instanceof String);
     }
     
+    /**
+     * 
+     */
     public void testPublicKey()
     {
         assertTrue(alice.getPublicKey() instanceof String);
     }
     
+    /**
+     * 
+     */
     public void testPrivateKey()
     {
         assertTrue(alice.getPrivateKey() instanceof String);
     }
     
+    /**
+     * 
+     */
     public void testEOOType() {
 		assertTrue(eoo instanceof String);
     }
     
+    /**
+     * 
+     */
     public void testEOO() {
 		assertNotSame(eoo, 1234);
     }
  
+    /**
+     * 
+     */
     public void testEORType() {
 		assertTrue(eor instanceof String);
     }
     
+    /**
+     * 
+     */
     public void testEOR() {
 		System.out.println(eor);
 		assertNotSame(eoo, "abcdef");
     }
     
+    /**
+     * 
+     */
     public void testEOOandEOR() {
 		assertNotSame(eoo, eor);
     }   

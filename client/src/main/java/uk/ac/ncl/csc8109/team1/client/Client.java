@@ -515,11 +515,12 @@ public class Client {
 	}
 	
 	/**
+	 * Register with TDS and receive a private queue name
 	 * 
-	 * @param c
-	 * @param tdsQueue
+	 * @param </code>c</code> client
+	 * @param <code>tdsQueue</code> TDS queue
 	 */
-	 void regRequestForQueue(Client c, String tdsQueue) {
+	 void regRequestForQueue(Client client, String tdsQueue) {
 		boolean success = false;
 		
 		// Initialise queue service
@@ -531,20 +532,21 @@ public class Client {
 	    success = sqsx.create(tdsQueue);
         System.out.println("Created queue " + tdsQueue + " " + success);
         
-        System.out.println("Source's UUID Length:" + c.getUUID().length());
+        System.out.println("Source's UUID Length:" + client.getUUID().length());
         // Send a registration request
-        success = sqsx.registerRequest(tdsQueue, c.getUUID(), c.getPublicKey());
+        success = sqsx.registerRequest(tdsQueue, client.getUUID(), client.getPublicKey());
         System.out.println("Sent registration request to queue " + queueName + " " + success);
         
         
 	}
 	
 	/**
+	 * Gets the queue name from the TDS
 	 * 
-	 * @param tdsQueue
-	 * @param userid
+	 * @param <code>tdsQueue</code> TDS queue
+	 * @param <code>uuid</code> client UUID
 	 */
-	 void getQueueNameFromTDS(String tdsQueue, String userid) {
+	 void getQueueNameFromTDS(String tdsQueue, String uuid) {
 		boolean success = false;
 
 		// Initialise queue service
@@ -553,8 +555,8 @@ public class Client {
         String messageHandle = null;
         
         // Try to receive message for Bob
-        Message message = sqsx.receiveMyMessage(tdsQueue, userid);
-        System.out.println("There is " + (message==null ? "no" : "a") + " message for " + userid);
+        Message message = sqsx.receiveMyMessage(tdsQueue, uuid);
+        System.out.println("There is " + (message==null ? "no" : "a") + " message for " + uuid);
         
         if (message != null) {
         	messageHandle = message.getReceiptHandle();
@@ -575,27 +577,32 @@ public class Client {
 	}
 	
 	/**
+	 * Sends abort request to TDS
 	 * 
-	 * @param tdsQueueName
-	 * @param label
-	 * @param source
-	 * @param target
-	 * @return
+	 * @param <code>tdsQueue</code> TDS queue
+	 * @param </code>label</code> exchange label
+	 * @param <code>source</code> sending client
+	 * @param <code>target</code> receiving client
+	 * @return <code>true</code> if abort sent; otherwise, <code>false</code>
 	 */
-	boolean abortRequest(String tdsQueueName, String label, String source, String target) {
+	boolean abortRequest(String tdsQueue, String label, String source, String target) {
 		boolean success = false;
 		String signAbort = sigMsg("AbortRequest");
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
         // Send a message
-		success = sqsx.abortRequest(tdsQueueName, label, signAbort, source, target);
+		success = sqsx.abortRequest(tdsQueue, label, signAbort, source, target);
         //success = sqsx.sendMessage(exchangeQueueName, label, "Abort", source, target);
         return success;
 	}
 	
 	/**
-	 * 
+	 * Receives abort response from TDS
+	 *
+	 * @param <code>client</code> client
+	 * @param <code>myQueue</code> client's queue
+	 * @return <code>true</code> if abort accepted; if denied, <code>false</code>
 	 */
-	boolean abortResponse(Client c, String myQueue) {
+	boolean abortResponse(Client client, String myQueue) {
 
 		boolean success = false;
 
@@ -615,9 +622,8 @@ public class Client {
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
 
-            c.setAbort(message.getBody());
+            client.setAbort(message.getBody());
 
-            
             success = sqsx.deleteMessage(queueName, messageHandle);
             System.out.println("Deleted message from queue " + queueName + " " + success);
         }
@@ -625,48 +631,28 @@ public class Client {
 	}
 	
 	/**
+	 * Sends label back to TDS
 	 * 
-	 * @param queueName
-	 * @param label
-	 * @param source
-	 * @param target
+	 * @param <code>tdsQueue</code> TDS queue
+	 * @param </code>label</code> exchange label
+	 * @param <code>source</code> sending client
+	 * @param <code>target</code> receiving client
 	 */
-	void returnLabelToTds(String queueName, String label, String source, String target) {
+	void returnLabelToTds(String tdsQueue, String label, String source, String target) {
 		String signlbl = sigMsg(label.replaceAll("-", ""));
 		
 		boolean success = false;
 		// Initialise queue service
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		// Send a message
-        success = sqsx.sendMessage(queueName, label, signlbl, source, target);
-        System.out.println("Sent message to queue " + queueName + " " + success);
+        success = sqsx.sendMessage(tdsQueue, label, signlbl, source, target);
+        System.out.println("Sent message to queue " + tdsQueue + " " + success);
 	}
 	
 	/**
+	 * Reads queue name from a file 
 	 * 
-	 * @param clientName
-	 * @param queueName
-	 */
-	void storeQueue(String queueName) {
-		//String FILENAME = "resource/" + clientName + "/queue";
-		String FILENAME = "queue";
-
-		
-		File qNameFile = new File(FILENAME);
-		if (!qNameFile.exists()) {
-			try {
-				qNameFile.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			write(FILENAME, queueName);
-		}
-	}
-	
-	/**
-	 * 
-	 * @param clientName
-	 * @return
+	 * @return queue name 
 	 * @throws IOException
 	 */
 	String readQueueNameFromFile() throws IOException {
@@ -678,9 +664,8 @@ public class Client {
 	/**
 	 * Replaces specfic line from key file
 	 * 
-	 * @param startofline
-	 * @param data
-	 * @param iv
+	 * @param <code>startofline</code> start of line
+	 * @param <code>data</code> data to be replaced with
 	 * @throws IOException
 	 */
 	void replaceSelected(String startofline, String data) throws IOException {
@@ -713,8 +698,8 @@ public class Client {
 	/**
 	 * Read a specific line
 	 * 
-	 * @param startofline
-	 * @return
+	 * @param <code>startofline</code> start of line
+	 * @return second element of the line 
 	 * @throws IOException
 	 */
 	String readline(String startofline) throws IOException {
