@@ -1,18 +1,5 @@
 package uk.ac.ncl.csc8109.team1.tds;
 
-import java.io.File;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,22 +7,15 @@ import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
 
 import uk.ac.ncl.csc8109.team1.db.model.FairExchangeEntity;
-import uk.ac.ncl.csc8109.team1.db.model.FairExchangeStage;
-import uk.ac.ncl.csc8109.team1.db.model.FileEntity;
-import uk.ac.ncl.csc8109.team1.db.model.LogEntity;
 import uk.ac.ncl.csc8109.team1.db.model.RegisterEntity;
 import uk.ac.ncl.csc8109.team1.db.repository.FileRepository;
-import uk.ac.ncl.csc8109.team1.db.repository.LogRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.MessageRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.RegisterRepository;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.FileRepositoryImpl;
-import uk.ac.ncl.csc8109.team1.db.repository.impl.LogRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.MessageRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.db.repository.impl.RegisterRepositoryImpl;
 import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
 import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
-import uk.ac.ncl.csc8109.team1.crypto.CryptoInterface;
-import uk.ac.ncl.csc8109.team1.crypto.Crypto;
 import uk.ac.ncl.csc8109.team1.tds.CoffeySaidha;
 
 /**
@@ -48,16 +28,18 @@ public class tds {
 	static RegisterRepository rr = new RegisterRepositoryImpl();
 	static RegisterEntity re = new RegisterEntity();
 	static MessageRepository mr = new MessageRepositoryImpl();
-	static LogRepository lr = new LogRepositoryImpl();
-	static LogEntity le = new LogEntity();
 	static FileRepository fr = new FileRepositoryImpl();
-	//get time
-	static long time = System.currentTimeMillis();
+	
+	private static final String tdsMessageQueue = "csc8109_1_tds_queue_20070306"; // TDS message queue name
+	private static final String tdsRegistrationQueue = "csc8109_1_tds_queue_20070306_reg"; // TDS registration queue name
+	private static final MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1"); // Initialise message queueing service
 
 	/**
 	 * Register new TDS user
+	 * @param id
+	 * @param publickey
+	 * @return
 	 */
-
 	public static boolean register(String id, String publickey) {
 		// Check id
 		if(rr.checkAlreadyExist(id))
@@ -68,13 +50,10 @@ public class tds {
 		System.out.println(id);
 		// Create a message queue name
 		String ClientName = "queueName" + UUID.randomUUID().toString();	    
-		//send name to client
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		//create queue
+		// Create queue and send to client
 		boolean success = sqsx.create(ClientName);
 		System.out.println("Create client queue: " + success);
-		String queue2Name = "csc8109_1_tds_queue_20070306_reg";
-		boolean b = sqsx.registerResponse(queue2Name, id, ClientName);
+		boolean b = sqsx.registerResponse(tdsRegistrationQueue, id, ClientName);
 		System.out.println("Send client queue Name" + b);
 		if(!b)
 		{
@@ -121,7 +100,6 @@ public class tds {
 		uuid = UUID.randomUUID();
 
 		// Send label to Alice
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		String fromId_queue = rr.getQueueById(fromId);
 		System.out.println(fromId_queue);
 		String label = uuid.toString().replaceAll("-",  "");
@@ -137,6 +115,7 @@ public class tds {
 		}
 
 		// Initialise exchange state table
+		long time = System.currentTimeMillis(); // Get time
 		fe.setTimestamp(time);
 		fe.setFromID(fromId);
 		fe.setToID(toId);
@@ -162,15 +141,6 @@ public class tds {
 
 	public static void main(String[] args) {
 		System.out.println("TDS Service started");
-
-		// Initialise queue service
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-
-		// TDS message queue name
-		final String tdsMessageQueue = "csc8109_1_tds_queue_20070306";
-
-		// TDS registration queue name
-		final String tdsRegistrationQueue = "csc8109_1_tds_queue_20070306_reg";
 
 		String messageHandle = null;
 		Message message = null;
