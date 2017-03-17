@@ -127,7 +127,7 @@ public class Target {
 		          // do something...
 		          
 		          String eoo = bob.readline("EOO");
-		  		  sendEORMsg(bob.readline("Queue"), bob.readline("Label"), bob.generateEOR(eoo), bob.getUUID().trim(), bob.readline("Target"));
+		  		  sendEORMsg(TDS_QueueName, bob.readline("Label"), bob.generateEOR(eoo), bob.getUUID().trim(), bob.readline("Target"));
 		  		
 		          break;
 		    case 4:
@@ -142,7 +142,7 @@ public class Target {
 		    case 5:
 		          System.out.println("You've chosen item #5");
 		          // do something...		          
-		          bob.returnLabelToTds(bob.readline("Queue"), bob.readline("Label"), bob.getUUID(), bob.readline("Target"));
+		          bob.returnLabelToTds(TDS_QueueName, bob.readline("Label"), bob.getUUID(), bob.readline("Target"));
 
 		          break;
 		    case 6:
