@@ -258,11 +258,13 @@ public class Target {
 				e.printStackTrace();
 			}
             
+    		String shared = c.sharedSecret(c.readline("RecipientPublicKey"));
+    		c.decrypt("recClassified", "deClassified", shared);
+
             // Delete message
             success = sqsx.deleteMessage(myQueue, messageHandle);
             System.out.println("Deleted message from queue " + myQueue + " " + success);
-            
-            
+
         }
         
 
