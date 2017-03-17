@@ -106,7 +106,7 @@ public class Client {
 			uid = UUID.randomUUID().toString();
 			write(FILENAME, uid);
 		} else {
-			uid = new String(Files.readAllBytes(Paths.get(FILENAME)));
+			uid = new String(Files.readAllBytes(Paths.get(FILENAME))).trim();
 		}
 		
 		File pubKey = new File( "resource/" + clientName + "/public.key");
@@ -468,15 +468,14 @@ public class Client {
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		System.out.println("Initialised queue service");
 	
-		// Create a message queue name
-	    String queueName = tdsQueue;
 	    
 	    // Create a queue
-	    success = sqsx.create(queueName);
-        System.out.println("Created queue " + queueName + " " + success);
+	    success = sqsx.create(tdsQueue);
+        System.out.println("Created queue " + tdsQueue + " " + success);
         
+        System.out.println("Source's UUID Length:" + c.getUUID().length());
         // Send a registration request
-        success = sqsx.registerRequest(queueName, c.getUUID() /*"Alice"*/, c.getPublicKey());
+        success = sqsx.registerRequest(tdsQueue, c.getUUID(), c.getPublicKey());
         System.out.println("Sent registration request to queue " + queueName + " " + success);
         
         

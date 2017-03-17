@@ -64,11 +64,12 @@ public class Source {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		/* Needs changing */
-		String bobUUID = "5e869ef4-f37d-4d65-a74b-3e5c188bbdf9";
+		String bobUUID = "9a3761c2-c883-4ab0-be2c-0c13832f11a5";
+
 
 		Client alice = new Client(NAME);
 		System.out.println(NAME + "'s Information");
-		System.out.println("UUID: " + alice.getUUID().trim());
+		System.out.println("UUID: " + alice.getUUID());
 		System.out.println("Public Key: " + alice.getPublicKey());
 		System.out.println("Private Key: " + alice.getPrivateKey());
 
@@ -99,15 +100,16 @@ public class Source {
 			case 1:
 				System.out.println("You've chosen option #1");
 				// Step 1: Register with TDS and request for a queue name
+				
 				alice.regRequestForQueue(alice, TDS_QueueName_Reg);
 				while (alice.getQueueName() == null) {
-					
-					Thread.sleep(20000);
+					Thread.sleep(5000);
 					// Step 2: Get a queue name from the TDS
 					alice.getQueueNameFromTDS(TDS_QueueName_Reg,
-							new String(Files.readAllBytes(Paths.get("resource/Alice/UUID"))).trim());
-					alice.replaceSelected(NAME, "Queue", alice.getQueueName());
+							alice.getUUID());
 				}
+				alice.replaceSelected(NAME, "Queue", alice.getQueueName());
+
 				break;
 			case 2:
 				System.out.println("You've chosen option #2");
@@ -116,9 +118,9 @@ public class Source {
 				System.out.println("Exchange Message Signature: " + sigMsg);
 				sendExchangeRequest(TDS_QueueName, PROTOCOL_NAME, sigMsg, alice.getUUID(), bobUUID);
 				while (alice.getLabel() == null && alice.getTargetPubKey() == null) {
-					//Thread.sleep(20000);
+					Thread.sleep(5000);
 					// Step 4: Receive response with a label and receiver's public key 
-					receiveExchangeResponse(alice, alice.readline(NAME, "Queue"));
+					receiveExchangeResponse(alice, alice.readline(NAME, "Queue").trim());
 				}
 				break;
 			case 3:
@@ -142,15 +144,17 @@ public class Source {
 				File f = new File("resource/" + NAME + "/enclassified");
 
 				// Step 6: Send the encrypted file to TDS
-				System.out.println(alice.readline(NAME, "Queue"));
-				System.out.println("Message send status: " + sendDocMsg(f, alice, alice.readline(NAME, "Queue")));
+				//System.out.println(alice.readline(NAME, "Queue").trim());
+				System.out.println("Message send status: " + sendDocMsg(f, alice, TDS_QueueName));
 
 				break;
 			case 4:
 				System.out.println("You've chosen option #4");
 				// Step 7: Receive the eor from TDS
 				while (alice.getEOR() == null) {
-					receiveEORMsg(alice, alice.readline(NAME, "Queue"));
+					Thread.sleep(5000);
+
+					receiveEORMsg(alice, alice.readline(NAME, "Queue").trim());
 				}
 				break;
 			case 5:

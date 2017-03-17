@@ -101,13 +101,14 @@ public class Target {
 		  		  bob.regRequestForQueue(bob, TDS_QueueName_Reg);
 		  		  while(bob.getQueueName() == null) {
 
-					 //Thread.sleep(20000);
+					 Thread.sleep(10000);
 				   // Step 2: 
-					 bob.getQueueNameFromTDS(TDS_QueueName_Reg, new String(Files.readAllBytes(Paths.get("resource/Bob/UUID"))).trim() );
-					 bob.replaceSelected(NAME, "Queue", bob.getQueueName());
+					 bob.getQueueNameFromTDS(TDS_QueueName_Reg, bob.getUUID() );
 					 //bob.replaceSelected(NAME, "Target", aliceUUID);
 				  }
-		          
+
+		  		  bob.replaceSelected(NAME, "Queue", bob.getQueueName());
+
 		          break;
 		    case 2:
 		          System.out.println("You've chosen item #2");
@@ -115,6 +116,8 @@ public class Target {
 		          
 		          while(bob.getEOO() == null){
 			      	  // Step 3: 
+					  Thread.sleep(10000);
+
 			  		  receiveEOOMsg(bob);  
 		          }
 		
@@ -131,6 +134,8 @@ public class Target {
 		          System.out.println("You've chosen item #4");
 		          // do something...
 		          // Step 5: 
+				  Thread.sleep(5000);
+
 		      	  receiveDocMsg(bob, bob.readline(NAME, "Queue"));
 		          
 		          break;
