@@ -92,11 +92,11 @@ public class TDSSimulation {
 		
 		
 	//Step 4: 
-		receiveDocMsg(aliceExchangeQ);
+		//receiveDocMsg(aliceExchangeQ);
 		
 		
 	//Step 5: 
-		sendEOOMsg(bobExchangeQ, readline("Label"), readline("EOO"), readline("Source"), readline("Target"), alice_publicKey);
+		//sendEOOMsg(bobExchangeQ, readline("Label"), readline("EOO"), readline("Source"), readline("Target"), alice_publicKey);
 
 		
 	// Step 6:

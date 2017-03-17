@@ -24,7 +24,7 @@ public class ClientTest extends TestCase{
     public ClientTest( String testName )
     {
         super( testName );
-        alice = new Client("Alice");
+        alice = new Client();
         alice.setLabel("label");
         alice.setDestination("Bob"); 
         alice.setQueueName("queue");

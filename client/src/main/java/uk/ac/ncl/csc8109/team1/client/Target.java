@@ -64,8 +64,8 @@ public class Target {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		String aliceUUID = "2ed5457b-9c94-4979-baec-9e9e786d8508";
 		
-		Client bob = new Client(NAME);
-		System.out.println(NAME + "'s Information:");
+		Client bob = new Client();
+		System.out.println("Bob's Information:");
 		System.out.println("UUID: " + bob.getUUID().trim());
 		System.out.println("Public Key: " + bob.getPublicKey());
 		System.out.println("Private Key: " + bob.getPrivateKey());
@@ -107,7 +107,7 @@ public class Target {
 					 //bob.replaceSelected(NAME, "Target", aliceUUID);
 				  }
 
-		  		  bob.replaceSelected(NAME, "Queue", bob.getQueueName());
+		  		  bob.replaceSelected("Queue", bob.getQueueName());
 
 		          break;
 		    case 2:
@@ -126,8 +126,8 @@ public class Target {
 		          System.out.println("You've chosen item #3");
 		          // do something...
 		          
-		          String eoo = bob.readline(NAME, "EOO");
-		  		  sendEORMsg(bob.readline(NAME, "Queue"), bob.readline(NAME, "Label"), bob.generateEOR(eoo), bob.getUUID().trim(), bob.readline(NAME, "Target"));
+		          String eoo = bob.readline("EOO");
+		  		  sendEORMsg(bob.readline("Queue"), bob.readline("Label"), bob.generateEOR(eoo), bob.getUUID().trim(), bob.readline("Target"));
 		  		
 		          break;
 		    case 4:
@@ -136,13 +136,13 @@ public class Target {
 		          // Step 5: 
 				  Thread.sleep(5000);
 
-		      	  receiveDocMsg(bob, bob.readline(NAME, "Queue"));
+		      	  receiveDocMsg(bob, bob.readline("Queue"));
 		          
 		          break;
 		    case 5:
 		          System.out.println("You've chosen item #5");
 		          // do something...		          
-		          bob.returnLabelToTds(bob.readline(NAME, "Queue"), bob.readline(NAME, "Label"), bob.getUUID(), bob.readline(NAME, "Target"));
+		          bob.returnLabelToTds(bob.readline("Queue"), bob.readline("Label"), bob.getUUID(), bob.readline("Target"));
 
 		          break;
 		    case 6:
@@ -226,14 +226,14 @@ public class Target {
             document.flip();
             
             
-            c.replaceSelected(NAME, "Label", attributes.get("Label").getStringValue());
-            c.replaceSelected(NAME, "Target", attributes.get("Target").getStringValue());
+            c.replaceSelected("Label", attributes.get("Label").getStringValue());
+            c.replaceSelected("Target", attributes.get("Target").getStringValue());
             
             
             OutputStream outputFile;
             WritableByteChannel outputChannel = null;
 			try {
-				outputFile = new FileOutputStream("resource/"+  NAME + "/recClassified");
+				outputFile = new FileOutputStream("/recClassified");
 	            outputChannel = Channels.newChannel(outputFile);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -263,7 +263,7 @@ public class Target {
 	 */
 	public static void receiveEOOMsg(Client target) throws IOException {
 		boolean success = false;
-		String queue = target.readline(NAME, "Queue");
+		String queue = target.readline("Queue");
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
 		// Receive message
@@ -287,15 +287,15 @@ public class Target {
             target.setDestination(attributes.get("Source").getStringValue().trim());
             target.setSourcePubKey(attributes.get("SourceKey").getStringValue().trim());
             
-            target.replaceSelected(NAME, "Label", target.getLabel());
-            target.replaceSelected(NAME, "Target", target.getDestination());
-            target.replaceSelected(NAME, "EOO", target.getEOO());
-            target.replaceSelected(NAME, "RecipientPublicKey", target.getSourcePubKey());
+            target.replaceSelected("Label", target.getLabel());
+            target.replaceSelected("Target", target.getDestination());
+            target.replaceSelected("EOO", target.getEOO());
+            target.replaceSelected("RecipientPublicKey", target.getSourcePubKey());
             
             
             // Delete message
-            success = sqsx.deleteMessage(target.readline(NAME, "Queue"), messageHandle);
-            System.out.println("Deleted message from queue " + target.readline(NAME, "Queue") + " " + success);
+            success = sqsx.deleteMessage(target.readline("Queue"), messageHandle);
+            System.out.println("Deleted message from queue " + target.readline("Queue") + " " + success);
             
         }		
        
@@ -374,7 +374,7 @@ public class Target {
             System.out.println("  TargetKey:" + attributes.get("TargetKey").getStringValue());
             c.setTargetPubKey(attributes.get("TargetKey").getStringValue());
             
-    		c.replaceSelected(NAME, "RecipientPublicKey", c.getTargetPubKey());
+    		c.replaceSelected("RecipientPublicKey", c.getTargetPubKey());
             
             success = sqsx.deleteMessage(myQueue, messageHandle);
             System.out.println("Deleted message from queue " + myQueue + " " + success);

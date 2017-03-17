@@ -58,23 +58,23 @@ public class Source {
 	private static final String TDS_QueueName_Reg = "csc8109_1_tds_queue_20070306_reg";
 	private static final String PROTOCOL_NAME = "CoffeySaidha";
 	
-	private static final String NAME = "Alice";
+	//private static final String NAME = "Alice";
 
 
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		/* Needs changing */
-		String bobUUID = "9a3761c2-c883-4ab0-be2c-0c13832f11a5";
+		String bobUUID = "20b67872-b644-4daf-9943-c6ee28917f14";
 
 
-		Client alice = new Client(NAME);
-		System.out.println(NAME + "'s Information");
+		Client alice = new Client();
+		System.out.println("Alice's Information");
 		System.out.println("UUID: " + alice.getUUID());
 		System.out.println("Public Key: " + alice.getPublicKey());
 		System.out.println("Private Key: " + alice.getPrivateKey());
 
 		String[] items = { "Register and request for queue name", 
-							"Request for a exchange", 
+							"Request for an exchange", 
 							"Send a document with EOO",
 							"Get EOR from TDS", 
 							"Return label to TDS", 
@@ -108,7 +108,7 @@ public class Source {
 					alice.getQueueNameFromTDS(TDS_QueueName_Reg,
 							alice.getUUID());
 				}
-				alice.replaceSelected(NAME, "Queue", alice.getQueueName());
+				alice.replaceSelected("Queue", alice.getQueueName());
 
 				break;
 			case 2:
@@ -120,28 +120,28 @@ public class Source {
 				while (alice.getLabel() == null && alice.getTargetPubKey() == null) {
 					Thread.sleep(5000);
 					// Step 4: Receive response with a label and receiver's public key 
-					receiveExchangeResponse(alice, alice.readline(NAME, "Queue").trim());
+					receiveExchangeResponse(alice, alice.readline("Queue").trim());
 				}
 				break;
 			case 3:
 				System.out.println("You've chosen option #3");
 
 				// Step 5: encrypt a file
-				alice.setQueueName(alice.readline(NAME, "Queue").trim());
-				alice.setLabel(alice.readline(NAME, "Label").trim());
-				alice.setDestination(alice.readline(NAME, "Target").trim());
-				System.out.println("Exchange Label: " + alice.readline(NAME, "Label").trim());
-				System.out.println("Exchange Target: " + alice.readline(NAME, "Target").trim());
+				alice.setQueueName(alice.readline("Queue").trim());
+				alice.setLabel(alice.readline("Label").trim());
+				alice.setDestination(alice.readline("Target").trim());
+				System.out.println("Exchange Label: " + alice.readline("Label").trim());
+				System.out.println("Exchange Target: " + alice.readline("Target").trim());
 
-				String bobPublicKey = alice.readline(NAME, "RecipientPublicKey").trim();
+				String bobPublicKey = alice.readline("RecipientPublicKey").trim();
 				System.out.println(bobPublicKey);
 
 				// Compute shared secret
 				String shared = alice.sharedSecret(bobPublicKey);
 				System.out.println(shared);
 
-				alice.encrypt("resource/" + NAME + "/classified", "resource/" + NAME + "/enclassified", shared);
-				File f = new File("resource/" + NAME + "/enclassified");
+				alice.encrypt("classified", "enclassified", shared);
+				File f = new File("enclassified");
 
 				// Step 6: Send the encrypted file to TDS
 				//System.out.println(alice.readline(NAME, "Queue").trim());
@@ -153,14 +153,13 @@ public class Source {
 				// Step 7: Receive the eor from TDS
 				while (alice.getEOR() == null) {
 					Thread.sleep(5000);
-
-					receiveEORMsg(alice, alice.readline(NAME, "Queue").trim());
+					receiveEORMsg(alice, alice.readline("Queue").trim());
 				}
 				break;
 			case 5:
 				System.out.println("You've chosen option #5");
 				// Step 8: Return label 
-				alice.returnLabelToTds(alice.readline(NAME, "Queue").trim(), alice.readline(NAME, "Label").trim(), alice.getUUID(), alice.readline(NAME, "Target").trim());
+				alice.returnLabelToTds(alice.readline("Queue").trim(), alice.readline("Label").trim(), alice.getUUID(), alice.readline("Target").trim());
 				break;
 			case 6:
 				System.out.println("You've chosen option #6");
@@ -277,7 +276,7 @@ public class Source {
             System.out.println("  Receipt handle: " + messageHandle);
             System.out.println("  Message body: " + message.getBody());
             
-            c.replaceSelected(NAME, "EOR", message.getBody());
+            c.replaceSelected("EOR", message.getBody());
             c.setEOR(message.getBody());
             
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
@@ -341,9 +340,9 @@ public class Source {
             System.out.println("  TargetKey:" + attributes.get("TargetKey").getStringValue());
             c.setTargetPubKey(attributes.get("TargetKey").getStringValue());
 
-    		c.replaceSelected(NAME, "Label", c.getLabel());
-    		c.replaceSelected(NAME, "Target", c.getDestination());
-    		c.replaceSelected(NAME, "RecipientPublicKey", c.getTargetPubKey());
+    		c.replaceSelected("Label", c.getLabel());
+    		c.replaceSelected("Target", c.getDestination());
+    		c.replaceSelected("RecipientPublicKey", c.getTargetPubKey());
               
             success = sqsx.deleteMessage(myQueue, messageHandle);
             System.out.println("Deleted message from queue " + myQueue + " " + success);

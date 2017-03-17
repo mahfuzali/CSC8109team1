@@ -81,9 +81,9 @@ public class Client {
 	 * @param clientName
 	 */
 	/* For testing purpose client name is provided */
-	public Client(String clientName) {
+	public Client() {
 		try {
-			initialize(clientName);
+			initialize();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -95,8 +95,10 @@ public class Client {
 	 * @param clientName
 	 * @throws IOException
 	 */
-	void initialize(String clientName) throws IOException {
-	String FILENAME = "resource/" + clientName + "/UUID";
+	void initialize(/*String clientName*/) throws IOException {
+	   //String FILENAME = "resource/" + clientName + "/UUID";
+		String FILENAME = "UUID";
+
 		
 		File uuidFile = new File(FILENAME);
 		// if file doesnt exists, then create it
@@ -109,13 +111,17 @@ public class Client {
 			uid = new String(Files.readAllBytes(Paths.get(FILENAME))).trim();
 		}
 		
-		File pubKey = new File( "resource/" + clientName + "/public.key");
-		File priKey = new File( "resource/" + clientName + "/private.key");
+		//File pubKey = new File( "resource/" + clientName + "/public.key");
+		//File priKey = new File( "resource/" + clientName + "/private.key");
+		File pubKey = new File("public.key");
+		File priKey = new File("private.key");
 		
 		if (pubKey.exists() && priKey.exists()) {
 			//System.out.println("Exist");
 			crypto = new Crypto();
-			crypto.loadKeyPair("resource/" + clientName);
+			//crypto.loadKeyPair("resource/" + clientName);
+			crypto.loadKeyPair("");
+
 			this.publicKey = crypto.getPublicKey();
 			this.privateKey = crypto.getPrivateKey();
 		} else {
@@ -124,7 +130,10 @@ public class Client {
 			priKey.createNewFile();
 			
 			crypto = new Crypto();
-			crypto.storeKeyPair("resource/" + clientName);
+			//crypto.storeKeyPair("resource/" + clientName);
+			crypto.storeKeyPair("");
+
+			
 			this.publicKey = crypto.getPublicKey();
 			this.privateKey = crypto.getPrivateKey();
 		}
@@ -575,9 +584,11 @@ public class Client {
 	 * @param clientName
 	 * @param queueName
 	 */
-	void storeQueue(String clientName, String queueName) {
-		String FILENAME = "resource/" + clientName + "/queue";
+	void storeQueue(String queueName) {
+		//String FILENAME = "resource/" + clientName + "/queue";
+		String FILENAME = "queue";
 
+		
 		File qNameFile = new File(FILENAME);
 		if (!qNameFile.exists()) {
 			try {
@@ -595,8 +606,8 @@ public class Client {
 	 * @return
 	 * @throws IOException
 	 */
-	String readQueueNameFromFile(String clientName) throws IOException {
-		String FILENAME = "resource/" + clientName + "/queue";
+	String readQueueNameFromFile() throws IOException {
+		String FILENAME = "queue";
 		return new String(Files.readAllBytes(Paths.get(FILENAME)));
 	}
 	
@@ -609,10 +620,10 @@ public class Client {
 	 * @param iv
 	 * @throws IOException
 	 */
-	void replaceSelected(String clientName, String startofline, String data) throws IOException {
+	void replaceSelected(String startofline, String data) throws IOException {
 		String store = "";
 		try {
-			File file = new File("resource/" + clientName + "/record");
+			File file = new File("record");
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line = "", oldtext = "";
 			while ((line = reader.readLine()) != null) {
@@ -627,7 +638,7 @@ public class Client {
 
 			String newtext = oldtext.replace(tmp[1], data);
 
-			FileWriter writer = new FileWriter("resource/" + clientName +  "/record");
+			FileWriter writer = new FileWriter("record");
 			writer.write(newtext);
 			writer.close();
 		} catch (IOException ioe) {
@@ -643,10 +654,10 @@ public class Client {
 	 * @return
 	 * @throws IOException
 	 */
-	String readline(String clientName, String startofline) throws IOException {
+	String readline(String startofline) throws IOException {
         String a = "";
         	
-        File newfile = new File("resource/" + clientName + "/record");
+        File newfile = new File("record");
         BufferedReader reader = new BufferedReader(new FileReader(newfile));
         String line = "";
         
