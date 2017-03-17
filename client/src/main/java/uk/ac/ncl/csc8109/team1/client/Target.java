@@ -48,7 +48,7 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
 import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
 
-/** 
+/**
  * This class represents a target client i.e. the receiver
  * 
  * @author Mahfuz Ali
@@ -56,186 +56,179 @@ import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
  * @email m.ali4@newcastle.ac.uk
  */
 public class Target {
-	private static final String TDS_QueueName = "csc8109_1_tds_queue_20070306";
-	private static final String TDS_QueueName_Reg = "csc8109_1_tds_queue_20070306_reg";
+	private static final String TDS_QUEUE = "csc8109_1_tds_queue_20070306";
+	private static final String TDS_REGISTRATION_QUEUE = "csc8109_1_tds_queue_20070306_reg";
 
 	private static final String NAME = "Bob";
-	
+
 	public static void main(String[] args) throws IOException, InterruptedException {
 		String aliceUUID = "273a22a1-4002-44f8-9561-f6101d2fd074";
-		
+
 		Client bob = new Client();
 		System.out.println("Bob's Information:");
 		System.out.println("UUID: " + bob.getUUID().trim());
 		System.out.println("Public Key: " + bob.getPublicKey());
 		System.out.println("Private Key: " + bob.getPrivateKey());
-		
+
 		bob.replaceSelected("Target", aliceUUID);
 
-		
-		String[] items = {"Register and request for queue name",
-				  "Get EOO from TDS",
-				  "Send EOR message to TDS",
-				  "Check TDS for a document",
-				  "Return label to TDS", 
-				  "Send abort message",
-				  "End program"};
-		
+		String[] items = { "Register and request for queue name", "Get EOO from TDS", "Send EOR message to TDS",
+				"Check TDS for a document", "Return label to TDS", "Send abort message", "End program" };
+
 		Scanner in = new Scanner(System.in);
-		// print menu
+
+		// Print menu
 		for (int i = 1; i <= 7; i++) {
-		  System.out.println(i + ". " + items[i-1]);        	
+			System.out.println(i + ". " + items[i - 1]);
 		}
 		System.out.println("0. Quit");
-		
+
 		// handle user commands
 		boolean quit = false;
 		int menuItem;
-		
+
 		do {
-		    System.out.print("Choose menu item: ");
-		    menuItem = in.nextInt();
-		    switch (menuItem) {
-		    case 1:
-		          System.out.println("You've chosen item #1");
-		          // do something...
-				  // Step 1: 
-		  		  bob.regRequestForQueue(bob, TDS_QueueName_Reg);
-		  		  while(bob.getQueueName() == null) {
+			System.out.print("Choose a menu item: ");
+			menuItem = in.nextInt();
+			switch (menuItem) {
+			case 1:
+				System.out.println("You've chosen item #1");
+				// Step 1:
+				bob.regRequestForQueue(bob, TDS_REGISTRATION_QUEUE);
+				while (bob.getQueueName() == null) {
 
-					 Thread.sleep(10000);
-				   // Step 2: 
-					 bob.getQueueNameFromTDS(TDS_QueueName_Reg, bob.getUUID() );
-				  }
+					Thread.sleep(10000);
+					// Step 2:
+					bob.getQueueNameFromTDS(TDS_REGISTRATION_QUEUE, bob.getUUID());
+				}
 
-		  		  bob.replaceSelected("Queue", bob.getQueueName());
+				bob.replaceSelected("Queue", bob.getQueueName());
 
-		          break;
-		    case 2:
-		          System.out.println("You've chosen item #2");
-		          // do something...
-		          
-		          while(bob.getEOO() == null){
-			      	  // Step 3: 
-					  Thread.sleep(10000);
+				break;
+			case 2:
+				System.out.println("You've chosen item #2");
+				// do something...
 
-			  		  receiveEOOMsg(bob);  
-		          }
-		
-		          break;
-		    case 3:
-		          System.out.println("You've chosen item #3");
-		          // do something...
-		          
-		          String eoo = bob.readline("EOO");
-		  		  sendEORMsg(TDS_QueueName, bob.readline("Label"), bob.generateEOR(eoo), bob.getUUID().trim(), bob.readline("Target"));
-		  		
-		          break;
-		    case 4:
-		          System.out.println("You've chosen item #4");
-		          // do something...
-		          // Step 5: 
-				  Thread.sleep(5000);
+				while (bob.getEOO() == null) {
+					// Step 3:
+					Thread.sleep(10000);
 
-		      	  receiveDocMsg(bob, bob.readline("Queue"));
-		          
-		          break;
-		    case 5:
-		          System.out.println("You've chosen item #5");
-		          // do something...		          
-		          bob.returnLabelToTds(TDS_QueueName, bob.readline("Label"), bob.getUUID(), bob.readline("Target"));
+					receiveEOOMsg(bob);
+				}
 
-		          break;
-		    case 6:
-		          System.out.println("You've chosen item #6");
-		          // do something...
+				break;
+			case 3:
+				System.out.println("You've chosen item #3");
+				// do something...
 
-				  bob.abortRequest(TDS_QueueName, bob.readline("Label").trim(), bob.getUUID(), bob.readline("Target").trim()); 
+				String eoo = bob.readline("EOO");
+				sendEORMsg(TDS_QUEUE, bob.readline("Label"), bob.generateEOR(eoo), bob.getUUID().trim(),
+						bob.readline("Target"));
 
-				  while (bob.getAbort() == null) {
+				break;
+			case 4:
+				System.out.println("You've chosen item #4");
+				// do something...
+				// Step 5:
+				Thread.sleep(5000);
+
+				receiveDocMsg(bob, bob.readline("Queue"));
+
+				break;
+			case 5:
+				System.out.println("You've chosen item #5");
+				// do something...
+				bob.returnLabelToTds(TDS_QUEUE, bob.readline("Label"), bob.getUUID(), bob.readline("Target"));
+
+				break;
+			case 6:
+				System.out.println("You've chosen item #6");
+				// do something...
+
+				bob.abortRequest(TDS_QUEUE, bob.readline("Label").trim(), bob.getUUID(),
+						bob.readline("Target").trim());
+
+				while (bob.getAbort() == null) {
 					Thread.sleep(5000);
 					bob.abortResponse(bob, bob.readline("Queue").trim());
-				  }
-				  
-				  System.out.println("About request accepted: " + bob.getAbort());
+				}
 
+				System.out.println("About request accepted: " + bob.getAbort());
 
-		          break;
-		    case 0:
-		          quit = true;
-		          break;
-		    default:
-		          System.out.println("Invalid choice.");
-		    }
+				break;
+			case 0:
+				quit = true;
+				break;
+			default:
+				System.out.println("Invalid choice.");
+			}
 		} while (!quit);
 		System.out.println("Bye-bye!");
+		in.close();
 	}
-	
+
 	/**
 	 * 
 	 * @param myQueue
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void receiveDocMsg(Client c, String myQueue) throws IOException {
-        boolean success = false;
+		boolean success = false;
 		// Receive message with attached document
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
 		String messageHandle = null;
-        Message message = sqsx.receiveMessage(myQueue);
-        ByteBuffer document;
-        if (message != null) {
-        	messageHandle = message.getReceiptHandle();
-        	System.out.println("Message received from queue " + myQueue);
-            System.out.println("  ID: " + message.getMessageId());
-            System.out.println("  Receipt handle: " + messageHandle);
-            System.out.println("  Message body: " + message.getBody());
-            //setEOO(message.getBody());
-            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
-            System.out.println("  Label:" + attributes.get("Label").getStringValue());
-            System.out.println("  Source:" + attributes.get("Source").getStringValue());
-            System.out.println("  Target:" + attributes.get("Target").getStringValue());
-            System.out.println("  DocumentName:" + attributes.get("DocumentName").getStringValue());
-            document = attributes.get("Document").getBinaryValue().asReadOnlyBuffer();
-            document.flip();
-            
-            
-            c.replaceSelected("Label", attributes.get("Label").getStringValue());
-            c.replaceSelected("Target", attributes.get("Target").getStringValue());
-            
-            
-            OutputStream outputFile;
-            WritableByteChannel outputChannel = null;
+		Message message = sqsx.receiveMessage(myQueue);
+		ByteBuffer document;
+		if (message != null) {
+			messageHandle = message.getReceiptHandle();
+			System.out.println("Message received from queue " + myQueue);
+			System.out.println("  ID: " + message.getMessageId());
+			System.out.println("  Receipt handle: " + messageHandle);
+			System.out.println("  Message body: " + message.getBody());
+			// setEOO(message.getBody());
+			Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+			System.out.println("  Label:" + attributes.get("Label").getStringValue());
+			System.out.println("  Source:" + attributes.get("Source").getStringValue());
+			System.out.println("  Target:" + attributes.get("Target").getStringValue());
+			System.out.println("  DocumentName:" + attributes.get("DocumentName").getStringValue());
+			document = attributes.get("Document").getBinaryValue().asReadOnlyBuffer();
+			document.flip();
+
+			c.replaceSelected("Label", attributes.get("Label").getStringValue());
+			c.replaceSelected("Target", attributes.get("Target").getStringValue());
+
+			OutputStream outputFile;
+			WritableByteChannel outputChannel = null;
 			try {
 				outputFile = new FileOutputStream("recClassified");
-	            outputChannel = Channels.newChannel(outputFile);
+				outputChannel = Channels.newChannel(outputFile);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            try {
+			try {
 				outputChannel.write(document);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            
-    		String shared = c.sharedSecret(c.readline("RecipientPublicKey"));
-    		c.decrypt("recClassified", "deClassified", shared);
 
-            // Delete message
-            success = sqsx.deleteMessage(myQueue, messageHandle);
-            System.out.println("Deleted message from queue " + myQueue + " " + success);
+			String shared = c.sharedSecret(c.readline("RecipientPublicKey"));
+			c.decrypt("recClassified", "deClassified", shared);
 
-        }
-        
+			// Delete message
+			success = sqsx.deleteMessage(myQueue, messageHandle);
+			System.out.println("Deleted message from queue " + myQueue + " " + success);
+
+		}
 
 	}
-	
+
 	/**
 	 * 
 	 * @param target
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void receiveEOOMsg(Client target) throws IOException {
 		boolean success = false;
@@ -243,41 +236,39 @@ public class Target {
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
 		// Receive message
-        String messageHandle = null;
-        Message message = sqsx.receiveMessage(queue);
-        if (message != null) {
-        	messageHandle = message.getReceiptHandle();
-        	System.out.println("Message received from queue " + queue);
-            System.out.println("  ID: " + message.getMessageId());
-            System.out.println("  Receipt handle: " + messageHandle);
-            System.out.println("  Message body: " + message.getBody());
-            target.setEOO(message.getBody());
-            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
-            System.out.println("  Label:" + attributes.get("Label").getStringValue());
-            
-            System.out.println("  Source:" + attributes.get("Source").getStringValue());
-            System.out.println("  Target:" + attributes.get("Target").getStringValue());
-            System.out.println("  SourceKey:" + attributes.get("SourceKey").getStringValue());
-            
-            target.setLabel(attributes.get("Label").getStringValue().trim());
-            target.setDestination(attributes.get("Source").getStringValue().trim());
-            target.setSourcePubKey(attributes.get("SourceKey").getStringValue().trim());
-            
-            target.replaceSelected("Label", target.getLabel());
-            target.replaceSelected("Target", target.getDestination());
-            target.replaceSelected("EOO", target.getEOO());
-            target.replaceSelected("RecipientPublicKey", target.getSourcePubKey());
-            
-            
-            // Delete message
-            success = sqsx.deleteMessage(target.readline("Queue"), messageHandle);
-            System.out.println("Deleted message from queue " + target.readline("Queue") + " " + success);
-            
-        }		
-       
+		String messageHandle = null;
+		Message message = sqsx.receiveMessage(queue);
+		if (message != null) {
+			messageHandle = message.getReceiptHandle();
+			System.out.println("Message received from queue " + queue);
+			System.out.println("  ID: " + message.getMessageId());
+			System.out.println("  Receipt handle: " + messageHandle);
+			System.out.println("  Message body: " + message.getBody());
+			target.setEOO(message.getBody());
+			Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+			System.out.println("  Label:" + attributes.get("Label").getStringValue());
+
+			System.out.println("  Source:" + attributes.get("Source").getStringValue());
+			System.out.println("  Target:" + attributes.get("Target").getStringValue());
+			System.out.println("  SourceKey:" + attributes.get("SourceKey").getStringValue());
+
+			target.setLabel(attributes.get("Label").getStringValue().trim());
+			target.setDestination(attributes.get("Source").getStringValue().trim());
+			target.setSourcePubKey(attributes.get("SourceKey").getStringValue().trim());
+
+			target.replaceSelected("Label", target.getLabel());
+			target.replaceSelected("Target", target.getDestination());
+			target.replaceSelected("EOO", target.getEOO());
+			target.replaceSelected("RecipientPublicKey", target.getSourcePubKey());
+
+			// Delete message
+			success = sqsx.deleteMessage(target.readline("Queue"), messageHandle);
+			System.out.println("Deleted message from queue " + target.readline("Queue") + " " + success);
+
+		}
 
 	}
-	
+
 	/**
 	 * 
 	 * @param tdsQueue
@@ -288,24 +279,23 @@ public class Target {
 	 * @return
 	 * @throws IOException
 	 */
-	public static boolean sendEORMsg(String tdsQueue, String label, String eor, String uuid, String target) throws IOException {
+	public static boolean sendEORMsg(String tdsQueue, String label, String eor, String uuid, String target)
+			throws IOException {
 		boolean success = false;
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 
-		if ((tdsQueue != null && !tdsQueue.isEmpty()) 
-				&& (label != null && !label.isEmpty())
-				&& (eor != null && !eor.isEmpty())
-				&& (uuid != null && !uuid.isEmpty())
+		if ((tdsQueue != null && !tdsQueue.isEmpty()) && (label != null && !label.isEmpty())
+				&& (eor != null && !eor.isEmpty()) && (uuid != null && !uuid.isEmpty())
 				&& (target != null && !target.isEmpty())) {
-			
+
 			success = sqsx.sendMessage(tdsQueue, label, eor, uuid, target);
 			if (!success)
 				throw new IllegalArgumentException("null or empty value is passed");
 		}
-	
+
 		return success;
 	}
-	
+
 	/**
 	 * 
 	 * @param tdsQueue
@@ -314,15 +304,15 @@ public class Target {
 	 * @param source
 	 * @param target
 	 */
-	public static void sendPubKeyRequest(String tdsQueue, String protocol, String sigMsg, String source, String target) {
-		boolean success = false;
+	public static boolean sendPubKeyRequest(String tdsQueue, String protocol, String sigMsg, String source,
+			String target) {
 		// Initialise queue service
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-        
-        // Send an exchange request
-        success = sqsx.exchangeRequest(tdsQueue, protocol, sigMsg, source, target);
+
+		// Send an exchange request
+		return sqsx.exchangeRequest(tdsQueue, protocol, sigMsg, source, target);
 	}
-	
+
 	/**
 	 * 
 	 * @param c
@@ -333,29 +323,28 @@ public class Target {
 		boolean success = false;
 
 		// Receive it then delete it
-        String messageHandle = null;
+		String messageHandle = null;
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-        Message message = sqsx.receiveMessage(myQueue);
-        if (message != null) {
-        	messageHandle = message.getReceiptHandle();
-        	System.out.println("Message received from queue " + myQueue);
-            System.out.println("  ID: " + message.getMessageId());
-            System.out.println("  Receipt handle: " + messageHandle);
-            System.out.println("  Message body: " + message.getBody());
-            Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
-            System.out.println("  Label:" + attributes.get("Label").getStringValue());            
-            System.out.println("  Source:" + attributes.get("Source").getStringValue());
-            System.out.println("  Target:" + attributes.get("Target").getStringValue());
+		Message message = sqsx.receiveMessage(myQueue);
+		if (message != null) {
+			messageHandle = message.getReceiptHandle();
+			System.out.println("Message received from queue " + myQueue);
+			System.out.println("  ID: " + message.getMessageId());
+			System.out.println("  Receipt handle: " + messageHandle);
+			System.out.println("  Message body: " + message.getBody());
+			Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
+			System.out.println("  Label:" + attributes.get("Label").getStringValue());
+			System.out.println("  Source:" + attributes.get("Source").getStringValue());
+			System.out.println("  Target:" + attributes.get("Target").getStringValue());
 
-            System.out.println("  TargetKey:" + attributes.get("TargetKey").getStringValue());
-            c.setTargetPubKey(attributes.get("TargetKey").getStringValue());
-            
-    		c.replaceSelected("RecipientPublicKey", c.getTargetPubKey());
-            
-            success = sqsx.deleteMessage(myQueue, messageHandle);
-            System.out.println("Deleted message from queue " + myQueue + " " + success);
-        }
+			System.out.println("  TargetKey:" + attributes.get("TargetKey").getStringValue());
+			c.setTargetPubKey(attributes.get("TargetKey").getStringValue());
+
+			c.replaceSelected("RecipientPublicKey", c.getTargetPubKey());
+
+			success = sqsx.deleteMessage(myQueue, messageHandle);
+			System.out.println("Deleted message from queue " + myQueue + " " + success);
+		}
 	}
-	
 
 }

@@ -78,9 +78,7 @@ public class Client {
 	/**
 	 * In instantiation, a unique id is generated; along with,
 	 * public and private key and a queue name
-	 * @param clientName
 	 */
-	/* For testing purpose client name is provided */
 	public Client() {
 		try {
 			initialize();
@@ -92,10 +90,9 @@ public class Client {
 
 	/**
 	 * 
-	 * @param clientName
 	 * @throws IOException
 	 */
-	void initialize(/*String clientName*/) throws IOException {
+	void initialize() throws IOException {
 	   //String FILENAME = "resource/" + clientName + "/UUID";
 		String FILENAME = "UUID";
 
