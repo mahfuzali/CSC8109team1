@@ -64,7 +64,7 @@ public class Source {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		/* Needs changing */
-		String bobUUID = "47344255-e610-4561-a2c0-6a1285a4cd4f";
+		String bobUUID = "5ddf9afd-2796-4e44-b20b-d642462ba1d1";
 
 
 		Client alice = new Client();
@@ -162,12 +162,20 @@ public class Source {
 			case 5:
 				System.out.println("You've chosen option #5");
 				// Step 8: Return label 
-				alice.returnLabelToTds(alice.readline("Queue").trim(), alice.readline("Label").trim(), alice.getUUID(), alice.readline("Target").trim());
+				alice.returnLabelToTds(TDS_QueueName, alice.readline("Label").trim(), alice.getUUID(), alice.readline("Target").trim());
 				break;
 			case 6:
 				System.out.println("You've chosen option #6");
 				// Step 8: Send an abort message to TDS
-				// TODO: 
+				alice.abortRequest(TDS_QueueName, alice.readline("Label").trim(), alice.getUUID(), alice.readline("Target").trim()); 
+
+				while (alice.getAbort() != null) {
+					Thread.sleep(5000);
+					alice.abortResponse(alice, alice.readline("Queue").trim());
+				}
+				
+				System.out.println("About request accepted: " + alice.getAbort());
+				
 				break;
 			case 0:
 				quit = true;

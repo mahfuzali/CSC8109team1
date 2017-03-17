@@ -149,6 +149,17 @@ public class Target {
 		    case 6:
 		          System.out.println("You've chosen item #6");
 		          // do something...
+
+				  bob.abortRequest(TDS_QueueName, bob.readline("Label").trim(), bob.getUUID(), bob.readline("Target").trim()); 
+
+				  while (bob.getAbort() != null) {
+					Thread.sleep(5000);
+					bob.abortResponse(bob, bob.readline("Queue").trim());
+				  }
+				  
+				  System.out.println("About request accepted: " + bob.getAbort());
+
+
 		          break;
 		    case 0:
 		          quit = true;
@@ -234,7 +245,7 @@ public class Target {
             OutputStream outputFile;
             WritableByteChannel outputChannel = null;
 			try {
-				outputFile = new FileOutputStream("/recClassified");
+				outputFile = new FileOutputStream("recClassified");
 	            outputChannel = Channels.newChannel(outputFile);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block

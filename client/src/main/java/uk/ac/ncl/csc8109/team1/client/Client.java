@@ -67,7 +67,7 @@ public class Client {
 	private String tds;
 	private String destination;
 	
-	private boolean abort;
+	private String abort;
 	
 	private String sourcePubKey;
 	private String targetPubKey;
@@ -231,7 +231,7 @@ public class Client {
 	 * 
 	 * @return
 	 */
-	public boolean isAbort() {
+	public String getAbort() {
 		return abort;
 	}
 	
@@ -239,7 +239,7 @@ public class Client {
 	 * 
 	 * @param abort
 	 */
-	void setAbort(boolean abort) {
+	void setAbort(String abort) {
 		this.abort = abort;
 	}
 
@@ -527,47 +527,57 @@ public class Client {
 	
 	/**
 	 * 
-	 * @param exchangeQueueName
+	 * @param tdsQueueName
 	 * @param label
 	 * @param source
 	 * @param target
 	 * @return
 	 */
-	boolean abortRequest(String exchangeQueueName, String label, String source, String target) {
+	boolean abortRequest(String tdsQueueName, String label, String source, String target) {
 		boolean success = false;
+		String signAbort = sigMsg("AbortRequest");
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
         // Send a message
-        success = sqsx.sendMessage(exchangeQueueName, label, "Abort", source, target);
+		success = sqsx.abortRequest(tdsQueueName, label, signAbort, source, target);
+        //success = sqsx.sendMessage(exchangeQueueName, label, "Abort", source, target);
         return success;
 	}
 	
 	/**
 	 * 
 	 */
-	void abortResponse() {
+	boolean abortResponse(Client c, String myQueue) {
+
+		boolean success = false;
+
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		// Receive message
         String messageHandle = null;
-        Message message = sqsx.receiveMessage(queueName);
+        Message message = sqsx.receiveMessage(myQueue);
+        
         if (message != null) {
         	messageHandle = message.getReceiptHandle();
-        	System.out.println("Message received from queue " + queueName);
+        	System.out.println("Message received from queue " + myQueue);
             System.out.println("  ID: " + message.getMessageId());
             System.out.println("  Receipt handle: " + messageHandle);
             System.out.println("  Message body: " + message.getBody());
-            if(message.getBody() != null) {
-            	if (message.getBody().equals("Granted")) {
-            		setAbort(true);
-            	} else if (message.getBody().equals("Denied")) {
-            		setAbort(false);
-            	}
-            }
             Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
             System.out.println("  Label:" + attributes.get("Label").getStringValue());
             System.out.println("  Source:" + attributes.get("Source").getStringValue());
             System.out.println("  Target:" + attributes.get("Target").getStringValue());
+            System.out.println("  Abort:" + attributes.get("Abort").getStringValue());
+            
+            
+            if(attributes.get("Abort").getStringValue() == "Success") {
+            	c.setAbort(attributes.get("Abort").getStringValue());
+            } else if (attributes.get("Abort").getStringValue() == "Denied") {
+            	c.setAbort(attributes.get("Abort").getStringValue());
+            }
+            
+            success = sqsx.deleteMessage(queueName, messageHandle);
+            System.out.println("Deleted message from queue " + queueName + " " + success);
         }
-        
+		return success;
 	}
 	
 	/**
@@ -681,7 +691,7 @@ public class Client {
 	 * @param target
 	 */
 	void returnLabelToTds(String queueName, String label, String source, String target) {
-		String signlbl = sigMsg(label);
+		String signlbl = sigMsg(label.replaceAll("-", ""));
 		
 		boolean success = false;
 		// Initialise queue service
