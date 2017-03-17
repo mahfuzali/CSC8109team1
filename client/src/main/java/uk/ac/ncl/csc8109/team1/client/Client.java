@@ -59,7 +59,7 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
 public class Client {
 	private CryptoInterface crypto;
 
-	private String uid;
+	private String uuid;
 	private String publicKey;
 	private String privateKey;
 	
@@ -83,7 +83,7 @@ public class Client {
 	 */
 	public Client() {
 		try {
-			initialize();
+			initialise();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -91,47 +91,41 @@ public class Client {
 
 
 	/**
+	 * Initialises the UUID, public and private key; 
+	 * if already exists then loads it from files
 	 * 
 	 * @throws IOException
 	 */
-	void initialize() throws IOException {
-	   //String FILENAME = "resource/" + clientName + "/UUID";
+	void initialise() throws IOException {
 		String FILENAME = "UUID";
 
-		
 		File uuidFile = new File(FILENAME);
+		
 		// if file doesnt exists, then create it
 		if (!uuidFile.exists()) {
 			uuidFile.createNewFile();
 			
-			uid = UUID.randomUUID().toString();
-			write(FILENAME, uid);
+			uuid = UUID.randomUUID().toString();
+			write(FILENAME, uuid);
 		} else {
-			uid = new String(Files.readAllBytes(Paths.get(FILENAME))).trim();
+			uuid = new String(Files.readAllBytes(Paths.get(FILENAME))).trim();
 		}
 		
-		//File pubKey = new File( "resource/" + clientName + "/public.key");
-		//File priKey = new File( "resource/" + clientName + "/private.key");
 		File pubKey = new File("public.key");
 		File priKey = new File("private.key");
 		
 		if (pubKey.exists() && priKey.exists()) {
-			//System.out.println("Exist");
 			crypto = new Crypto();
-			//crypto.loadKeyPair("resource/" + clientName);
 			crypto.loadKeyPair("");
 
 			this.publicKey = crypto.getPublicKey();
 			this.privateKey = crypto.getPrivateKey();
 		} else {
-			//System.out.println("Does not exist");
 			pubKey.createNewFile();
 			priKey.createNewFile();
 			
 			crypto = new Crypto();
-			//crypto.storeKeyPair("resource/" + clientName);
 			crypto.storeKeyPair("");
-
 			
 			this.publicKey = crypto.getPublicKey();
 			this.privateKey = crypto.getPrivateKey();
@@ -140,15 +134,17 @@ public class Client {
 	
 	/**
 	 * Gets the unique uuid
-	 * @return <code>uid</code>
+	 * 
+	 * @return <code>uuid</code> UUID
 	 */
 	public String getUUID() {
-		return uid;
+		return uuid;
 	}
 
 	/**
 	 * Gets the public key
-	 * @return <code>publicKey</code>
+	 * 
+	 * @return <code>publicKey</code> public key
 	 */
 	public String getPublicKey() {
 		return publicKey;
@@ -156,7 +152,8 @@ public class Client {
 
 	/**
 	 * Gets the private key
-	 * @return <code>privateKey</code>
+	 * 
+	 * @return <code>privateKey</code> private key
 	 */
 	public String getPrivateKey() {
 		return privateKey;
@@ -164,7 +161,8 @@ public class Client {
 
 	/**
 	 * Gets the queue name
-	 * @return <code>queueName</code>
+	 * 
+	 * @return <code>queueName</code> queue name
 	 */
 	public String getQueueName() {
 		return queueName;
@@ -172,7 +170,8 @@ public class Client {
 
 	/**
 	 * Sets the queue
-	 * @param queueName
+	 * 
+	 * @param <code>queueName</code>  queue name
 	 */
 	void setQueueName(String queueName) {
 		this.queueName = queueName;
@@ -180,7 +179,7 @@ public class Client {
 
 	/**
 	 * Gets the label
-	 * @return <code>label</code>
+	 * @return <code>label</code> exchange label
 	 */
 	public String getLabel() {
 		return label;
@@ -188,7 +187,8 @@ public class Client {
 
 	/**
 	 * Sets the label for exchange
-	 * @param <code>label</code> label for exchange
+	 * 
+	 * @param <code>label</code> exchange label
 	 */
 	void setLabel(String label) {
 		this.label = label;
@@ -196,6 +196,7 @@ public class Client {
 
 	/**
 	 * Gets the name of the tds 
+	 * 
 	 * @return <code>tds</code> name of the tds
 	 */
 	public String getTds() {
@@ -204,6 +205,7 @@ public class Client {
 
 	/**
 	 * Sets the value name of the tds
+	 * 
 	 * @param <code>tds<code> name of tds
 	 */
 	void setTds(String tds) {
@@ -212,6 +214,7 @@ public class Client {
 
 	/**
 	 * Gets the name of the destination
+	 * 
 	 * @return <code>source</code> destination name
 	 */
 	public String getDestination() {
@@ -220,6 +223,7 @@ public class Client {
 
 	/**
 	 * Sets the name of the destination
+	 * 
 	 * @param <code>source</code> destination name
 	 */
 	void setDestination(String destination) {
