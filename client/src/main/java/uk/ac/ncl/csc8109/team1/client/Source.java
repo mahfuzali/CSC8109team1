@@ -178,6 +178,7 @@ public class Source {
 					System.out.println("Waiting for the abort response...");
 					
 					Thread.sleep(5000);
+					// Step 9: Receive abort response
 					alice.abortResponse(alice, alice.readline("Queue").trim());
 				}
 

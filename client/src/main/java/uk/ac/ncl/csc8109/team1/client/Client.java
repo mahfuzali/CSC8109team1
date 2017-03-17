@@ -57,23 +57,25 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
  * @email m.ali4@newcastle.ac.uk
  */
 public class Client {
+	private CryptoInterface crypto;
+
 	private String uid;
 	private String publicKey;
 	private String privateKey;
+	
 	private String queueName;
-	private String label;
-	private CryptoInterface crypto;
+	private String label;	
 	
 	private String tds;
 	private String destination;
-	
 	private String abort;
-	
+
 	private String sourcePubKey;
 	private String targetPubKey;
-	
 	private String EOO;
 	private String EOR;
+	
+	private boolean receivedDoc;
 	
 	/**
 	 * In instantiation, a unique id is generated; along with,
@@ -303,6 +305,22 @@ public class Client {
 	 */
 	public void setEOR(String eOR) {
 		EOR = eOR;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isReceivedDoc() {
+		return receivedDoc;
+	}
+
+	/**
+	 * 
+	 * @param receivedDoc
+	 */
+	public void setReceivedDoc(boolean receivedDoc) {
+		this.receivedDoc = receivedDoc;
 	}
 
 	/**

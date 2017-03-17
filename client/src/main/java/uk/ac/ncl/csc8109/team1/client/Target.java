@@ -120,52 +120,65 @@ public class Target {
 
 				break;
 			case 3:
-				System.out.println("You've chosen item #3");
-				// do something...
-
+				System.out.print("You've chosen item #3: ");
+				System.out.println("Send EOR message to TDS");
+				
 				String eoo = bob.readline("EOO");
+				// Step 4: Send to EOR to TDS
 				sendEORMsg(TDS_QUEUE, bob.readline("Label"), bob.generateEOR(eoo), bob.getUUID().trim(),
 						bob.readline("Target"));
 
 				break;
 			case 4:
-				System.out.println("You've chosen item #4");
-				// do something...
-				// Step 5:
-				Thread.sleep(5000);
-
-				receiveDocMsg(bob, bob.readline("Queue"));
+				System.out.print("You've chosen item #4: ");
+				System.out.println("Check TDS for a document");
+				
+				while (bob.isReceivedDoc() == false) {
+					System.out.println("Waiting to receive document...");
+					
+					Thread.sleep(5000);
+					// Step 5: Receive the document from TDS
+					receiveDocMsg(bob, bob.readline("Queue"));					
+				}
 
 				break;
 			case 5:
-				System.out.println("You've chosen item #5");
-				// do something...
+				System.out.print("You've chosen item #5: ");
+				System.out.println("Return label to TDS");
+				
+				// Step 6: Return label
 				bob.returnLabelToTds(TDS_QUEUE, bob.readline("Label"), bob.getUUID(), bob.readline("Target"));
 
 				break;
 			case 6:
-				System.out.println("You've chosen item #6");
-				// do something...
-
+				System.out.print("You've chosen item #6: ");
+				System.out.println("Send abort message");
+				
+				// Step 7: Send an abort message to TDS
 				bob.abortRequest(TDS_QUEUE, bob.readline("Label").trim(), bob.getUUID(),
 						bob.readline("Target").trim());
 
 				while (bob.getAbort() == null) {
+					System.out.println("Waiting for the abort response...");
+
 					Thread.sleep(5000);
+					// Step 8: Receive abort response
 					bob.abortResponse(bob, bob.readline("Queue").trim());
 				}
 
-				System.out.println("About request accepted: " + bob.getAbort());
+				System.out.println("Abort request accepted: " + bob.getAbort());
 
 				break;
 			case 0:
 				quit = true;
+				System.out.println("Exiting the program...");
 				break;
 			default:
-				System.out.println("Invalid choice.");
+				System.out.println("Invalid choice. Please, try again.");
 			}
 		} while (!quit);
-		System.out.println("Bye-bye!");
+		
+		System.out.println("End of program");
 		in.close();
 	}
 
@@ -174,7 +187,7 @@ public class Target {
 	 * @param myQueue
 	 * @throws IOException
 	 */
-	public static void receiveDocMsg(Client c, String myQueue) throws IOException {
+	public static void receiveDocMsg(Client target, String myQueue) throws IOException {
 		boolean success = false;
 		// Receive message with attached document
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
@@ -197,8 +210,8 @@ public class Target {
 			document = attributes.get("Document").getBinaryValue().asReadOnlyBuffer();
 			document.flip();
 
-			c.replaceSelected("Label", attributes.get("Label").getStringValue());
-			c.replaceSelected("Target", attributes.get("Target").getStringValue());
+			target.replaceSelected("Label", attributes.get("Label").getStringValue());
+			target.replaceSelected("Target", attributes.get("Target").getStringValue());
 
 			OutputStream outputFile;
 			WritableByteChannel outputChannel = null;
@@ -216,9 +229,11 @@ public class Target {
 				e.printStackTrace();
 			}
 
-			String shared = c.sharedSecret(c.readline("RecipientPublicKey"));
-			c.decrypt("recClassified", "deClassified", shared);
+			String shared = target.sharedSecret(target.readline("RecipientPublicKey"));
+			target.decrypt("recClassified", "deClassified", shared);
 
+			target.setReceivedDoc(true);
+			
 			// Delete message
 			success = sqsx.deleteMessage(myQueue, messageHandle);
 			System.out.println("Deleted message from queue " + myQueue + " " + success);
@@ -317,11 +332,11 @@ public class Target {
 
 	/**
 	 * 
-	 * @param c
+	 * @param target
 	 * @param myQueue
 	 * @throws IOException
 	 */
-	public static void receivePubKeyResponse(Client c, String myQueue) throws IOException {
+	public static void receivePubKeyResponse(Client target, String myQueue) throws IOException {
 		boolean success = false;
 
 		// Receive it then delete it
@@ -340,9 +355,9 @@ public class Target {
 			System.out.println("  Target:" + attributes.get("Target").getStringValue());
 
 			System.out.println("  TargetKey:" + attributes.get("TargetKey").getStringValue());
-			c.setTargetPubKey(attributes.get("TargetKey").getStringValue());
+			target.setTargetPubKey(attributes.get("TargetKey").getStringValue());
 
-			c.replaceSelected("RecipientPublicKey", c.getTargetPubKey());
+			target.replaceSelected("RecipientPublicKey", target.getTargetPubKey());
 
 			success = sqsx.deleteMessage(myQueue, messageHandle);
 			System.out.println("Deleted message from queue " + myQueue + " " + success);
