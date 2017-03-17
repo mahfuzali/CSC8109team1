@@ -102,7 +102,7 @@ public class tds {
 		// Send label to Alice
 		String fromId_queue = rr.getQueueById(fromId);
 		System.out.println(fromId_queue);
-		String label = uuid.toString().replaceAll("-",  "");
+		String label = uuid.toString();
 		message = "exchange response£» " + label;
 		String toid_publickey = rr.getPublicKeyById(toId);
 		System.out.println(toid_publickey);
