@@ -261,7 +261,7 @@ public class Source {
 			System.out.println("  Source:" + attributes.get("Source").getStringValue());
 			System.out.println("  Target:" + attributes.get("Target").getStringValue());
 
-			System.out.println("EOR: " + source.getEOR());
+			System.out.println("Received EOR from TDS: " + source.getEOR());
 			
 			// Delete message
 			success = sqsx.deleteMessage(myQueue, messageHandle);

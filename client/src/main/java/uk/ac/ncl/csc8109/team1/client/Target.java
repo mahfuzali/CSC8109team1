@@ -278,6 +278,8 @@ public class Target {
 			target.replaceSelected("EOO", target.getEOO());
 			target.replaceSelected("RecipientPublicKey", target.getSourcePubKey());
 
+			System.out.println("Received EOO from TDS: " + target.getEOO());
+			
 			// Delete message
 			success = sqsx.deleteMessage(target.readline("Queue"), messageHandle);
 			System.out.println("Deleted message from queue " + target.readline("Queue") + " " + success);
