@@ -50,7 +50,7 @@ public class CryptoApp {
 		
 		
 		
-		/*
+		
 		sender(alice);
 		receiver(bob);
 		
@@ -61,7 +61,7 @@ public class CryptoApp {
 		
 		getSharedKey(alice, bob);
 		encryptionAndDecryption(alice, bob);
-		*/	
+		/**/	
 	}
 	
 	/**
@@ -157,9 +157,9 @@ public class CryptoApp {
 		String receiverCheck = receiver.getSharedKey(sender.getPublicKey());
 	
 		System.out.println("Alice encrypts the file using the computes shared key");
-		sender.encryptFile("tech", "encryptedtech", senderCheck);
+		sender.encryptFile("resource/classified", "resource/encryptedclassified", senderCheck);
 		System.out.println("Bob decrypts the file using the computes shared key");
-		receiver.decryptFile("encryptedtech", "decryptedtech", receiverCheck);
+		receiver.decryptFile("resource/encryptedclassified", "resource/decryptedclassified", receiverCheck);
 	}
 	
 	

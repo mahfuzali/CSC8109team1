@@ -208,12 +208,12 @@ class CryptoUtil {
 		PublicKey publicKey = keyPair.getPublic();
 
 		X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());
-		FileOutputStream fos = new FileOutputStream(path + "/public.key");
+		FileOutputStream fos = new FileOutputStream(path + "public.key");
 		fos.write(x509EncodedKeySpec.getEncoded());
 		fos.close();
 
 		PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
-		fos = new FileOutputStream(path + "/private.key");
+		fos = new FileOutputStream(path + "private.key");
 		fos.write(pkcs8EncodedKeySpec.getEncoded());
 		fos.close();
 	}
@@ -231,14 +231,14 @@ class CryptoUtil {
 	KeyPair loadKeyPair(String path)
 			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		// read public key from file
-		File filePublicKey = new File(path + "/public.key");
+		File filePublicKey = new File(path + "public.key");
 		FileInputStream fis = new FileInputStream(filePublicKey);
 		byte[] encodedPublicKey = new byte[(int) filePublicKey.length()];
 		fis.read(encodedPublicKey);
 		fis.close();
 
 		// read private key from file
-		File filePrivateKey = new File(path + "/private.key");
+		File filePrivateKey = new File(path + "private.key");
 		fis = new FileInputStream(filePrivateKey);
 		byte[] encodedPrivateKey = new byte[(int) filePrivateKey.length()];
 		fis.read(encodedPrivateKey);
