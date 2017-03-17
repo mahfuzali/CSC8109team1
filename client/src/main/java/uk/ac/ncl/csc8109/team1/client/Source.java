@@ -89,8 +89,8 @@ public class Source {
 			case 1:
 				System.out.print("You've chosen option #1: ");
 				System.out.println("Register and request for queue name");
+				
 				// Step 1: Register with TDS and request for a queue name
-
 				alice.regRequestForQueue(alice, TDS_REGISTRATION_QUEUE);
 				while (alice.getQueueName() == null) {
 					System.out.println("Waiting for the queue name...");

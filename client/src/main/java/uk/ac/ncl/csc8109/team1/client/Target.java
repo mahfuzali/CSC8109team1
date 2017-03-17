@@ -52,14 +52,12 @@ import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
  * This class represents a target client i.e. the receiver
  * 
  * @author Mahfuz Ali
- * @Version 1.3
+ * @Version 1.5
  * @email m.ali4@newcastle.ac.uk
  */
 public class Target {
 	private static final String TDS_QUEUE = "csc8109_1_tds_queue_20070306";
 	private static final String TDS_REGISTRATION_QUEUE = "csc8109_1_tds_queue_20070306_reg";
-
-	private static final String NAME = "Bob";
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		String aliceUUID = "273a22a1-4002-44f8-9561-f6101d2fd074";
@@ -83,7 +81,7 @@ public class Target {
 		}
 		System.out.println("0. Quit");
 
-		// handle user commands
+		// Handle user commands
 		boolean quit = false;
 		int menuItem;
 
@@ -92,13 +90,16 @@ public class Target {
 			menuItem = in.nextInt();
 			switch (menuItem) {
 			case 1:
-				System.out.println("You've chosen item #1");
-				// Step 1:
+				System.out.print("You've chosen item #1: ");
+				System.out.println("Register and request for queue name");
+
+				// Step 1: Register with TDS and request for a queue name
 				bob.regRequestForQueue(bob, TDS_REGISTRATION_QUEUE);
 				while (bob.getQueueName() == null) {
-
-					Thread.sleep(10000);
-					// Step 2:
+					System.out.println("Waiting for the queue name...");
+					
+					Thread.sleep(5000);
+					// Step 2: Get a queue name from the TDS
 					bob.getQueueNameFromTDS(TDS_REGISTRATION_QUEUE, bob.getUUID());
 				}
 
@@ -111,7 +112,7 @@ public class Target {
 
 				while (bob.getEOO() == null) {
 					// Step 3:
-					Thread.sleep(10000);
+					Thread.sleep(5000);
 
 					receiveEOOMsg(bob);
 				}
