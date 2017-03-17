@@ -52,7 +52,7 @@ public class CoffeySaidha {
 	 * @param toQueue
 	 * @return
 	 */
-	public static boolean receiveDocEOO(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
+	private static boolean receiveDocEOO(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
 		
 		// Check for valid exchange
 		FairExchangeEntity stateEntity = null;
@@ -169,7 +169,7 @@ public class CoffeySaidha {
 	 * @param toQueue
 	 * @return
 	 */
-	public static boolean receiveEOR(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
+	private static boolean receiveEOR(Message message, String label, String fromid, String fromQueue, String fromPK, String toid, String toQueue){
 
 		// Check for valid exchange
 		FairExchangeEntity stateEntity = null;
@@ -264,7 +264,7 @@ public class CoffeySaidha {
 	 * @param fromPK
 	 * @return
 	 */
-	public static boolean receiveLabel(int step, Message message, String label, String fromid, String fromPK, String toid) {
+	private static boolean receiveLabel(int step, Message message, String label, String fromid, String fromPK, String toid) {
 		
 		// Check for valid exchange
 		FairExchangeEntity stateEntity = null;
@@ -356,7 +356,9 @@ public class CoffeySaidha {
 	 * @param source
 	 * @return
 	 */
-	public static boolean abortExchange(String label, int step, Message message, String source) {
+	private static boolean abort(String label, int step, Message message, String source) {
+		
+		RegisterRepository userRegistry = new RegisterRepositoryImpl();
 		
 		// Abort only allowed for step 1 or 2
 		if (step != 1 && step != 2) {
@@ -364,14 +366,12 @@ public class CoffeySaidha {
 			return false;
 		}
 		
-		RegisterRepository userRegistry = new RegisterRepositoryImpl();
-		
 		// Get public key for source
 		String sourcePK = userRegistry.getPublicKeyById(source);
 		if (sourcePK == null) {
 			System.err.println("Can't find public key for user " + source);
 			return false;
-		}
+		}	
 
 		// Check for valid exchange
 		FairExchangeEntity stateEntity = null;
@@ -487,5 +487,35 @@ public class CoffeySaidha {
 		}
 		
 		return true;
-	}	
+	}
+	
+	/**
+	 * Abort an exchange (public wrapper)
+	 * @param label
+	 * @param step
+	 * @param message - SigA("AbortRequest")
+	 * @param source
+	 * @return
+	 */
+	public static boolean abortExchange(String label, int step, Message message, String source) {
+
+		RegisterRepository userRegistry = new RegisterRepositoryImpl();
+
+		String sourceQueue = userRegistry.getQueueById(source);
+		if (sourceQueue == null) {
+			System.err.println("Can't find queue name for user " + source);
+			return false;
+		}
+		
+		boolean abortSuccess = abort(label, step, message, source);
+		
+		// Send Abort result to Source
+		if (!sqsx.sendMessage(sourceQueue, label, (abortSuccess ? "Success" : "Denied"), "TDSUSER", source)) {
+			System.err.println("Can't send message to queue " + sourceQueue);
+			return false;			
+		};
+		System.out.println("Sent abort response to queue " + sourceQueue);
+		
+		return true;
+	}
 }

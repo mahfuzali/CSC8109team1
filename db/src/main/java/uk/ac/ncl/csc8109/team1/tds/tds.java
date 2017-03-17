@@ -242,6 +242,13 @@ public class tds {
 						System.out.println("Label=" + Label);
 					}
 					
+					// Get the abort attribute if present
+					String abort = null;
+					if (attributes.get("Abort") != null) {
+						abort = attributes.get("Abort").getStringValue();
+						System.out.println("Abort=" + abort);
+					}
+					
 					// Get the message body
 					String Message = message.getBody();				
 
@@ -274,7 +281,13 @@ public class tds {
 						
 						if (table_protocol.equals("CoffeySaidha")) {
 							System.out.println("CoffeySaidha step " + stage);
-							boolean success = CoffeySaidha.runStep(Label, stage, message, fromid,toId);
+							
+							boolean success;				
+							if (abort!= null && abort.equals("AbortRequest")) {
+								success = CoffeySaidha.abortExchange(Label, stage, message, fromid);
+							} else {
+								success = CoffeySaidha.runStep(Label, stage, message, fromid,toId);
+							}
 							System.out.println(success);
 						} else {
 							System.err.println("Unrecognised protocol " + table_protocol);
@@ -297,10 +310,7 @@ public class tds {
 			catch (InterruptedException e){
 				running = false;
 			}
-
 		}
-
 	}
-
 }
 
