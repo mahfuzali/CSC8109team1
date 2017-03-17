@@ -72,6 +72,7 @@ public class Client {
 
 	private String sourcePubKey;
 	private String targetPubKey;
+	
 	private String EOO;
 	private String EOR;
 	
@@ -286,48 +287,54 @@ public class Client {
 	}
 
 	/**
+	 * Gets the EOO
 	 * 
-	 * @return
+	 * @return <code>EOO</code> EOO from source
 	 */
 	public String getEOO() {
 		return EOO;
 	}
 
 	/**
+	 * Sets the EOO
 	 * 
-	 * @param eOO
+	 * @param <code>eOO</code> EOO from source
 	 */
 	public void setEOO(String eOO) {
 		EOO = eOO;
 	}
 
 	/**
+	 * Gets the EOR
 	 * 
-	 * @return
+	 * @return <code>EOR</code> EOO from target
 	 */
 	public String getEOR() {
 		return EOR;
 	}
 
 	/**
+	 * Gets the EOR
 	 * 
-	 * @param eOR
+	 * @param <code>eOR</code> EOO from target
 	 */
 	public void setEOR(String eOR) {
 		EOR = eOR;
 	}
 
 	/**
+	 * Check if document received
 	 * 
-	 * @return
+	 * @return <code>receivedDoc</code> true if received; otherwise, false
 	 */
 	public boolean isReceivedDoc() {
 		return receivedDoc;
 	}
 
 	/**
+	 * Sets value when expecting a document from TDS
 	 * 
-	 * @param receivedDoc
+	 * @param <code>receivedDoc</code> true if received; otherwise, false
 	 */
 	public void setReceivedDoc(boolean receivedDoc) {
 		this.receivedDoc = receivedDoc;
@@ -446,54 +453,67 @@ public class Client {
 	}
 
 	/**
+	 * Encrypts the file
 	 * 
-	 * @param f
-	 * @param inputPath
-	 * @param outputPath
-	 * @param key
+	 * @param <code>inputPath</code> file to encrypt
+	 * @param <code>outputPath<code> encrypted file
+	 * @param <code>key</code> key to encrypt the file with
 	 */
 	void encrypt(String inputPath, String outputPath, String key) {
 		crypto.encryptFile(inputPath, outputPath, key);
 	}
 	
 	/**
+	 * Decryptd the file
 	 * 
-	 * @param f
-	 * @param inputPath
-	 * @param outputPath
-	 * @param key
+	 * @param <code>inputPath</code> file to decrypt
+	 * @param <code>outputPath<code> decrypted file
+	 * @param <code>key</code> key to decrypt the file with
 	 */
 	void decrypt(String inputPath, String outputPath, String key) {
 		crypto.decryptFile(inputPath, outputPath, key);
 	}
 	
 	/**
+	 * Calculates shared secret
 	 * 
-	 * @param recipientsPublicKey
+	 * @param <code>targetPublicKey</code> target's public key
 	 * @return
 	 */
-	String sharedSecret(String recipientsPublicKey) {
-		return crypto.getSharedKey(recipientsPublicKey);
+	String sharedSecret(String targetPublicKey) {
+		return crypto.getSharedKey(targetPublicKey);
 	}
 	
 	/**
+	 * Generates EOO
 	 * 
-	 * @param file
-	 * @return
+	 * @param <code>file</code> file to be used to generate EOO
+	 * @return <code>EOO</code> generated EOO
 	 */
 	String generateEOO(File file) {
 		return crypto.getSignature(crypto.getHashOfFile(file));
 	}
 
 	/**
+	 * Generates EOR
 	 * 
-	 * @param str
-	 * @return
+	 * @param <code>str</code> EOO to be used to generate EOR
+	 * @return <code>EOR</code> generated EO
 	 */
-	String generateEOR(String str) {
-		return crypto.getSignature(str);
+	String generateEOR(String eoo) {
+		return crypto.getSignature(eoo);
 	}
 
+	/**
+	 * Generates a signature of a string
+	 * 
+	 * @param <code>str</code> string to be used to generate signature
+	 * @return <code>signature</code> generated signature
+	 */
+	String sigMsg(String str) {
+		return crypto.getSignature(str);
+	}
+	
 	/**
 	 * 
 	 * @param c
@@ -606,11 +626,20 @@ public class Client {
 	
 	/**
 	 * 
-	 * @param s
-	 * @return
+	 * @param queueName
+	 * @param label
+	 * @param source
+	 * @param target
 	 */
-	String sigMsg(String s) {
-		return crypto.getSignature(s);
+	void returnLabelToTds(String queueName, String label, String source, String target) {
+		String signlbl = sigMsg(label.replaceAll("-", ""));
+		
+		boolean success = false;
+		// Initialise queue service
+		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
+		// Send a message
+        success = sqsx.sendMessage(queueName, label, signlbl, source, target);
+        System.out.println("Sent message to queue " + queueName + " " + success);
 	}
 	
 	/**
@@ -705,24 +734,6 @@ public class Client {
         String[] tmp = a.split(" : ");
 
         return tmp[1];
-	}
-	
-	/**
-	 * 
-	 * @param queueName
-	 * @param label
-	 * @param source
-	 * @param target
-	 */
-	void returnLabelToTds(String queueName, String label, String source, String target) {
-		String signlbl = sigMsg(label.replaceAll("-", ""));
-		
-		boolean success = false;
-		// Initialise queue service
-		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
-		// Send a message
-        success = sqsx.sendMessage(queueName, label, signlbl, source, target);
-        System.out.println("Sent message to queue " + queueName + " " + success);
 	}
 	
 }
