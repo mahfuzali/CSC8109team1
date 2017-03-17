@@ -64,7 +64,7 @@ public class Source {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		/* Needs changing */
-		String bobUUID = "20b67872-b644-4daf-9943-c6ee28917f14";
+		String bobUUID = "47344255-e610-4561-a2c0-6a1285a4cd4f";
 
 
 		Client alice = new Client();
