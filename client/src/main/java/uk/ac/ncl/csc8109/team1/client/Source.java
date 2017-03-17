@@ -150,11 +150,11 @@ public class Source {
 				System.out.print("You've chosen option #4: ");
 				System.out.println("Get EOR from TDS");
 				
-				// Step 7: Receive the eor from TDS
 				while (alice.getEOR() == null) {
 					System.out.println("Waiting for the EOR...");
 
 					Thread.sleep(5000);
+					// Step 7: Receive the eor from TDS
 					receiveEORMsg(alice, alice.readline("Queue").trim());
 				}
 				break;

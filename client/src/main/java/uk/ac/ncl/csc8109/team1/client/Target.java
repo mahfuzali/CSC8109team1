@@ -107,13 +107,14 @@ public class Target {
 
 				break;
 			case 2:
-				System.out.println("You've chosen item #2");
-				// do something...
-
+				System.out.print("You've chosen item #2: ");
+				System.out.println("Get EOO from TDS");
+				
 				while (bob.getEOO() == null) {
-					// Step 3:
-					Thread.sleep(5000);
+					System.out.println("Waiting for the EOO...");
 
+					Thread.sleep(5000);
+					// Step 3: Receive EOO from TDS
 					receiveEOOMsg(bob);
 				}
 
