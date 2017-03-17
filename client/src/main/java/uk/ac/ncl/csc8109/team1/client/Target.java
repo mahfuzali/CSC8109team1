@@ -62,7 +62,7 @@ public class Target {
 	private static final String NAME = "Bob";
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		String aliceUUID = "2ed5457b-9c94-4979-baec-9e9e786d8508";
+		String aliceUUID = "273a22a1-4002-44f8-9561-f6101d2fd074";
 		
 		Client bob = new Client();
 		System.out.println("Bob's Information:");
@@ -70,6 +70,8 @@ public class Target {
 		System.out.println("Public Key: " + bob.getPublicKey());
 		System.out.println("Private Key: " + bob.getPrivateKey());
 		
+		bob.replaceSelected("Target", aliceUUID);
+
 		
 		String[] items = {"Register and request for queue name",
 				  "Get EOO from TDS",
@@ -104,7 +106,6 @@ public class Target {
 					 Thread.sleep(10000);
 				   // Step 2: 
 					 bob.getQueueNameFromTDS(TDS_QueueName_Reg, bob.getUUID() );
-					 //bob.replaceSelected(NAME, "Target", aliceUUID);
 				  }
 
 		  		  bob.replaceSelected("Queue", bob.getQueueName());

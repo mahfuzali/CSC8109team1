@@ -73,6 +73,9 @@ public class Source {
 		System.out.println("Public Key: " + alice.getPublicKey());
 		System.out.println("Private Key: " + alice.getPrivateKey());
 
+		alice.replaceSelected("Target", bobUUID);
+
+		
 		String[] items = { "Register and request for queue name", 
 							"Request for an exchange", 
 							"Send a document with EOO",
