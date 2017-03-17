@@ -231,16 +231,18 @@ public class Client {
 	}
 	
 	/**
+	 * Gets abort response
 	 * 
-	 * @return
+	 * @return <code>abort</code> abort response
 	 */
 	public String getAbort() {
 		return abort;
 	}
 	
 	/**
+	 * Sets abort response 
 	 * 
-	 * @param abort
+	 * @param <code>abort</code> abort response
 	 */
 	void setAbort(String abort) {
 		this.abort = abort;
@@ -248,35 +250,39 @@ public class Client {
 
 	
 	/**
+	 * Gets source's public key
 	 * 
-	 * @return
+	 * @return <code>sourcePubKey</code> source's public key
 	 */
 	public String getSourcePubKey() {
 		return sourcePubKey;
 	}
 
 	/**
+	 * Sets source's public key
 	 * 
-	 * @param sourcePubKey
+	 * @param <code>sourcePubKey</code> source's public key
 	 */
 	void setSourcePubKey(String sourcePubKey) {
 		this.sourcePubKey = sourcePubKey;
 	}
 
 	/**
+	 * Gets target's public key
 	 * 
-	 * @return
+	 * @return <code>targetPubKey</code> target's public key
 	 */
 	public String getTargetPubKey() {
 		return targetPubKey;
 	}
 
 	/**
+	 * Sets target's public key
 	 * 
-	 * @param key
+	 * @param <code>targetPubKey</code> target's public key
 	 */
-	void setTargetPubKey(String key) {
-		targetPubKey = key;
+	void setTargetPubKey(String targetPubKey) {
+		this.targetPubKey = targetPubKey;
 	}
 
 	/**
@@ -329,6 +335,7 @@ public class Client {
 
 	/**
 	 * Writes to a file only if the data does not exists
+	 * 
 	 * @param <code>FILENAME<code> name of the file 
 	 * @param <code>data</code> data to write
 	 */
@@ -343,6 +350,7 @@ public class Client {
 	
 	/**
 	 * Reads from a file
+	 * 
 	 * @param <code>FILENAME</code> file to read from
 	 */
 	public void readFromFile(String FILENAME) {
@@ -369,7 +377,8 @@ public class Client {
 	}
 	
 	/**
-	 * Writes to a file o
+	 * Writes to a file
+	 * 
 	 * @param <code>FILENAME<code> name of the file 
 	 * @param <code>data</code> data to write
 	 */
@@ -403,6 +412,7 @@ public class Client {
 	
 	/**
 	 * Checks if the data exists in the file
+	 * 
 	 * @param <code>FILENAME<code> name of the file 
 	 * @param <code>data</code> data to check
 	 * @return <code>true</code> if exists; else, <code>false</code>
