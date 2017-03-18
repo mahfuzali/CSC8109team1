@@ -180,6 +180,7 @@ public class Client {
 
 	/**
 	 * Gets the label
+	 * 
 	 * @return <code>label</code> exchange label
 	 */
 	public String getLabel() {
