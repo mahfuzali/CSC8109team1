@@ -754,6 +754,4 @@ public class Client {
 		return COFFEY_SAIDHA_PROTOCOL;
 	}
 
-	
-	
 }
