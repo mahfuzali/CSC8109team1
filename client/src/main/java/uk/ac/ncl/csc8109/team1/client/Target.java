@@ -54,10 +54,9 @@ import uk.ac.ncl.csc8109.team1.msg.MessageInterface;
  * @email m.ali4@newcastle.ac.uk
  */
 public class Target {
-	private static final String TDS_QUEUE = "csc8109_1_tds_queue_20070306";
-	private static final String TDS_REGISTRATION_QUEUE = "csc8109_1_tds_queue_20070306_reg";
 
 	public static void main(String[] args) throws IOException, InterruptedException {
+		/* Assumption: prior exchange of UUID with the source before protocol execution */
 		String aliceUUID = "273a22a1-4002-44f8-9561-f6101d2fd074";
 
 		Client bob = new Client();
@@ -92,13 +91,13 @@ public class Target {
 				System.out.println("Register and request for queue name");
 
 				// Step 1: Register with TDS and request for a queue name
-				bob.regRequestForQueue(bob, TDS_REGISTRATION_QUEUE);
+				bob.regRequestForQueue(bob, bob.getTdsRegistrationQueue());
 				while (bob.getQueueName() == null) {
 					System.out.println("Waiting for the queue name...");
 					
 					Thread.sleep(5000);
 					// Step 2: Get a queue name from the TDS
-					bob.getQueueNameFromTDS(TDS_REGISTRATION_QUEUE, bob.getUUID());
+					bob.getQueueNameFromTDS(bob.getTdsRegistrationQueue(), bob.getUUID());
 				}
 
 				bob.replaceSelected("Queue", bob.getQueueName());
@@ -123,7 +122,7 @@ public class Target {
 				
 				String eoo = bob.readline("EOO");
 				// Step 4: Send to EOR to TDS
-				sendEORMsg(TDS_QUEUE, bob.readline("Label"), bob.generateEOR(eoo), bob.getUUID().trim(),
+				sendEORMsg(bob.getTdsQueue(), bob.readline("Label"), bob.generateEOR(eoo), bob.getUUID().trim(),
 						bob.readline("Target"));
 
 				break;
@@ -145,7 +144,7 @@ public class Target {
 				System.out.println("Return label to TDS");
 				
 				// Step 6: Return label
-				bob.returnLabelToTds(TDS_QUEUE, bob.readline("Label"), bob.getUUID(), bob.readline("Target"));
+				bob.returnLabelToTds(bob.getTdsQueue(), bob.readline("Label"), bob.getUUID(), bob.readline("Target"));
 
 				break;
 			case 6:
@@ -153,7 +152,7 @@ public class Target {
 				System.out.println("Send abort message");
 				
 				// Step 7: Send an abort message to TDS
-				bob.abortRequest(TDS_QUEUE, bob.readline("Label").trim(), bob.getUUID(),
+				bob.abortRequest(bob.getTdsQueue(), bob.readline("Label").trim(), bob.getUUID(),
 						bob.readline("Target").trim());
 
 				while (bob.getAbort() == null) {

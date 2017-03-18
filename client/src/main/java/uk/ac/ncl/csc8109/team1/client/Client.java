@@ -53,7 +53,7 @@ import com.amazonaws.services.sqs.model.MessageAttributeValue;
  * This class represents a client in a fair-exchange protocol
  * 
  * @author Mahfuz Ali
- * @Version 1.3
+ * @Version 1.5
  * @email m.ali4@newcastle.ac.uk
  */
 public class Client {
@@ -75,6 +75,11 @@ public class Client {
 	
 	private String EOO;
 	private String EOR;
+	
+	private final String TDS_QUEUE = "csc8109_1_tds_queue_20070306";
+	private final String TDS_REGISTRATION_QUEUE = "csc8109_1_tds_queue_20070306_reg";
+	private final String  COFFEY_SAIDHA_PROTOCOL = "CoffeySaidha";
+
 	
 	private boolean receivedDoc;
 	
@@ -721,5 +726,34 @@ public class Client {
 
         return tmp[1];
 	}
+
+	/**
+	 * Gets the tds queue
+	 * 
+	 * @return <code>TDS_QUEUE</code> tds queue
+	 */
+	public String getTdsQueue() {
+		return TDS_QUEUE;
+	}
+
+	/**
+	 * Gets the tds registration queue
+	 * 
+	 * @return <code>TDS_REGISTRATION_QUEUE</code> tds registration queue
+	 */
+	public String getTdsRegistrationQueue() {
+		return TDS_REGISTRATION_QUEUE;
+	}
+
+	/**
+	 * Gets Coffey-Saidha protocol
+	 * 
+	 * @return <code>COFFEY_SAIDHA_PROTOCOL</code> Coffey-Saidha protocol 
+	 */
+	public String getCoffeySaidhaProtocol() {
+		return COFFEY_SAIDHA_PROTOCOL;
+	}
+
+	
 	
 }

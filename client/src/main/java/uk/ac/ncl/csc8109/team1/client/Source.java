@@ -50,12 +50,9 @@ import uk.ac.ncl.csc8109.team1.msg.AmazonExtendedSQS;
  */
 public class Source {
 
-	private static final String TDS_QUEUE = "csc8109_1_tds_queue_20070306";
-	private static final String TDS_REGISTRATION_QUEUE = "csc8109_1_tds_queue_20070306_reg";
-	private static final String PROTOCOL_NAME = "CoffeySaidha";
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		/* Needs changing */
+		/* Assumption: prior exchange of UUID with the target before protocol execution */
 		String bobUUID = "2a497f70-7921-4115-b2a6-c1fa645bcacd";
 
 		Client alice = new Client();
@@ -91,13 +88,13 @@ public class Source {
 				System.out.println("Register and request for queue name");
 				
 				// Step 1: Register with TDS and request for a queue name
-				alice.regRequestForQueue(alice, TDS_REGISTRATION_QUEUE);
+				alice.regRequestForQueue(alice, alice.getTdsRegistrationQueue());
 				while (alice.getQueueName() == null) {
 					System.out.println("Waiting for the queue name...");
 					Thread.sleep(5000);
 					
 					// Step 2: Get a queue name from the TDS
-					alice.getQueueNameFromTDS(TDS_REGISTRATION_QUEUE, alice.getUUID());
+					alice.getQueueNameFromTDS(alice.getTdsRegistrationQueue(), alice.getUUID());
 				}
 				alice.replaceSelected("Queue", alice.getQueueName());
 
@@ -110,7 +107,7 @@ public class Source {
 				String sigMsg = alice.sigMsg("ExchangeRequest");
 				System.out.println("Exchange Message Signature: " + sigMsg);
 				
-				sendExchangeRequest(TDS_QUEUE, PROTOCOL_NAME, sigMsg, alice.getUUID(), bobUUID);
+				sendExchangeRequest(alice.getTdsQueue(), alice.getCoffeySaidhaProtocol(), sigMsg, alice.getUUID(), bobUUID);
 				while (alice.getLabel() == null && alice.getTargetPubKey() == null && alice.getDestination() == null) {
 					System.out.println("Waiting for the exchange response...");
 					
@@ -143,7 +140,7 @@ public class Source {
 				File f = new File("enclassified");
 
 				// Step 6: Send the encrypted file along with the EOO to TDS
-				System.out.println("Message send status: " + sendDocMsg(f, alice, TDS_QUEUE));
+				System.out.println("Message send status: " + sendDocMsg(f, alice, alice.getTdsQueue()));
 
 				break;
 			case 4:
@@ -163,7 +160,7 @@ public class Source {
 				System.out.println("Return label to TDS");
 				
 				// Step 8: Return label
-				alice.returnLabelToTds(TDS_QUEUE, alice.readline("Label").trim(), alice.getUUID(),
+				alice.returnLabelToTds(alice.getTdsQueue(), alice.readline("Label").trim(), alice.getUUID(),
 						alice.readline("Target").trim());
 				break;
 			case 6:
@@ -171,7 +168,7 @@ public class Source {
 				System.out.println("Send abort message");
 				
 				// Step 8: Send an abort message to TDS
-				alice.abortRequest(TDS_QUEUE, alice.readline("Label").trim(), alice.getUUID(),
+				alice.abortRequest(alice.getTdsQueue(), alice.readline("Label").trim(), alice.getUUID(),
 						alice.readline("Target").trim());
 
 				while (alice.getAbort() == null) {
