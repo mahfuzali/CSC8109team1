@@ -45,11 +45,11 @@ public class CoffeySaidhaTest {
 	public void setup() {
 		sqsx = new AmazonExtendedSQS("csc8109team1");
 		label = "e401ee10-e2ff-437f-ab0e-ce2038681d98";
-		TDS_QueueName = "csc8109_1_tds_queue_coffeysaidha_test";
+		TDS_QueueName = "junit_test_csc8109_1_tds_queue";
 		source = "Alice";
 		target = "Bob";
-		sourceQueueName = "csc8109_1_tds_queue_20070306_alice";
-		targetQueueName = "csc8109_1_tds_queue_20070306_bob";
+		sourceQueueName = "junit_test_csc8109_1_tds_queue_20070306_alice";
+		targetQueueName = "junit_test_csc8109_1_tds_queue_20070306_bob";
 		sourceCrypto = new Crypto();
 		targetCrypto = new Crypto();
 		sourcePublicKey = sourceCrypto.getPublicKey();

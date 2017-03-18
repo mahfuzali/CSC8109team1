@@ -516,6 +516,6 @@ public class CoffeySaidha {
 		};
 		System.out.println("Sent abort response to queue " + sourceQueue);
 		
-		return true;
+		return abortSuccess;
 	}
 }
