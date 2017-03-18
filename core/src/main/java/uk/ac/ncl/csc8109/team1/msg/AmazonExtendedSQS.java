@@ -4,12 +4,14 @@
 package uk.ac.ncl.csc8109.team1.msg;
 
 import java.util.Map;
+
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import com.amazon.sqs.javamessaging.AmazonSQSExtendedClient;
@@ -385,7 +387,8 @@ public class AmazonExtendedSQS implements MessageInterface {
 		String queueUrl;
 		Path docPath;
 		byte[] docByteArray;
-		ByteBuffer docByteBuffer;
+		byte[] encodedDocByteArray;
+		String base64document;
 		
 		// Get the Queue URL
 		try {
@@ -399,7 +402,8 @@ public class AmazonExtendedSQS implements MessageInterface {
 		try {
 			docPath = Paths.get(document);
 			docByteArray = Files.readAllBytes(docPath);
-			docByteBuffer = ByteBuffer.wrap(docByteArray);
+			encodedDocByteArray = Base64.getEncoder().encode(docByteArray);
+			base64document = new String(encodedDocByteArray);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -412,9 +416,9 @@ public class AmazonExtendedSQS implements MessageInterface {
 			messageAttributes.put("Source", new MessageAttributeValue().withDataType("String.Source").withStringValue(source));
 			messageAttributes.put("Target", new MessageAttributeValue().withDataType("String.Target").withStringValue(target));
 			messageAttributes.put("DocumentName", new MessageAttributeValue().withDataType("String.DocumentName").withStringValue(document));
-			messageAttributes.put("Document", new MessageAttributeValue().withDataType("Binary.Document").withBinaryValue(docByteBuffer));
+			messageAttributes.put("Message", new MessageAttributeValue().withDataType("String.Message").withStringValue(message));
 		    SendMessageRequest request = new SendMessageRequest();
-		    request.withMessageBody(message);
+		    request.withMessageBody(base64document);
 		    request.withQueueUrl(queueUrl);
 		    request.withMessageAttributes(messageAttributes);
 		    sqsExtended.sendMessage(request);

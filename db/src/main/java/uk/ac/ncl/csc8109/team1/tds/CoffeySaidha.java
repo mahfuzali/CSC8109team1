@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 
@@ -66,28 +67,22 @@ public class CoffeySaidha {
 		}
 
 		// Read message with attached document
-        String msgEOO = message.getBody();
+        String base64Document = message.getBody();
+        byte[] document = Base64.getDecoder().decode(base64Document);
         Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
         String docName = attributes.get("DocumentName").getStringValue();
-        ByteBuffer document = attributes.get("Document").getBinaryValue().asReadOnlyBuffer();
-        document.flip();
+        String msgEOO = attributes.get("Message").getStringValue();
         
         // Download document
         OutputStream outputFile;
-        WritableByteChannel outputChannel = null;
 		try {
 			outputFile = new FileOutputStream(docName);
-            outputChannel = Channels.newChannel(outputFile);
-		} catch (FileNotFoundException e) {
+			outputFile.write(document);
+		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
-        try {
-			outputChannel.write(document);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
+
         System.out.println("Document " + docName + " received and downloaded");
 
 		// Check EOO

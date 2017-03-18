@@ -37,6 +37,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -193,36 +194,28 @@ public class Target {
 
 		String messageHandle = null;
 		Message message = sqsx.receiveMessage(myQueue);
-		ByteBuffer document;
 		if (message != null) {
 			messageHandle = message.getReceiptHandle();
 			System.out.println("Message received from queue " + myQueue);
 			System.out.println("  ID: " + message.getMessageId());
 			System.out.println("  Receipt handle: " + messageHandle);
-			System.out.println("  Message body: " + message.getBody());
-			// setEOO(message.getBody());
+			System.out.println("  Message body: " + message.getBody().substring(0, 79));
+			String base64Document = message.getBody();
+			byte[] document = Base64.getDecoder().decode(base64Document);
 			Map<String, MessageAttributeValue> attributes = message.getMessageAttributes();
 			System.out.println("  Label:" + attributes.get("Label").getStringValue());
 			System.out.println("  Source:" + attributes.get("Source").getStringValue());
 			System.out.println("  Target:" + attributes.get("Target").getStringValue());
 			System.out.println("  DocumentName:" + attributes.get("DocumentName").getStringValue());
-			document = attributes.get("Document").getBinaryValue().asReadOnlyBuffer();
-			document.flip();
 
 			target.replaceSelected("Label", attributes.get("Label").getStringValue());
 			target.replaceSelected("Target", attributes.get("Target").getStringValue());
 
 			OutputStream outputFile;
-			WritableByteChannel outputChannel = null;
 			try {
 				outputFile = new FileOutputStream("recClassified");
-				outputChannel = Channels.newChannel(outputFile);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			try {
-				outputChannel.write(document);
-			} catch (IOException e) {
+				outputFile.write(document);
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
