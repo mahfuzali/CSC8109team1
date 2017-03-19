@@ -21,7 +21,7 @@ import java.net.URL;
  */
 
 public class FileRepositoryImpl implements FileRepository {
-    private String bucketName = "csc8109team1";
+    private String bucketName = "csc8109team1docs";
     private Logger log = Logger.getLogger(FileRepositoryImpl.class);
     private static AmazonS3 s3;
     public FileRepositoryImpl(){
