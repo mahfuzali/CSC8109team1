@@ -30,13 +30,9 @@
  */
 package uk.ac.ncl.csc8109.team1.client;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Scanner;
