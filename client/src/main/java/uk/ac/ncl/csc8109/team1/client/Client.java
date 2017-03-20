@@ -107,7 +107,7 @@ public class Client {
 
 		File uuidFile = new File(FILENAME);
 		
-		// if file doesnt exists, then create it
+		// if file doesn't exists, then create it
 		if (!uuidFile.exists()) {
 			uuidFile.createNewFile();
 			
@@ -715,8 +715,7 @@ public class Client {
         BufferedReader reader = new BufferedReader(new FileReader(newfile));
         String line = "";
         
-        while((line = reader.readLine()) != null)
-        {
+        while((line = reader.readLine()) != null) {
             if(line.startsWith(startofline))
             	a = line;
         }
