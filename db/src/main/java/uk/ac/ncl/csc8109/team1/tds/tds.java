@@ -283,6 +283,9 @@ public class tds {
 							stage = fe.getStage();
 						} catch (Exception e) {
 							System.err.println("Can't find protocol");
+							// Delete the message from the queue once it has been processed
+							boolean success = sqsx.deleteMessage(tdsMessageQueue, messageHandle);  
+							System.out.println("Delete message: " + success);	
 							continue;
 						}
 						
