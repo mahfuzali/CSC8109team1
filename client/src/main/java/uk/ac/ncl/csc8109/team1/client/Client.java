@@ -532,13 +532,7 @@ public class Client {
 		// Initialise queue service
 		MessageInterface sqsx = new AmazonExtendedSQS("csc8109team1");
 		System.out.println("Initialised queue service");
-	
-	    
-	    // Create a queue
-	    success = sqsx.create(tdsQueue);
-        System.out.println("Created queue " + tdsQueue + " " + success);
-        
-        System.out.println("Source's UUID Length:" + client.getUUID().length());
+	        
         // Send a registration request
         success = sqsx.registerRequest(tdsQueue, client.getUUID(), client.getPublicKey());
         System.out.println("Sent registration request to queue " + queueName + " " + success);
