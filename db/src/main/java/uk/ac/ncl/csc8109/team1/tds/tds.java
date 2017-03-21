@@ -276,8 +276,18 @@ public class tds {
 						}
 						
 						// Get the protocol and stage from the state table
-						String table_protocol = fe.getProtocol();
-						int stage = fe.getStage();
+						String table_protocol = "";
+						int stage = 0;
+						try {
+							table_protocol = fe.getProtocol();
+							stage = fe.getStage();
+						} catch (Exception e) {
+							System.err.println("Can't find protocol");
+							// Delete the message from the queue once it has been processed
+							boolean success = sqsx.deleteMessage(tdsMessageQueue, messageHandle);  
+							System.out.println("Delete message: " + success);	
+							continue;
+						}
 						
 						if (table_protocol.equals("CoffeySaidha")) {
 							System.out.println("CoffeySaidha step " + stage);
