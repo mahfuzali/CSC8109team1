@@ -624,8 +624,8 @@ public class Client {
 
             client.setAbort(message.getBody());
 
-            success = sqsx.deleteMessage(queueName, messageHandle);
-            System.out.println("Deleted message from queue " + queueName + " " + success);
+            success = sqsx.deleteMessage(myQueue, messageHandle);
+            System.out.println("Deleted message from queue " + myQueue + " " + success);
         }
 		return success;
 	}
